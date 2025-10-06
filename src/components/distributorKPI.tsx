@@ -7,10 +7,10 @@ type KPIProps = {
   color?: string;
 };
 
-const DistributorKPI: React.FC<KPIProps> = ({ title, value, color = "bg-purple-500" }) => {
+const DistributorKPI: React.FC<KPIProps> = ({ title, value, color = "bg-purple-100" }) => {
   return (
-    <div className={`p-4 rounded-lg shadow ${color} text-white`}>
-      <p className="text-sm">{title}</p>
+    <div className={`p-4 rounded-2xl shadow  ${color} `}>
+      <p className="text-sm font-bold ">{title}</p>
       <p className="text-2xl font-bold mt-2">{value}</p>
     </div>
   );

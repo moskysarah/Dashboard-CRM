@@ -1,0 +1,4 @@
+- [x] Update src/main.tsx to import "./services/i18n"
+- [x] Update src/pages/operations/RapportsList.tsx to import api from "../../services/api"
+- [x] Update src/pages/operations/TransactionsList.tsx to import api from "../../services/api"
+- [x] Run dev server to verify errors are resolved

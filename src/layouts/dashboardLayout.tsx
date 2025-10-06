@@ -1,9 +1,11 @@
-import type { ReactNode } from "react"; 
+// src/layouts/DashboardLayout.tsx
+import type { ReactNode } from "react";
 import { Sidebar } from "../components/Sidebar";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { Bell, Mail } from "lucide-react";
-import { useNavigate } from "react-router-dom"; 
-import { useTranslation } from "react-i18next"; // ✅ import traduction
+import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { UserContext } from "../contexts/userContext";
 
 type Props = {
   children?: ReactNode;
@@ -23,14 +25,14 @@ type Message = {
 };
 
 const DashboardLayout: React.FC<Props> = ({ children }) => {
+  const { user } = useContext(UserContext);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [notifOpen, setNotifOpen] = useState(false);
   const [msgOpen, setMsgOpen] = useState(false);
   const navigate = useNavigate();
-  const { t, i18n } = useTranslation(); 
+  const { t, i18n } = useTranslation();
 
-  // Changer la langue
   const changeLanguage = (lang: string) => {
     i18n.changeLanguage(lang);
   };
@@ -69,22 +71,40 @@ const DashboardLayout: React.FC<Props> = ({ children }) => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      <Sidebar />
+  <div className="flex h-screen bg-gray-100 overflow-hidden overflow-x-hidden">
+    <Sidebar />
 
-      <div className="flex-1 flex flex-col">
-        <header className="bg-white shadow p-4 flex justify-between items-center">
-          <h2 className="text-lg font-semibold">{t("dashboard")}</h2>
+    <div className="flex-1 flex flex-col">
+      <header className="bg-white shadow border-b border-blue-200 p-4 flex justify-between items-center h-16">
+        <h2 className="font-bold">Dashboard</h2>
 
-          <div className="flex items-center gap-4">
-            {/* Sélecteur de langue */}
-            <select
-              onChange={(e) => changeLanguage(e.target.value)}
-              className="border rounded px-2 py-1"
-            >
-              <option value="fr">Français</option>
-              <option value="en">English</option>
-            </select>
+        <div className="flex items-center gap-4">
+          {/* Profil utilisateur */}
+          {user && (
+            <div className="flex items-center gap-2 bg-gray-100 px-3 py-1 rounded-full">
+              <img
+                src={user.avatar}
+                alt="Avatar"
+                className="w-10 h-10 rounded-full border-2 border-gray-300"
+              />
+              <div className="text-left">
+                <p className="font-semibold text-sm">{user.name}</p>
+                <p className="text-xs text-gray-500">{user.role}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Sélecteur de langue */}
+          <select
+            onChange={(e) => changeLanguage(e.target.value)}
+            className="border rounded px-2 py-1"
+          >
+            <option value="fr">Français</option>
+            <option value="en">English</option>
+          </select>
+
+
+     
 
             {/* Notifications */}
             <div className="relative">
@@ -133,14 +153,16 @@ const DashboardLayout: React.FC<Props> = ({ children }) => {
             {/* Déconnexion */}
             <button
               onClick={handleLogout}
-              className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+              className="ml-auto mr-6  bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
             >
-              {t("logout")}
+              {t("Connexion")}
             </button>
           </div>
         </header>
 
-        <main className="p-4 overflow-auto flex-1">{children}</main>
+        <main className="p-4 flex-1 overflow-y-auto h-[calc(100vh-64px)]">
+             {children}
+       </main>
       </div>
     </div>
   );

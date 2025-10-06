@@ -1,11 +1,12 @@
 // Rôles possibles pour les utilisateurs du Back-Office
-export type Role = 'admin' | 'merchant' | 'distributor';
+export type Role = 'administrateur' | 'marchand' | 'distributeur';
 
 // structure d'un utilisateur
 export interface User {
   id: string;
   name: string;
   email: string;
+  avatar?: string;
   role: Role;
   status: 'active' | 'suspended';
 }
@@ -22,4 +23,13 @@ export interface Transaction {
   createdAt: string; // date ISO
   merchantId?: string;
   distributorId?: string;
+}
+
+// structure d'un ticket IT
+export interface Ticket {
+  id: string;
+  title: string;
+  type: string;
+  status: "Ouvert" | "En cours" | "Résolu";
+  priority: "Haute" | "Moyenne" | "Basse";
 }

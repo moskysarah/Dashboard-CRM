@@ -1,13 +1,22 @@
-import React, { useState } from "react";
-import { notifications } from "../api/fakeAPI";
+// src/components/Notification.tsx
+import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { fetchNotifications, markNotificationAsRead, type Notification as NotificationType } from "../services/notification";
 
 const Notification: React.FC = () => {
   const { t } = useTranslation();
-  const [notifs, setNotifs] = useState(notifications);
+  const [notifs, setNotifs] = useState<NotificationType[]>([]);
 
-  const markAsRead = (id: number) => {
-    setNotifs(prev => prev.map(n => (n.id === id ? { ...n, read: true } : n)));
+  useEffect(() => {
+    fetchNotifications().then(setNotifs).catch(err => console.error(err));
+  }, []);
+
+  const handleMarkAsRead = (id: number) => {
+    markNotificationAsRead(id)
+      .then(() => {
+        setNotifs(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+      })
+      .catch(err => console.error(err));
   };
 
   return (
@@ -18,7 +27,7 @@ const Notification: React.FC = () => {
           <li
             key={n.id}
             className={`border-b py-2 last:border-b-0 cursor-pointer ${n.read ? "text-gray-400" : "font-medium"}`}
-            onClick={() => markAsRead(n.id)}
+            onClick={() => handleMarkAsRead(n.id)}
           >
             <p>{t(n.message)}</p>
             <p className="text-xs text-gray-500">{n.date}</p>
