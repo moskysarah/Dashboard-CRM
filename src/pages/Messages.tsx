@@ -6,7 +6,7 @@ interface Message {
   id: number;
   sender: string;
   content: string;
-  date: string;
+  date: string; 
 }
 
 export default function Messages() {

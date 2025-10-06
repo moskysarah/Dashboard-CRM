@@ -8,7 +8,7 @@ import googleLogo from "../assets/logo-google.jpg";
 const Login = () => {
   const navigate = useNavigate();
   
-  const { setUser } = useContext(UserContext);
+  useContext(UserContext);
 
   // États login/register
   const [loginPhoneOrEmail, setLoginPhoneOrEmail] = useState("");

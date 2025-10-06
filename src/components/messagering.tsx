@@ -10,23 +10,38 @@ const Messaging: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchMessages().then((data) => {
-      setMsgs(data);
-      setLoading(false);
-    });
+    fetchMessages()
+      .then((data) => {
+        setMsgs(data);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
   }, []);
 
   const sendMessage = async () => {
     if (newMsg.trim() === "") return;
-    const message: Omit<Message, "id"> = {
+
+    //ajout de tous les champs du type Message
+    const message: Omit<Message, "id" | "timestamp"> = {
       sender: t("you"),
-      content: newMsg,
       date: new Date().toISOString().slice(0, 16).replace("T", " "),
+      message: newMsg,
+      create_at: "",
+      update_at: "",
+      is_sent: false,
+      phone: "",
+      is_for: "",
+      User: 0
     };
-    const saved = await postMessage(message);
-    if (saved) {
-      setMsgs([...msgs, saved]);
-      setNewMsg("");
+
+    try {
+      const saved = await postMessage(message);
+      if (saved) {
+        setMsgs((prev) => [...prev, saved]);
+        setNewMsg("");
+      }
+    } catch (error) {
+      console.error("Error sending message:", error);
     }
   };
 
@@ -41,7 +56,7 @@ const Messaging: React.FC = () => {
           {msgs.map((m) => (
             <div key={m.id} className="border-b py-2 last:border-b-0">
               <p className="font-medium">{m.sender}</p>
-              <p className="text-gray-600 text-sm">{m.content}</p>
+              <p className="text-gray-600 text-sm">{m.message}</p>
               <p className="text-gray-400 text-xs">{m.date}</p>
             </div>
           ))}

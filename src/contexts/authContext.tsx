@@ -1,66 +1,49 @@
-import React, { createContext, useState, useEffect } from "react";
-import { getProfile, login as apiLogin } from "../services/api";
-import type { User } from "../types/domain";
+import { createContext, useState } from "react";
+import type { ReactNode } from "react";
 
-interface AuthContextType {
-  user: User | null;
-  login: (username: string, password: string) => Promise<void>;
-  logout: () => void;
-  loading: boolean;
+interface User {
+  id: number;
+  username: string;
+  first_name: string;
+  last_name: string;
+  date_created: string;
+  date_joined: string;
+  date_update: string;
+  profile_image: string;
+  phone: string;
+  user_permissions: any[];
+  settings: any;
+  is_active: boolean;
+  is_email_verified: boolean;
+  is_phone_verified: boolean;
+  is_superuser: boolean;
+  last_login: string;
+  merchant: any | null;
+  user: any | null;
+  email?: string;
+  city: string;
+  country: string;
+  role?: string;
+  
+  avatar?: string;
 }
 
-export const AuthContext = createContext<AuthContextType>({
+interface UserContextType {
+  user: User | null;
+  setUser: (user: User | null) => void;
+}
+
+export const UserContext = createContext<UserContextType>({
   user: null,
-  login: async () => {},
-  logout: () => {},
-  loading: false,
+  setUser: () => {},
 });
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-
-  // Vérifie token à l'initialisation
-  useEffect(() => {
-    const initializeUser = async () => {
-      const token = localStorage.getItem("accessToken");
-      if (token) {
-        try {
-          const res = await getProfile();
-          setUser(res.data);
-        } catch (err) {
-          console.warn("Token invalide, logout automatique");
-          logout();
-        }
-      }
-      setLoading(false);
-    };
-    initializeUser();
-  }, []);
-
-  // Login
-  const login = async (username: string, password: string) => {
-    const res = await apiLogin(username, password);
-    const { access, refresh } = res.data;
-    localStorage.setItem("accessToken", access);
-    localStorage.setItem("refreshToken", refresh);
-
-    const profile = await getProfile();
-    setUser(profile.data);
-  };
-
-  // Logout
-  const logout = () => {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
-    setUser(null);
-  };
-
-  // Refresh token automatique (optionnel, à ajouter dans interceptor axios si nécessaire)
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <UserContext.Provider value={{ user, setUser }}>
       {children}
-    </AuthContext.Provider>
+    </UserContext.Provider>
   );
 };

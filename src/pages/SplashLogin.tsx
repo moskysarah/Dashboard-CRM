@@ -49,17 +49,17 @@ const SplashLogin: React.FC = () => {
             className="z-10 flex flex-col justify-center items-center"
           >
             <motion.img
-              src="src/assets/yellow.png" // logo post smart
+              src="src/assets/postesmart-logo-2.png" // logo post smart
               alt="Logo"
               className="w-24 h-24 mb-4"
-              animate={{ rotate: [0, 360] }}
+
               transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
             />
             <motion.h1
-              className="text-4xl font-bold text-white"
+              className="text-4xl font-bold text-white mb-4"
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.5, duration: 1 }}
+              transition={{ delay: 0.5, duration: 3 }}
             >
               Bienvenue à Post Smart
             </motion.h1>

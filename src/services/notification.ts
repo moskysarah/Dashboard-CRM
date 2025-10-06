@@ -1,20 +1,22 @@
-import getNotifications from "./api";
-import markNotificationRead from "./api";
 
+import api from "./api"; 
+
+//  la structure Notification
 export interface Notification {
   id: string;
   message: string;
   read: boolean;
+  date: string;
   timestamp: string;
 }
 
-// Récupérer toutes les notifications
+// je récupérer toutes les notifications depuis l’api
 export const fetchNotifications = async (): Promise<Notification[]> => {
-  const response = await getNotifications({});
+  const response = await api.get("/notifications");
   return response.data;
 };
 
-// Marquer une notification comme lue
+// marquer une notification comme lue
 export const markNotificationAsRead = async (id: string): Promise<void> => {
-  await markNotificationRead(id);
+  await api.patch(`/notifications/${id}`, { read: true });
 };
