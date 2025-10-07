@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { LOCAL_STORAGE_KEYS } from '../config/constants'; // Le chemin est déjà bon, mais c'est pour l'exemple
 import type { User } from '../types/domain';
+import { cleanupAuthLocalStorage } from '../utils/localStorageCleanup';
 
 export interface AuthState {
   user: User | null;
@@ -29,16 +30,14 @@ export const useAuth = create<AuthState>()(
           isAuthenticated: true,
         });
         // Nettoyage du token temporaire qui n'est plus nécessaire
-        localStorage.removeItem(LOCAL_STORAGE_KEYS.USER_PHONE);
-        localStorage.removeItem(LOCAL_STORAGE_KEYS.OTP_CODE);
-        localStorage.removeItem(LOCAL_STORAGE_KEYS.MASKED_PHONE);
+        cleanupAuthLocalStorage();
       },
 
       logout: () => {
         // On vide l'état du store
         set({ user: null, accessToken: null, refreshToken: null, isAuthenticated: false });
         // Et on s'assure de nettoyer complètement le localStorage
-        localStorage.removeItem(LOCAL_STORAGE_KEYS.AUTH_STATE);
+        cleanupAuthLocalStorage();
       },
     }),
     { name: LOCAL_STORAGE_KEYS.AUTH_STATE }

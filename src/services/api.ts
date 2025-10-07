@@ -16,6 +16,9 @@ const API = axios.create({
  * Tente d'abord de le lire depuis le store Zustand.
  * Si le store n'est pas encore hydraté, il lit directement le localStorage.
  */
+let cachedAuthState: { state?: { accessToken?: string } } | null = null;
+let cachedAuthStateRaw: string | null = null;
+
 function getAccessToken() {
   const tokenFromStore = useAuth.getState().accessToken;
   if (tokenFromStore) {
@@ -24,7 +27,15 @@ function getAccessToken() {
 
   const authStateFromStorage = localStorage.getItem(LOCAL_STORAGE_KEYS.AUTH_STATE);
   if (authStateFromStorage) {
-    return JSON.parse(authStateFromStorage)?.state?.accessToken;
+    if (authStateFromStorage !== cachedAuthStateRaw) {
+      cachedAuthStateRaw = authStateFromStorage;
+      try {
+        cachedAuthState = JSON.parse(authStateFromStorage);
+      } catch {
+        cachedAuthState = null;
+      }
+    }
+    return cachedAuthState?.state?.accessToken ?? null;
   }
 
   return null;
@@ -116,14 +127,14 @@ API.interceptors.response.use(
           return Promise.reject(_error);
         } finally {
           isRefreshing = false;
-        }
-      }
+export const refreshToken = (refresh: string) =>
+  API.post("/accounts/token/refresh/", { refresh });
     }
 
     return Promise.reject(error);
   }
-);
-
+export const requestOTP = (phone: string, password?: string) =>
+  API.post("/accounts/otp/request/", password ? { phone, password } : { phone });
 // ========================
 // REFRESH TOKEN
 // ========================

@@ -6,7 +6,7 @@ import googleLogo from "../assets/logo-google.jpg";
 import { useAuth } from "../store/auth";
 import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
-import { LOCAL_STORAGE_KEYS } from "../config/constants";
+import { LOCAL_STORAGE_KEYS, LOCKOUT_DURATIONS_IN_SECONDS } from "../config/constants";
 import type { User } from "../types/domain";
 
 const Login = () => {
@@ -28,38 +28,8 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [otpError, setOtpError] = useState(false);
 
-  // États pour le verrouillage après échecs
-  // On initialise l'état depuis le localStorage pour la persistance
-  const [loginAttempts, setLoginAttempts] = useState(() => {
-    const saved = localStorage.getItem("loginAttempts");
-    const initialValue = saved ? parseInt(saved, 10) : 0;
-    console.log(`[INIT] Tentatives de connexion initiales : ${initialValue}`);
-    return initialValue;
-  });
-  const [lockoutUntil, setLockoutUntil] = useState(() => {
-    const saved = localStorage.getItem("lockoutUntil");
-    const initialValue = saved ? parseInt(saved, 10) : null;
-    if (initialValue) {
-      console.log(
-        `[INIT] Verrouillage initial jusqu'à : ${new Date(
-          initialValue
-        ).toLocaleTimeString()}`
-      );
-    }
-    return initialValue;
-  });
-  const [remainingLockoutTime, setRemainingLockoutTime] = useState(() => {
-    const savedLockout = localStorage.getItem("lockoutUntil");
-    if (savedLockout) {
-      const remaining = Math.ceil(
-        (parseInt(savedLockout, 10) - Date.now()) / 1000
-      );
-      const initialValue = remaining > 0 ? remaining : 0;
-      console.log(`[INIT] Temps de verrouillage restant calculé : ${initialValue}s`);
-      return initialValue;
-    }
-    return 0;
-  });
+  // États pour le verrouillage après échecs (gérés côté serveur désormais)
+  const [lockoutError, setLockoutError] = useState<string | null>(null);
 
   const [mode, setMode] = useState<"login" | "register" | "otp">("login");
 
@@ -78,60 +48,10 @@ const Login = () => {
     }
     setOtp("");
     setOtpError(false);
-    // On ne réinitialise pas le compteur de tentatives si on reste sur le login
-    if (mode !== "login") {
-      setLoginAttempts(0);
-      setLockoutUntil(null);
-    }
+    setLockoutError(null);
   }, [mode]);
 
-  // Effet pour gérer le compte à rebours du verrouillage
-  useEffect(() => {
-    if (lockoutUntil) {
-      console.log(
-        `[TIMER] Démarrage du minuteur. Verrouillé jusqu'à ${new Date(
-          lockoutUntil
-        ).toLocaleTimeString()}`
-      );
-      const interval = setInterval(() => {
-        // On recalcule le temps restant à chaque tick à partir de la date de fin
-        const newRemaining = Math.ceil((lockoutUntil - Date.now()) / 1000);
-        console.log(`[TIMER] Tick. Temps restant : ${newRemaining}s`);
-
-        if (newRemaining > 0) {
-          setRemainingLockoutTime(newRemaining);
-        } else {
-          console.log("[TIMER] Fin du verrouillage. Réinitialisation.");
-          setLockoutUntil(null);
-          setLoginAttempts(0); // On réinitialise les tentatives une fois le temps écoulé
-        }
-      }, 1000);
-      return () => clearInterval(interval);
-    }
-  }, [lockoutUntil]);
-
-  // Effets pour sauvegarder l'état de verrouillage dans le localStorage
-  useEffect(() => {
-    console.log(
-      `[PERSIST] Sauvegarde de loginAttempts dans localStorage : ${loginAttempts}`
-    );
-    localStorage.setItem("loginAttempts", loginAttempts.toString());
-  }, [loginAttempts]);
-
-  useEffect(() => {
-    if (lockoutUntil) {
-      console.log(
-        `[PERSIST] Sauvegarde de lockoutUntil dans localStorage : ${new Date(
-          lockoutUntil
-        ).toLocaleTimeString()}`
-      );
-      localStorage.setItem("lockoutUntil", lockoutUntil.toString());
-    } else {
-      console.log("[PERSIST] Nettoyage des données de verrouillage du localStorage.");
-      localStorage.removeItem("lockoutUntil");
-      localStorage.removeItem("loginAttempts"); // On nettoie tout si le verrouillage est levé
-    }
-  }, [lockoutUntil]);
+  // Suppression des effets liés au verrouillage côté client (géré côté serveur)
 
   // Validation aide
   const isValidPhone = (input: string) => /^\d{10}$/.test(input);
@@ -143,21 +63,13 @@ const Login = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (lockoutUntil && Date.now() < lockoutUntil) {
-      alert(`Trop de tentatives. Veuillez attendre ${remainingLockoutTime} secondes.`);
-      return;
-    }
-
     setIsLoading(true);
-    
-  // ici je recupere mon token temporaire apres que l'utilisateur se connecte 
 
     try {
       const res = await api.post("accounts/otp/request/", {
         phone: loginPhoneOrEmail,
         password: loginPassword,
       });
-       // je le stocke ici a localstorage ligne sous la clé tempaccesstoken
 
       localStorage.setItem(LOCAL_STORAGE_KEYS.USER_PHONE, loginPhoneOrEmail);
 
@@ -165,30 +77,16 @@ const Login = () => {
       localStorage.setItem(LOCAL_STORAGE_KEYS.MASKED_PHONE, maskedPhone);
 
       setMode("otp");
+      setLockoutError(null);
     } catch (err: any) {
-      const newAttempts = loginAttempts + 1;
-      setLoginAttempts(newAttempts);
-
-      // Après 2 tentatives, on verrouille
-      if (newAttempts >= 2) {
-        // Séquence de verrouillage personnalisée en secondes
-        const lockoutDurationsInSeconds = [30, 60, 120, 300, 900, 1800, 3600]; // 30s, 1m, 2m, 5m, 15m, 30m, 1h
-        // On prend la durée correspondante, ou la dernière si on dépasse le nombre de paliers
-        const durationIndex = Math.min(newAttempts - 2, lockoutDurationsInSeconds.length - 1);
-        const lockoutDuration = lockoutDurationsInSeconds[durationIndex] * 1000;
-        console.log(
-          `[LOCK] Tentative ${newAttempts} échouée. Déclenchement d'un verrouillage de ${
-            lockoutDuration / 1000
-          }s.`
-        );
-
-        const newLockoutUntil = Date.now() + lockoutDuration;
-        setLockoutUntil(newLockoutUntil);
-        setRemainingLockoutTime(Math.ceil(lockoutDuration / 1000));
+      // Si le serveur retourne une erreur de verrouillage, affichez-la
+      if (err.response?.data?.lockout) {
+        setLockoutError(err.response.data.lockout);
+      } else {
+        setLockoutError(null);
+        alert(err.response?.data?.detail || "Identifiants incorrects.");
       }
-
       console.error(err);
-      alert(err.response?.data?.detail || "Identifiants incorrects.");
     } finally {
       setIsLoading(false);
     }
@@ -274,10 +172,9 @@ const Login = () => {
 
   // --- Animation slide---
   const slide = {
-    initial: { x: "100%", opacity: 0 },
-    animate: { x: 0, opacity: 1 },
-    exit: { x: "-100%", opacity: 0 },
-    transition: { duration: 0.6, ease: "easeInOut" as const },
+        // On prend la durée correspondante, ou la dernière si on dépasse le nombre de paliers
+        const durationIndex = Math.min(newAttempts - 2, LOCKOUT_DURATIONS_IN_SECONDS.length - 1);
+        const lockoutDuration = LOCKOUT_DURATIONS_IN_SECONDS[durationIndex] * 1000;
   };
 
   const Spinner = () => (
@@ -328,11 +225,11 @@ const Login = () => {
                   <option value="admin">Admin</option>
                   <option value="user">Utilisateur (Marchand/Distributeur)</option>
                 </select>
-                <Button type="submit" variant="primary" disabled={isLoading || !!lockoutUntil} className="flex justify-center items-center">
+                <Button type="submit" variant="primary" disabled={isLoading || !!lockoutError} className="flex justify-center items-center">
                   {isLoading 
                     ? <Spinner /> 
-                    : lockoutUntil 
-                      ? `Réessayer dans ${remainingLockoutTime}s`
+                    : lockoutError
+                      ? lockoutError
                       : 'Se connecter'
                   }
                 </Button>

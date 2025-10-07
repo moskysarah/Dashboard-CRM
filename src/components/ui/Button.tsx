@@ -7,7 +7,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
 }
 
-const baseClasses = "w-full py-2 rounded-lg font-semibold transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed";
+const baseClasses = "w-full py-2 rounded-lg font-semibold transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed focus:ring-2 focus:ring-offset-2";
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary: "bg-indigo-600 text-white hover:bg-indigo-700",

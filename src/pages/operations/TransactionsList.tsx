@@ -56,7 +56,7 @@ const TransactionsList: React.FC = () => {
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {transactions.map((t: Transaction) => (
+          {transactions.map((t) => (
             <tr key={t.id} className="hover:bg-gray-50 transition-colors">
               <td className="px-3 py-2 font-mono text-gray-500 whitespace-nowrap overflow-hidden text-ellipsis max-w-[150px]">
                 {t.codeTransaction || t.id}

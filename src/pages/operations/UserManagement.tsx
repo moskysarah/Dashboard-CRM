@@ -37,7 +37,7 @@ const SectionCard: React.FC<SectionCardProps> = ({ title, children }) => {
 // ===== UserManagement Component =====
 const UserManagement: React.FC = () => {
   const { users, loading, error, refreshUsers, updateUserStatus, updateUserRole } = useUsers();
-  const [roleDropdown, setRoleDropdown] = useState<number | null>(null);
+  const [selectedUserIdForRoleChange, setSelectedUserIdForRoleChange] = useState<number | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerTitle, setDrawerTitle] = useState("");
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
@@ -48,7 +48,7 @@ const UserManagement: React.FC = () => {
 
   const handleChangeRole = (userId: number, role: UserRole) => {
     updateUserRole(userId, role);
-    setRoleDropdown(null);
+    setSelectedUserIdForRoleChange(null);
   };
 
   const capitalize = (text: string) => text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
@@ -210,12 +210,12 @@ const UserManagement: React.FC = () => {
                   <td className="px-3 py-2 text-center relative">
                     <span
                       className={`text-xs px-2 py-0.5 rounded-full cursor-pointer ${roleColors[u.role || 'user']}`}
-                      onClick={() => setRoleDropdown(roleDropdown === u.id ? null : u.id)}
+                      onClick={() => setSelectedUserIdForRoleChange(selectedUserIdForRoleChange === u.id ? null : u.id)}
                     >
                       {u.role || 'user'}
                     </span>
 
-                    {roleDropdown === u.id && (
+                    {selectedUserIdForRoleChange === u.id && (
                       <div className="absolute top-10 left-1/2 transform -translate-x-1/2 w-56 bg-white border shadow-lg rounded-lg z-30">
                         {/* Barre de recherche */}
                         <input
