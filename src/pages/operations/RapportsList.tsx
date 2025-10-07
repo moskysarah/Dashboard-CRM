@@ -26,7 +26,8 @@ const ReportsList: React.FC = () => {
   useEffect(() => {
     const fetchReports = async () => {
       try {
-        const res = await api.get("/reports"); // 🔥 adapte l’endpoint à ton backend
+        // Correction de l'endpoint. Cet endpoint doit exister sur votre API.
+        const res = await api.get("/analytics/reports/");
         setData(res.data);
       } catch (err) {
         console.error("Erreur lors du chargement des rapports:", err);

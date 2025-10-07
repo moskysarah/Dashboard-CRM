@@ -26,7 +26,8 @@ const Sales: React.FC = () => {
   useEffect(() => {
     const fetchSales = async () => {
       try {
-        const res = await api.get("/sales"); //  l’endpoint au backend
+        // Correction de l'endpoint. Cet endpoint doit exister sur votre API.
+        const res = await api.get("/analytics/sales/");
         setSalesData(res.data);
       } catch (err) {
         console.error("Erreur lors du chargement des ventes:", err);

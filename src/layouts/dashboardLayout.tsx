@@ -3,9 +3,9 @@ import type { ReactNode } from "react";
 import { Sidebar } from "../components/Sidebar";
 import { useState, useEffect, useContext } from "react";
 import { Bell, Mail } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { UserContext } from "../contexts/userContext";
+import { useAuth } from "../store/auth";
 
 type Props = {
   children?: ReactNode;
@@ -25,7 +25,7 @@ type Message = {
 };
 
 const DashboardLayout: React.FC<Props> = ({ children }) => {
-  const { user } = useContext(UserContext);
+  const { user, logout } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [notifOpen, setNotifOpen] = useState(false);
@@ -38,6 +38,7 @@ const DashboardLayout: React.FC<Props> = ({ children }) => {
   };
 
   const handleLogout = () => {
+    logout();
     navigate("/login");
   };
 
@@ -83,12 +84,12 @@ const DashboardLayout: React.FC<Props> = ({ children }) => {
           {user && (
             <div className="flex items-center gap-2 bg-gray-100 px-3 py-1 rounded-full">
               <img
-                src={user.avatar}
+                src={user.profile_image || '/images/default-avatar.png'}
                 alt="Avatar"
                 className="w-10 h-10 rounded-full border-2 border-gray-300"
               />
               <div className="text-left">
-                <p className="font-semibold text-sm">{user.name}</p>
+                <p className="font-semibold text-sm">{user.username}</p>
                 <p className="text-xs text-gray-500">{user.role}</p>
               </div>
             </div>
@@ -130,32 +131,21 @@ const DashboardLayout: React.FC<Props> = ({ children }) => {
 
             {/* Messages */}
             <div className="relative">
-              <button className="relative" onClick={() => setMsgOpen(!msgOpen)}>
-                <Mail size={24} />
-                {messages.some(m => !m.read) && <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full" />}
-              </button>
-              {msgOpen && (
-                <div className="absolute right-0 mt-2 w-64 bg-white shadow-lg border rounded p-2 z-10">
-                  {messages.length === 0 && <p>{t("messages")}</p>}
-                  {messages.map(m => (
-                    <div
-                      key={m.id}
-                      className={`p-2 border-b cursor-pointer ${m.read ? "bg-gray-100" : "bg-white"}`}
-                      onClick={() => markMsgRead(m.id)}
-                    >
-                      <strong>{m.from}:</strong> {m.content}
-                    </div>
-                  ))}
-                </div>
-              )}
+              <Link to="/messages">
+                <button className="relative" onClick={() => setMsgOpen(false)}>
+                  <Mail size={24} />
+                  {messages.some(m => !m.read) && <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full" />}
+                </button>
+              </Link>
+              {/* La logique du dropdown de messages est retirée pour privilégier la page dédiée */}
             </div>
 
             {/* Déconnexion */}
             <button
               onClick={handleLogout}
-              className="ml-auto mr-6  bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+              className="ml-auto mr-6 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
             >
-              {t("Connexion")}
+              {t("logout")}
             </button>
           </div>
         </header>

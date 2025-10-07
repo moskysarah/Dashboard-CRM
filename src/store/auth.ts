@@ -1,12 +1,14 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { LOCAL_STORAGE_KEYS } from '../config/constants'; // Le chemin est déjà bon, mais c'est pour l'exemple
 import type { User } from '../types/domain';
 
 export interface AuthState {
   user: User | null;
-  token: string | null;
+  accessToken: string | null;
+  refreshToken: string | null;
   isAuthenticated: boolean;
-  loginWithOtp: (user: User, token: string) => void;
+  login: (user: User, tokens: { access: string; refresh: string }) => void;
   logout: () => void;
 }
 
@@ -14,17 +16,32 @@ export const useAuth = create<AuthState>()(
   persist(
     (set) => ({
       user: null,
-      token: null,
+      accessToken: null,
+      refreshToken: null,
       isAuthenticated: false,
 
-      // Login avec OTP validé
-      loginWithOtp: (user: User, token: string) => {
-        set({ user, token, isAuthenticated: true });
+      // Gère la connexion après une validation réussie
+      login: (user: User, tokens: { access: string; refresh: string }) => {
+        set({
+          user,
+          accessToken: tokens.access,
+          refreshToken: tokens.refresh,
+          isAuthenticated: true,
+        });
+        // Nettoyage du token temporaire qui n'est plus nécessaire
+        localStorage.removeItem(LOCAL_STORAGE_KEYS.USER_PHONE);
+        localStorage.removeItem(LOCAL_STORAGE_KEYS.OTP_CODE);
+        localStorage.removeItem(LOCAL_STORAGE_KEYS.MASKED_PHONE);
       },
 
-      logout: () => set({ user: null, token: null, isAuthenticated: false }),
+      logout: () => {
+        // On vide l'état du store
+        set({ user: null, accessToken: null, refreshToken: null, isAuthenticated: false });
+        // Et on s'assure de nettoyer complètement le localStorage
+        localStorage.removeItem(LOCAL_STORAGE_KEYS.AUTH_STATE);
+      },
     }),
-    { name: 'crm-auth' }
+    { name: LOCAL_STORAGE_KEYS.AUTH_STATE }
   )
 );
 export const useIsAuthenticated = () => {

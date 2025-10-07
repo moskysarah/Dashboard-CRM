@@ -1,45 +1,22 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useMemo } from "react";
 import TransactionsList from "./TransactionsList";
 import ReportsList from "./RapportsList";
 import { ArrowUpRight } from "lucide-react";
-import api from "../../services/api";
-
-// === Types ==
-type Permission = "Editeur" | "Lecteur";
-type Role = "Admin" | "Marchand" | "Distributeur";
-
-type User = {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  company: string;
-  createdDate: string;
-  createdAt: string;
-  role: Role;
-  status: "Active" | "Suspended";
-  permission: Permission;
-  avatar: string;
-};
+import { useUsers } from "../../hooks/useUsers";
+import type { User, UserRole } from "../../types/domain";
 
 // ===== Options =====
-const roleOptions: Role[] = ["Admin", "Marchand", "Distributeur"];
-const permissionOptions: Permission[] = ["Editeur", "Lecteur"];
+const roleOptions: UserRole[] = ["admin", "user", "superadmin"];
 
-const roleColors: Record<Role, string> = {
-  Admin: "bg-blue-400 text-white text-xs px-2 py-0.5 rounded-full",
-  Marchand: "bg-yellow-300 text-gray-800 text-xs px-2 py-0.5 rounded-full",
-  Distributeur: "bg-purple-400 text-white text-xs px-2 py-0.5 rounded-full",
+const roleColors: Record<UserRole, string> = {
+  admin: "bg-blue-400 text-white",
+  user: "bg-yellow-300 text-gray-800",
+  superadmin: "bg-purple-400 text-white",
 };
 
-const permissionColors: Record<Permission, string> = {
-  Editeur: "bg-green-400 text-white text-xs px-2 py-0.5 rounded-full",
-  Lecteur: "bg-orange-400 text-white text-xs px-2 py-0.5 rounded-full",
-};
-
-const statusColors: Record<User["status"], string> = {
-  Active: "bg-green-400 text-white text-xs px-2 py-0.5 rounded-full",
-  Suspended: "bg-red-400 text-white text-xs px-2 py-0.5 rounded-full",
+const statusColors: Record<"Active" | "Suspended", string> = {
+  Active: "bg-green-400 text-white",
+  Suspended: "bg-red-400 text-white",
 };
 
 // ===== Section Card Composant =====
@@ -59,65 +36,48 @@ const SectionCard: React.FC<SectionCardProps> = ({ title, children }) => {
 
 // ===== UserManagement Component =====
 const UserManagement: React.FC = () => {
-  const [users, setUsers] = useState<User[]>([]);
-  const [roleDropdown, setRoleDropdown] = useState<string | null>(null);
-  const [permDropdown, setPermDropdown] = useState<string | null>(null);
+  const { users, loading, error, refreshUsers, updateUserStatus, updateUserRole } = useUsers();
+  const [roleDropdown, setRoleDropdown] = useState<number | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerTitle, setDrawerTitle] = useState("");
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await api.get("/users"); // j adapte mon backend
-        setUsers(response.data);
-      } catch (error) {
-        console.error("Erreur lors de la récupération des utilisateurs :", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchUsers();
-  }, []);
-
-  const toggleStatus = (id: string) => {
-    setUsers(users.map(u =>
-      u.id === id ? { ...u, status: u.status === "Active" ? "Suspended" : "Active" } : u
-    ));
+  const handleToggleStatus = (user: User) => {
+    updateUserStatus(user.id, !user.is_active);
   };
 
-  const changeRole = (id: string, role: Role) => {
-    setUsers(users.map(u => (u.id === id ? { ...u, role } : u)));
+  const handleChangeRole = (userId: number, role: UserRole) => {
+    updateUserRole(userId, role);
     setRoleDropdown(null);
-  };
-
-  const changePermission = (id: string, perm: Permission) => {
-    setUsers(users.map(u => (u.id === id ? { ...u, permission: perm } : u)));
-    setPermDropdown(null);
   };
 
   const capitalize = (text: string) => text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
 
   // Stats
-  const totalUsers = users.length;
-  const activeUsers = users.filter(u => u.status === "Active").length;
-  const suspendedUsers = totalUsers - activeUsers;
-  const admins = users.filter(u => u.role === "Admin").length;
+  const stats = useMemo(() => {
+    const totalUsers = users.length;
+    const activeUsers = users.filter(u => u.is_active).length;
+    const suspendedUsers = totalUsers - activeUsers;
+    const admins = users.filter(u => u.role === "admin" || u.role === "superadmin").length;
+    return { totalUsers, activeUsers, suspendedUsers, admins };
+  }, [users]);
 
   // Drawer
   const openDrawer = (filter: string, title: string) => {
     if (filter === "total") setFilteredUsers(users);
-    if (filter === "active") setFilteredUsers(users.filter(u => u.status === "Active"));
-    if (filter === "suspended") setFilteredUsers(users.filter(u => u.status === "Suspended"));
-    if (filter === "admins") setFilteredUsers(users.filter(u => u.role === "Admin"));
+    if (filter === "active") setFilteredUsers(users.filter(u => u.is_active));
+    if (filter === "suspended") setFilteredUsers(users.filter(u => !u.is_active));
+    if (filter === "admins") setFilteredUsers(users.filter(u => u.role === "admin" || u.role === "superadmin"));
     setDrawerTitle(title);
     setDrawerOpen(true);
   };
 
   if (loading) {
     return <div className="p-6">Chargement des utilisateurs...</div>;
+  }
+
+  if (error) {
+    return <div className="p-6 text-red-500">{error}</div>;
   }
 
   return (
@@ -131,7 +91,7 @@ const UserManagement: React.FC = () => {
             onClick={() => openDrawer("total", "Total Utilisateurs")}
           />
           <h3 className="text-gray-500 text-sm">Total Utilisateurs</h3>
-          <p className="text-xl font-bold">{totalUsers}</p>
+          <p className="text-xl font-bold">{stats.totalUsers}</p>
         </div>
         {/* Actifs */}
         <div className="bg-white rounded-xl shadow-lg p-6 relative">
@@ -140,7 +100,7 @@ const UserManagement: React.FC = () => {
             onClick={() => openDrawer("active", "Utilisateurs Actifs")}
           />
           <h3 className="text-gray-500 text-sm">Actif</h3>
-          <p className="text-xl font-bold text-green-600">{activeUsers}</p>
+          <p className="text-xl font-bold text-green-600">{stats.activeUsers}</p>
         </div>
         {/* Suspendus */}
         <div className="bg-white rounded-xl shadow-lg p-6 relative">
@@ -149,7 +109,7 @@ const UserManagement: React.FC = () => {
             onClick={() => openDrawer("suspended", "Utilisateurs Suspendus")}
           />
           <h3 className="text-gray-500 text-sm">Suspendu</h3>
-          <p className="text-xl font-bold text-red-600">{suspendedUsers}</p>
+          <p className="text-xl font-bold text-red-600">{stats.suspendedUsers}</p>
         </div>
         {/* Admins */}
         <div className="bg-white rounded-xl shadow-lg p-6 relative">
@@ -158,7 +118,7 @@ const UserManagement: React.FC = () => {
             onClick={() => openDrawer("admins", "Administrateurs")}
           />
           <h3 className="text-gray-500 text-sm">Admin</h3>
-          <p className="text-xl font-bold text-blue-600">{admins}</p>
+          <p className="text-xl font-bold text-blue-600">{stats.admins}</p>
         </div>
       </div>
 
@@ -180,7 +140,7 @@ const UserManagement: React.FC = () => {
             <table className="w-full divide-y divide-gray-200 text-left text-xs">
               <thead className="bg-gray-50 sticky top-0 z-20">
                 <tr>
-                  {["Profil", "Nom", "Email", "Téléphone", "Entreprise", "Date", "Heure", "Statut", "Rôle", "Permission"].map((h) => (
+                  {["Profil", "Nom", "Email", "Téléphone", "Date d'inscription", "Statut", "Rôle"].map((h) => (
                     <th
                       key={h}
                       className="px-3 py-2 font-semibold text-gray-600 whitespace-nowrap"
@@ -194,19 +154,18 @@ const UserManagement: React.FC = () => {
                 {filteredUsers.map(u => (
                   <tr key={u.id} className="hover:bg-gray-50">
                     <td className="px-3 py-2">
-                      <img src={u.avatar} alt={u.name} className="w-8 h-8 rounded-full" />
+                      <img src={u.profile_image || '/images/default-avatar.png'} alt={u.username} className="w-8 h-8 rounded-full" />
                     </td>
-                    <td className="px-3 py-2">{capitalize(u.name)}</td>
-                    <td className="px-3 py-2">{u.email}</td>
+                    <td className="px-3 py-2">{capitalize(`${u.first_name || ''} ${u.last_name || ''}`.trim() || u.username)}</td>
+                    <td className="px-3 py-2">{u.email || 'N/A'}</td>
                     <td className="px-3 py-2">{u.phone}</td>
-                    <td className="px-3 py-2">{u.company}</td>
-                    <td className="px-3 py-2">{u.createdDate}</td>
-                    <td className="px-3 py-2">{u.createdAt}</td>
+                    <td className="px-3 py-2">{u.date_joined ? new Date(u.date_joined).toLocaleDateString() : 'N/A'}</td>
                     <td className="px-3 py-2">
-                      <span className={`${statusColors[u.status]}`}>{u.status}</span>
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${statusColors[u.is_active ? "Active" : "Suspended"]}`}>
+                        {u.is_active ? "Actif" : "Suspendu"}
+                      </span>
                     </td>
-                    <td className="px-3 py-2">{u.role}</td>
-                    <td className="px-3 py-2">{u.permission}</td>
+                    <td className="px-3 py-2">{u.role || 'N/A'}</td>
                   </tr>
                 ))}
               </tbody>
@@ -217,11 +176,17 @@ const UserManagement: React.FC = () => {
 
       {/* Gestion des utilisateurs */}
       <SectionCard title="Gestion des Utilisateurs">
+        <button
+          onClick={refreshUsers}
+          className="absolute top-6 right-6 bg-blue-500 text-white text-xs font-semibold px-3 py-1 rounded-md hover:bg-blue-600 transition"
+        >
+          🔄 Rafraîchir
+        </button>
         <div className="overflow-x-auto">
           <table className="w-full divide-y divide-gray-200 text-center text-xs">
             <thead className="sticky top-0 z-20 bg-gray-50">
               <tr>
-                {["Profil", "Nom", "Email", "Date", "Heure", "Rôle", "Permission", "Statut", "Actions"].map((h) => (
+                {["Profil", "Nom", "Email", "Date Inscription", "Rôle", "Statut", "Actions"].map((h) => (
                   <th key={h} className="px-3 py-2 font-medium text-gray-500 whitespace-nowrap">{h}</th>
                 ))}
               </tr>
@@ -232,24 +197,22 @@ const UserManagement: React.FC = () => {
                   {/* Profil */}
                   <td className="px-3 py-2 text-center">
                     <div className="flex justify-center items-center">
-                      <img src={u.avatar} alt={u.name} className="w-8 h-8 rounded-full" />
+                      <img src={u.profile_image || '/images/default-avatar.png'} alt={u.username} className="w-8 h-8 rounded-full" />
                     </div>
                   </td>
                   {/* Nom */}
-                  <td className="px-3 py-2 whitespace-nowrap font-medium">{capitalize(u.name)}</td>
+                  <td className="px-3 py-2 whitespace-nowrap font-medium">{capitalize(`${u.first_name || ''} ${u.last_name || ''}`.trim() || u.username)}</td>
                   {/* Email */}
-                  <td className="px-3 py-2 whitespace-nowrap text-gray-500">{u.email}</td>
+                  <td className="px-3 py-2 whitespace-nowrap text-gray-500">{u.email || 'N/A'}</td>
                   {/* Date */}
-                  <td className="px-3 py-2 whitespace-nowrap text-gray-500">{u.createdDate}</td>
-                  {/* Heure */}
-                  <td className="px-3 py-2 whitespace-nowrap text-gray-500">{u.createdAt}</td>
+                  <td className="px-3 py-2 whitespace-nowrap text-gray-500">{u.date_joined ? new Date(u.date_joined).toLocaleDateString() : 'N/A'}</td>
                   {/* Rôle */}
                   <td className="px-3 py-2 text-center relative">
                     <span
-                      className={`${roleColors[u.role]} cursor-pointer`}
+                      className={`text-xs px-2 py-0.5 rounded-full cursor-pointer ${roleColors[u.role || 'user']}`}
                       onClick={() => setRoleDropdown(roleDropdown === u.id ? null : u.id)}
                     >
-                      {u.role}
+                      {u.role || 'user'}
                     </span>
 
                     {roleDropdown === u.id && (
@@ -264,41 +227,10 @@ const UserManagement: React.FC = () => {
                           {roleOptions.map((r) => (
                             <div
                               key={r}
-                              onClick={() => changeRole(u.id, r)}
-                              className={`cursor-pointer ${roleColors[r]} text-center hover:opacity-80`}
+                              onClick={() => handleChangeRole(u.id, r)}
+                              className={`cursor-pointer text-xs px-2 py-0.5 rounded-full ${roleColors[r]} text-center hover:opacity-80`}
                             >
                               {r}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </td>
-                  {/* Permission */}
-                  <td className="px-3 py-2 text-center relative">
-                    <span
-                      className={`${permissionColors[u.permission]} cursor-pointer`}
-                      onClick={() => setPermDropdown(permDropdown === u.id ? null : u.id)}
-                    >
-                      {u.permission}
-                    </span>
-
-                    {permDropdown === u.id && (
-                      <div className="absolute top-10 left-1/2 transform -translate-x-1/2 w-56 bg-white border shadow-lg rounded-lg z-30">
-                        {/* Barre de recherche */}
-                        <input
-                          type="text"
-                          placeholder="Rechercher une option"
-                          className="w-full px-3 py-2 text-xs border-b outline-none"
-                        />
-                        <div className="max-h-48 overflow-y-auto p-2 space-y-2">
-                          {permissionOptions.map((p) => (
-                            <div
-                              key={p}
-                              onClick={() => changePermission(u.id, p)}
-                              className={`cursor-pointer ${permissionColors[p]} text-center hover:opacity-80`}
-                            >
-                              {p}
                             </div>
                           ))}
                         </div>
@@ -308,19 +240,21 @@ const UserManagement: React.FC = () => {
 
                   {/* Statut */}
                   <td className="px-3 py-2 whitespace-nowrap">
-                    <span className={`${statusColors[u.status]} font-semibold`}>{u.status}</span>
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${statusColors[u.is_active ? "Active" : "Suspended"]}`}>
+                      {u.is_active ? "Actif" : "Suspendu"}
+                    </span>
                   </td>
                   {/* Actions */}
                   <td className="px-3 py-2 whitespace-nowrap">
                     <button
-                      onClick={() => toggleStatus(u.id)}
+                      onClick={() => handleToggleStatus(u)}
                       className={`text-xs px-2 py-0.5 rounded-full font-semibold transition-colors ${
-                        u.status === "Active"
+                        u.is_active
                           ? "bg-red-400 hover:bg-red-500 text-white"
                           : "bg-green-400 hover:bg-green-500 text-white"
                       }`}
                     >
-                      {u.status === "Active" ? "Suspendre" : "Activer"}
+                      {u.is_active ? "Suspendre" : "Activer"}
                     </button>
                   </td>
                 </tr>
