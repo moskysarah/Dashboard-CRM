@@ -13,13 +13,25 @@ export interface AuthState {
   logout: () => void;
 }
 
+// Vérifie s'il y a un état d'authentification dans le localStorage au démarrage.
+const getInitialIsAuthenticated = (): boolean => {
+  const authState = localStorage.getItem(LOCAL_STORAGE_KEYS.AUTH_STATE);
+  if (!authState) return false;
+  try {
+    const { state } = JSON.parse(authState);
+    return !!state?.accessToken; // L'utilisateur est considéré comme authentifié s'il y a un token.
+  } catch {
+    return false;
+  }
+};
+
 export const useAuth = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
       accessToken: null,
       refreshToken: null,
-      isAuthenticated: false,
+      isAuthenticated: getInitialIsAuthenticated(),
 
       // Gère la connexion après une validation réussie
       login: (user: User, tokens: { access: string; refresh: string }) => {

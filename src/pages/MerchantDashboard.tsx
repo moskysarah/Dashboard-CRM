@@ -47,7 +47,7 @@ const MerchantDashboard: React.FC = () => {
       <p className="text-gray-600 mt-4 ml-6">Performance et transactions des marchands.</p>
 
       {/* KPIs marchands */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6 ml-6 w-300 ">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6 ml-6">
         <MerchantKPI
           title="Ventes totales"
           value={kpis.totalAmount}
@@ -71,15 +71,9 @@ const MerchantDashboard: React.FC = () => {
       </div>
 
       {/* Suivi de performance */}
-      <div className="bg-white p-4 rounded-lg shadow mt-6 w-300 ml-6">
+      <div className="bg-white p-4 rounded-lg shadow mt-6 ml-6">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold">Suivi des performances</h2>
-          <button
-            onClick={refresh}
-            className="bg-blue-500 text-white text-xs font-semibold px-3 py-1 rounded-md hover:bg-blue-600 transition"
-          >
-            🔄 Rafraîchir
-          </button>
         </div>
         <div className="max-h-96 overflow-y-auto overflow-x-auto rounded-lg">
           <table className="w-full text-left border-collapse">

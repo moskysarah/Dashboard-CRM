@@ -8,12 +8,16 @@ import ReportsList from "../pages/operations/RapportsList";
 import Sales from "../pages/Sales"; 
 import Finance from "../pages/Finance"; 
 import IT from "../pages/IT";
+import UsersPage from "../pages/UsersPage"; // Importer la nouvelle page
 import ProtectedRoute from "../components/ProtectedRoute";
 
 export const router = createBrowserRouter([
   { path: "/login", element: <SplashLogin /> },
 
   // Les superadmins ont accès à tout. Les admins ont accès à ces pages.
+  // La page des utilisateurs n'est accessible qu'aux superadmins.
+  { path: "/users", element: <ProtectedRoute allowedRoles={['superadmin']}><UsersPage /></ProtectedRoute> },
+
   { path: "/dashboard", element: <ProtectedRoute allowedRoles={['admin', 'user']}><Dashboard /></ProtectedRoute>},
   { path: "/it", element: <ProtectedRoute allowedRoles={['admin']}><IT /></ProtectedRoute> },
   { path: "/transactionslist", element: <ProtectedRoute allowedRoles={['admin', 'user']}><TransactionsList /></ProtectedRoute> },

@@ -188,10 +188,12 @@ export const regenerateMerchantSecret = (merchantId: string) =>
 // ========================
 // ADMIN PANEL
 // ========================
+export const getAdminOverview = () => API.get("/admin-panel/overview/");
 export const getAdminTransactions = () => API.get("/merchants/transactions/"); // L'API définit les transactions marchandes, pas un endpoint admin dédié.
 // La création de transaction via /admin-panel/ n'est pas définie dans l'API.
 
-export const getAdminUsers = () => API.get("/accounts/users/"); // L'admin a accès à tous les utilisateurs
+export const getAdminUsers = (params?: { page?: number; page_size?: number }) =>
+  API.get("/accounts/users/", { params }); // L'admin a accès à tous les utilisateurs
 export const getAdminUserById = (id: string) =>
   API.get(`/accounts/users/${id}/`);
 export const updateAdminUser = (id: string, data: any) =>

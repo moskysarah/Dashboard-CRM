@@ -72,11 +72,11 @@ const DashboardLayout: React.FC<Props> = ({ children }) => {
   };
 
   return (
-  <div className="flex h-screen bg-gray-100 overflow-hidden overflow-x-hidden">
+  <div className="flex h-screen bg-gray-100 max-w-screen">
     <Sidebar />
 
     <div className="flex-1 flex flex-col">
-      <header className="bg-white shadow border-b border-blue-200 p-4 flex justify-between items-center h-16">
+      <header className="bg-white shadow border-b border-blue-200 p-4 flex justify-between items-center h-16 max-w-full">
         <h2 className="font-bold">Dashboard</h2>
 
         <div className="flex items-center gap-4">

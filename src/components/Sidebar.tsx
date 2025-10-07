@@ -26,6 +26,17 @@ export function Sidebar() {
         </NavLink>
 
         <NavLink
+          to="/users"
+          className={({ isActive }) =>
+            `flex items-center gap-2 p-2 rounded-lg ${
+              isActive ? "bg-indigo-500 text-white  w-50 " : "text-white  hover:text-white w-50   hover:bg-indigo-500"
+            }`
+          }
+        >
+          <Users size={18} /> {t("Utilisateurs")}
+        </NavLink>
+
+        <NavLink
           to="/finance"
           className={({ isActive }) =>
             `flex items-center gap-2 p-2 rounded-lg ${
@@ -46,17 +57,6 @@ export function Sidebar() {
           }
         >
           <ShoppingCart size={18} /> {t("Vente")}
-        </NavLink>
-
-        <NavLink
-          to="/merchants"
-          className={({ isActive }) =>
-            `flex items-center gap-2 p-2 rounded-lg ${
-              isActive ? "bg-indigo-500 text-white  w-50 " : "text-white  hover:text-white w-50   hover:bg-indigo-500"
-            }`
-          }
-        >
-          <Users size={18} /> {t("Marchand")}
         </NavLink>
 
         <NavLink
