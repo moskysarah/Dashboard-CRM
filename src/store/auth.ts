@@ -1,30 +1,58 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { LOCAL_STORAGE_KEYS } from '../config/constants'; // Le chemin est déjà bon, mais c'est pour l'exemple
 import type { User } from '../types/domain';
+import { cleanupAuthLocalStorage } from '../utils/localStorageCleanup';
 
 export interface AuthState {
   user: User | null;
-  token: string | null;
+  accessToken: string | null;
+  refreshToken: string | null;
   isAuthenticated: boolean;
-  loginWithOtp: (user: User, token: string) => void;
+  login: (user: User, tokens: { access: string; refresh: string }) => void;
   logout: () => void;
 }
 
+// Vérifie s'il y a un état d'authentification dans le localStorage au démarrage.
+const getInitialIsAuthenticated = (): boolean => {
+  const authState = localStorage.getItem(LOCAL_STORAGE_KEYS.AUTH_STATE);
+  if (!authState) return false;
+  try {
+    const { state } = JSON.parse(authState);
+    return !!state?.accessToken; // L'utilisateur est considéré comme authentifié s'il y a un token.
+  } catch {
+    return false;
+  }
+};
+
 export const useAuth = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
-      token: null,
-      isAuthenticated: false,
+      accessToken: null,
+      refreshToken: null,
+      isAuthenticated: getInitialIsAuthenticated(),
 
-      // Login avec OTP validé
-      loginWithOtp: (user: User, token: string) => {
-        set({ user, token, isAuthenticated: true });
+      // Gère la connexion après une validation réussie
+      login: (user: User, tokens: { access: string; refresh: string }) => {
+        set({
+          user,
+          accessToken: tokens.access,
+          refreshToken: tokens.refresh,
+          isAuthenticated: true,
+        });
+        // Nettoyage du token temporaire qui n'est plus nécessaire
+        cleanupAuthLocalStorage();
       },
 
-      logout: () => set({ user: null, token: null, isAuthenticated: false }),
+      logout: () => {
+        // On vide l'état du store
+        set({ user: null, accessToken: null, refreshToken: null, isAuthenticated: false });
+        // Et on s'assure de nettoyer complètement le localStorage
+        cleanupAuthLocalStorage();
+      },
     }),
-    { name: 'crm-auth' }
+    { name: LOCAL_STORAGE_KEYS.AUTH_STATE }
   )
 );
 export const useIsAuthenticated = () => {

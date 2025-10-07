@@ -1,25 +1,32 @@
-// src/components/ProtectedRoute.tsx
-import React, { useContext } from "react";
-import { Navigate } from "react-router-dom";
-import { UserContext } from "../contexts/userContext";
-import type { JSX } from "react/jsx-runtime";
+import React from 'react';
+import { Navigate } from 'react-router-dom';
+import { useAuth } from '../store/auth';
+import type { UserRole } from '../types/domain';
 
-interface Props {
-  children: JSX.Element;
-  allowedRoles?: ("Admin" | "Marchand" | "Distributeur")[];
+interface ProtectedRouteProps {
+  children: React.ReactElement;
+  allowedRoles: UserRole[];
 }
 
-const ProtectedRoute: React.FC<Props> = ({ children, allowedRoles }) => {
-  const { user } = useContext(UserContext);
-  const isAuthenticated = Boolean(user);
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles }) => {
+  const isAuthenticated = useAuth((state) => state.isAuthenticated);
+  const user = useAuth((state) => state.user);
 
-  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (!isAuthenticated) {
+    // Si l'utilisateur n'est pas authentifié, le rediriger vers la page de connexion.
+    return <Navigate to="/login" replace />;
+  }
 
-  if (allowedRoles && (!user?.role || !allowedRoles.includes(user.role as "Admin" | "Marchand" | "Distributeur"))) {
+  const userRole = user?.role;
+  const isAuthorized = userRole && (allowedRoles.includes(userRole) || userRole === 'superadmin');
+
+  if (!isAuthorized) {
+    // Si l'utilisateur est authentifié mais n'a pas le bon rôle, le rediriger vers le dashboard.
+    // On pourrait aussi créer une page "Accès non autorisé".
     return <Navigate to="/dashboard" replace />;
   }
 
-  return children;
+  return children; // Si authentifié et autorisé, afficher le contenu.
 };
 
 export default ProtectedRoute;

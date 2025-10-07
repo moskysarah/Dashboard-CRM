@@ -1,0 +1,3701 @@
+openapi: 3.0.3
+info:
+  title: POSTEPAY API
+  version: 1.0.0
+  description: API transactionnelle POSTEPAY
+paths:
+  /api/v1/a2b/credit/remove/:
+    post:
+      operationId: api_v1_a2b_credit_remove_create
+      description: |-
+        Removes credit from a subscriber's account.
+        This view should be protected and only accessible by admins.
+      tags:
+      - A2B Credit
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RemoveCreditRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RemoveCreditRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RemoveCreditRequest'
+        required: true
+      security:
+      - MerchantAuthentication: []
+      - CustomJWTAuthentication: []
+      - cookieAuth: []
+      - basicAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RemoveCredit'
+          description: ''
+  /api/v1/a2b/credit/transfer/:
+    post:
+      operationId: api_v1_a2b_credit_transfer_create
+      description: Transfers credit from one subscriber to another.
+      tags:
+      - A2B Credit
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferCreditRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TransferCreditRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TransferCreditRequest'
+        required: true
+      security:
+      - MerchantAuthentication: []
+      - CustomJWTAuthentication: []
+      - cookieAuth: []
+      - basicAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransferCredit'
+          description: ''
+  /api/v1/accounts/initiate-email-verification/:
+    post:
+      operationId: api_v1_accounts_initiate_email_verification_create
+      description: View to initiate email verification by sending an OTP.
+      tags:
+      - Account Verification
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InitiateEmailVerificationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/InitiateEmailVerificationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/InitiateEmailVerificationRequest'
+        required: true
+      security:
+      - MerchantAuthentication: []
+      - CustomJWTAuthentication: []
+      - cookieAuth: []
+      - basicAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InitiateEmailVerification'
+          description: ''
+  /api/v1/accounts/initiate-phone-verification/:
+    post:
+      operationId: api_v1_accounts_initiate_phone_verification_create
+      description: View to initiate phone number verification by sending an OTP.
+      tags:
+      - Account Verification
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InitiatePhoneVerificationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/InitiatePhoneVerificationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/InitiatePhoneVerificationRequest'
+        required: true
+      security:
+      - MerchantAuthentication: []
+      - CustomJWTAuthentication: []
+      - cookieAuth: []
+      - basicAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InitiatePhoneVerification'
+          description: ''
+  /api/v1/accounts/otp/login/:
+    post:
+      operationId: api_v1_accounts_otp_login_create
+      tags:
+      - Account Authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OTPLoginRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/OTPLoginRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/OTPLoginRequest'
+        required: true
+      security:
+      - MerchantAuthentication: []
+      - CustomJWTAuthentication: []
+      - cookieAuth: []
+      - basicAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OTPLogin'
+          description: ''
+  /api/v1/accounts/otp/request/:
+    post:
+      operationId: api_v1_accounts_otp_request_create
+      tags:
+      - Account Authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OTPRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/OTPRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/OTPRequestRequest'
+        required: true
+      security:
+      - MerchantAuthentication: []
+      - CustomJWTAuthentication: []
+      - cookieAuth: []
+      - basicAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OTPRequest'
+          description: ''
+  /api/v1/accounts/password-reset/:
+    post:
+      operationId: api_v1_accounts_password_reset_create
+      tags:
+      - Account Authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordResetRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PasswordResetRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PasswordResetRequestRequest'
+      security:
+      - MerchantAuthentication: []
+      - CustomJWTAuthentication: []
+      - cookieAuth: []
+      - basicAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PasswordResetRequest'
+          description: ''
+  /api/v1/accounts/password-reset/confirm/:
+    post:
+      operationId: api_v1_accounts_password_reset_confirm_create
+      tags:
+      - Account Authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordResetConfirmRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PasswordResetConfirmRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PasswordResetConfirmRequest'
+        required: true
+      security:
+      - MerchantAuthentication: []
+      - CustomJWTAuthentication: []
+      - cookieAuth: []
+      - basicAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PasswordResetConfirm'
+          description: ''
+  /api/v1/accounts/token/phone/:
+    post:
+      operationId: api_v1_accounts_token_phone_create
+      description: |-
+        Takes a set of user credentials and returns an access and refresh JSON web
+        token pair to prove the authentication of those credentials.
+      tags:
+      - Account Authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenObtainWithPhoneRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenObtainWithPhoneRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenObtainWithPhoneRequest'
+        required: true
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenObtainWithPhone'
+          description: ''
+  /api/v1/accounts/user-settings/:
+    get:
+      operationId: api_v1_accounts_user_settings_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - Account User Settings
+      security:
+      - MerchantAuthentication: []
+      - CustomJWTAuthentication: []
+      - cookieAuth: []
+      - basicAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedUserSettingsList'
+          description: ''
+  /api/v1/accounts/user-settings/{id}/:
+    get:
+      operationId: api_v1_accounts_user_settings_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this User Setting.
+        required: true
+      tags:
+      - Account User Settings
+      security:
+      - MerchantAuthentication: []
+      - CustomJWTAuthentication: []
+      - cookieAuth: []
+      - basicAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSettings'
+          description: ''
+  /api/v1/accounts/users/:
+    get:
+      operationId: api_v1_accounts_users_list
+      parameters:
+      - in: query
+        name: email
+        schema:
+          type: string
+      - in: query
+        name: email__icontains
+        schema:
+          type: string
+      - in: query
+        name: first_name
+        schema:
+          type: string
+      - in: query
+        name: first_name__icontains
+        schema:
+          type: string
+      - in: query
+        name: last_name
+        schema:
+          type: string
+      - in: query
+        name: last_name__icontains
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: role
+        schema:
+          type: string
+          nullable: true
+          enum:
+          - admin
+          - superadmin
+          - user
+        description: |-
+          * `admin` - Admin
+          * `user` - User
+          * `superadmin` - SuperAdmin
+      - in: query
+        name: role__icontains
+        schema:
+          type: string
+      - in: query
+        name: username
+        schema:
+          type: string
+      - in: query
+        name: username__icontains
+        schema:
+          type: string
+      tags:
+      - Account Users
+      security:
+      - MerchantAuthentication: []
+      - CustomJWTAuthentication: []
+      - cookieAuth: []
+      - basicAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedUserList'
+          description: ''
+    post:
+      operationId: api_v1_accounts_users_create
+      tags:
+      - Account Users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreateUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserCreateUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserCreateUpdateRequest'
+        required: true
+      security:
+      - MerchantAuthentication: []
+      - CustomJWTAuthentication: []
+      - cookieAuth: []
+      - basicAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserCreateUpdate'
+          description: ''
+  /api/v1/accounts/users/{id}/:
+    get:
+      operationId: api_v1_accounts_users_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user.
+        required: true
+      tags:
+      - Account Users
+      security:
+      - MerchantAuthentication: []
+      - CustomJWTAuthentication: []
+      - cookieAuth: []
+      - basicAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetail'
+          description: ''
+    put:
+      operationId: api_v1_accounts_users_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user.
+        required: true
+      tags:
+      - Account Users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreateUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserCreateUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserCreateUpdateRequest'
+        required: true
+      security:
+      - MerchantAuthentication: []
+      - CustomJWTAuthentication: []
+      - cookieAuth: []
+      - basicAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserCreateUpdate'
+          description: ''
+    patch:
+      operationId: api_v1_accounts_users_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user.
+        required: true
+      tags:
+      - Account Users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUserCreateUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUserCreateUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUserCreateUpdateRequest'
+      security:
+      - MerchantAuthentication: []
+      - CustomJWTAuthentication: []
+      - cookieAuth: []
+      - basicAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserCreateUpdate'
+          description: ''
+    delete:
+      operationId: api_v1_accounts_users_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user.
+        required: true
+      tags:
+      - Account Users
+      security:
+      - MerchantAuthentication: []
+      - CustomJWTAuthentication: []
+      - cookieAuth: []
+      - basicAuth: []
+      - tokenAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/accounts/verify-email-otp/:
+    post:
+      operationId: api_v1_accounts_verify_email_otp_create
+      description: View to verify the OTP sent to the email.
+      tags:
+      - Account Verification
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyEmailOTPRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/VerifyEmailOTPRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/VerifyEmailOTPRequest'
+        required: true
+      security:
+      - MerchantAuthentication: []
+      - CustomJWTAuthentication: []
+      - cookieAuth: []
+      - basicAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifyEmailOTP'
+          description: ''
+  /api/v1/accounts/verify-phone-otp/:
+    post:
+      operationId: api_v1_accounts_verify_phone_otp_create
+      description: View to verify the OTP sent to the phone number.
+      tags:
+      - Account Verification
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyPhoneOTPRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/VerifyPhoneOTPRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/VerifyPhoneOTPRequest'
+        required: true
+      security:
+      - MerchantAuthentication: []
+      - CustomJWTAuthentication: []
+      - cookieAuth: []
+      - basicAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifyPhoneOTP'
+          description: ''
+  /api/v1/admin-panel/merchants/{merchant_id}/regenerate-secret/:
+    post:
+      operationId: api_v1_admin_panel_merchants_regenerate_secret_create
+      description: |-
+        Régénère la clé secrète d'un marchand et la retourne.
+        C'est la seule fois où la clé en clair est visible.
+      parameters:
+      - in: path
+        name: merchant_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Admin Panel - Merchants
+      security:
+      - MerchantAuthentication: []
+      - CustomJWTAuthentication: []
+      - cookieAuth: []
+      - basicAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/admin-panel/overview/:
+    get:
+      operationId: api_v1_admin_panel_overview_retrieve
+      tags:
+      - api
+      security:
+      - MerchantAuthentication: []
+      - CustomJWTAuthentication: []
+      - cookieAuth: []
+      - basicAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v1/admin-panel/transactions/{transaction_code}/set-status/:
+    post:
+      operationId: api_v1_admin_panel_transactions_set_status_create
+      description: |-
+        Permet à un administrateur de changer manuellement le statut d'une transaction.
+        À utiliser avec précaution.
+      parameters:
+      - in: path
+        name: transaction_code
+        schema:
+          type: string
+        required: true
+      tags:
+      - Admin Panel - Transactions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionSetStatusRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TransactionSetStatusRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TransactionSetStatusRequest'
+        required: true
+      security:
+      - MerchantAuthentication: []
+      - CustomJWTAuthentication: []
+      - cookieAuth: []
+      - basicAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Statut de la transaction mis à jour.
+          description: ''
+  /api/v1/admin-panel/users/{user_id}/set-role/:
+    post:
+      operationId: api_v1_admin_panel_users_set_role_create
+      description: Permet à un administrateur de changer le rôle d'un utilisateur.
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Admin Panel - Users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserSetRoleRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserSetRoleRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserSetRoleRequest'
+        required: true
+      security:
+      - MerchantAuthentication: []
+      - CustomJWTAuthentication: []
+      - cookieAuth: []
+      - basicAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Rôle de l'utilisateur mis à jour.
+          description: ''
+  /api/v1/admin-panel/users/{user_id}/set-status/:
+    post:
+      operationId: api_v1_admin_panel_users_set_status_create
+      description: |-
+        Permet à un administrateur de bloquer (is_active=False) ou
+        d'activer (is_active=True) un utilisateur.
+      parameters:
+      - in: path
+        name: user_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - Admin Panel - Users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserSetStatusRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserSetStatusRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserSetStatusRequest'
+        required: true
+      security:
+      - MerchantAuthentication: []
+      - CustomJWTAuthentication: []
+      - cookieAuth: []
+      - basicAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Statut de l'utilisateur mis à jour.
+          description: ''
+  /api/v1/analytics/overview/:
+    get:
+      operationId: api_v1_analytics_overview_retrieve
+      tags:
+      - api
+      security:
+      - MerchantAuthentication: []
+      - CustomJWTAuthentication: []
+      - cookieAuth: []
+      - basicAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v1/me/payouts/airtime/:
+    post:
+      operationId: api_v1_me_payouts_airtime_create
+      description: Utilise le solde du portefeuille pour acheter du crédit de communication
+        pour le numéro de téléphone de l'utilisateur.
+      summary: Acheter du crédit téléphonique avec son wallet
+      tags:
+      - Wallet
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BuyCreditRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BuyCreditRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BuyCreditRequest'
+        required: true
+      security:
+      - MerchantAuthentication: []
+      - CustomJWTAuthentication: []
+      - cookieAuth: []
+      - basicAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BuyCredit'
+          description: ''
+  /api/v1/me/payouts/mobile-money/:
+    post:
+      operationId: api_v1_me_payouts_mobile_money_create
+      description: 'Utilise le solde du portefeuille pour envoyer de l''argent vers
+        un numéro de téléphone Mobile Money externe (ex: Airtel, Orange, Vodacom).'
+      summary: Envoyer de l'argent vers un compte Mobile Money externe
+      tags:
+      - Top Up Mobile Money
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TopUpMobileMoneyRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TopUpMobileMoneyRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TopUpMobileMoneyRequest'
+        required: true
+      security:
+      - MerchantAuthentication: []
+      - CustomJWTAuthentication: []
+      - cookieAuth: []
+      - basicAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TopUpMobileMoney'
+          description: ''
+  /api/v1/me/payouts/mobile-money/status/:
+    post:
+      operationId: api_v1_me_payouts_mobile_money_status_create
+      description: Permet de consulter le statut actuel d'une transaction d'envoi
+        d'argent vers un compte Mobile Money externe.
+      summary: Vérifier le statut d'un envoi Mobile Money
+      tags:
+      - Top Up Mobile Money
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TopUpMobileMoneyStatusRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TopUpMobileMoneyStatusRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TopUpMobileMoneyStatusRequest'
+        required: true
+      security:
+      - MerchantAuthentication: []
+      - CustomJWTAuthentication: []
+      - cookieAuth: []
+      - basicAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TopUpMobileMoneyStatus'
+          description: ''
+  /api/v1/me/transactions/:
+    get:
+      operationId: api_v1_me_transactions_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - Wallet
+      security:
+      - MerchantAuthentication: []
+      - CustomJWTAuthentication: []
+      - cookieAuth: []
+      - basicAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedTransactionList'
+          description: ''
+  /api/v1/me/transactions/{id}/:
+    get:
+      operationId: api_v1_me_transactions_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this transaction.
+        required: true
+      tags:
+      - Wallet
+      security:
+      - MerchantAuthentication: []
+      - CustomJWTAuthentication: []
+      - cookieAuth: []
+      - basicAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionDetail'
+          description: ''
+  /api/v1/me/transfers/poste-pay/initiate/:
+    post:
+      operationId: api_v1_me_transfers_poste_pay_initiate_create
+      description: Démarre un processus de transfert de fonds depuis le portefeuille
+        de l'utilisateur connecté vers celui d'un autre utilisateur de la plateforme.
+        Un OTP est envoyé pour vérification.
+      summary: Initier un transfert vers un autre utilisateur PostePay
+      tags:
+      - Wallet
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WalletTransferRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/WalletTransferRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/WalletTransferRequest'
+        required: true
+      security:
+      - MerchantAuthentication: []
+      - CustomJWTAuthentication: []
+      - cookieAuth: []
+      - basicAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletTransfer'
+          description: ''
+  /api/v1/me/transfers/poste-pay/verify/:
+    post:
+      operationId: api_v1_me_transfers_poste_pay_verify_create
+      description: Confirme et exécute un transfert de fonds en attente en utilisant
+        l'OTP reçu par l'utilisateur.
+      summary: Vérifier et compléter un transfert avec OTP
+      tags:
+      - Wallet
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WalletTransferVerifyRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/WalletTransferVerifyRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/WalletTransferVerifyRequest'
+        required: true
+      security:
+      - MerchantAuthentication: []
+      - CustomJWTAuthentication: []
+      - cookieAuth: []
+      - basicAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletTransferVerify'
+          description: ''
+  /api/v1/me/wallets/:
+    get:
+      operationId: api_v1_me_wallets_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - Wallet
+      security:
+      - MerchantAuthentication: []
+      - CustomJWTAuthentication: []
+      - cookieAuth: []
+      - basicAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedWalletList'
+          description: ''
+  /api/v1/me/wallets/{id}/:
+    get:
+      operationId: api_v1_me_wallets_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this wallet.
+        required: true
+      tags:
+      - Wallet
+      security:
+      - MerchantAuthentication: []
+      - CustomJWTAuthentication: []
+      - cookieAuth: []
+      - basicAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wallet'
+          description: ''
+  /api/v1/me/wallets/recharge-async/complete/momo/:
+    post:
+      operationId: api_v1_me_wallets_recharge_async_complete_momo_create
+      description: Permet de finaliser une recharge asynchrone en fournissant l'OTP
+        (One-Time Password) reçu.
+      summary: Compléter une recharge de wallet (Mobile Money Asynchrone avec OTP)
+      tags:
+      - Wallet Async
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WalletRechargeCompleteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/WalletRechargeCompleteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/WalletRechargeCompleteRequest'
+        required: true
+      security:
+      - MerchantAuthentication: []
+      - CustomJWTAuthentication: []
+      - cookieAuth: []
+      - basicAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletRechargeComplete'
+          description: ''
+  /api/v1/me/wallets/recharge-async/momo/:
+    post:
+      operationId: api_v1_me_wallets_recharge_async_momo_create
+      description: Initie une recharge de portefeuille via Mobile Money en mode asynchrone.
+        Le système attend une action de l'utilisateur (comme la saisie d'un code sur
+        son téléphone) pour continuer.
+      summary: Initier une recharge de wallet (Mobile Money Asynchrone)
+      tags:
+      - Wallet Async
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WalletRechargeRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/WalletRechargeRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/WalletRechargeRequest'
+        required: true
+      security:
+      - MerchantAuthentication: []
+      - CustomJWTAuthentication: []
+      - cookieAuth: []
+      - basicAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletRecharge'
+          description: ''
+  /api/v1/me/wallets/recharge/credit-card/:
+    post:
+      operationId: api_v1_me_wallets_recharge_credit_card_create
+      description: Initie une recharge de portefeuille en utilisant une carte de crédit.
+        Le traitement final dépend d'un webhook du fournisseur de paiement.
+      summary: Recharger son wallet par carte de crédit
+      tags:
+      - Wallet
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WalletRechargeCreditCardRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/WalletRechargeCreditCardRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/WalletRechargeCreditCardRequest'
+        required: true
+      security:
+      - MerchantAuthentication: []
+      - CustomJWTAuthentication: []
+      - cookieAuth: []
+      - basicAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletRechargeCreditCard'
+          description: ''
+  /api/v1/me/wallets/recharge/momo/:
+    post:
+      operationId: api_v1_me_wallets_recharge_momo_create
+      description: Lance une requête de recharge de portefeuille via Mobile Money.
+        Le traitement est synchrone, la réponse contient le statut final du paiement.
+      summary: Recharger son wallet (Mobile Money Synchrone)
+      tags:
+      - Wallet
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WalletRechargeRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/WalletRechargeRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/WalletRechargeRequest'
+        required: true
+      security:
+      - MerchantAuthentication: []
+      - CustomJWTAuthentication: []
+      - cookieAuth: []
+      - basicAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletRecharge'
+          description: ''
+  /api/v1/merchants/profiles/:
+    get:
+      operationId: api_v1_merchants_profiles_list
+      description: |-
+        ViewSet pour gérer les Marchands (CRUD).
+        L'accès est restreint aux administrateurs.
+      tags:
+      - Merchants
+      security:
+      - MerchantAuthentication: []
+      - CustomJWTAuthentication: []
+      - cookieAuth: []
+      - basicAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Merchant'
+          description: ''
+    post:
+      operationId: api_v1_merchants_profiles_create
+      description: |-
+        ViewSet pour gérer les Marchands (CRUD).
+        L'accès est restreint aux administrateurs.
+      tags:
+      - Merchants
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MerchantRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MerchantRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MerchantRequest'
+        required: true
+      security:
+      - MerchantAuthentication: []
+      - CustomJWTAuthentication: []
+      - cookieAuth: []
+      - basicAuth: []
+      - tokenAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Merchant'
+          description: ''
+  /api/v1/merchants/profiles/{id}/:
+    get:
+      operationId: api_v1_merchants_profiles_retrieve
+      description: |-
+        ViewSet pour gérer les Marchands (CRUD).
+        L'accès est restreint aux administrateurs.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Marchand.
+        required: true
+      tags:
+      - Merchants
+      security:
+      - MerchantAuthentication: []
+      - CustomJWTAuthentication: []
+      - cookieAuth: []
+      - basicAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Merchant'
+          description: ''
+    put:
+      operationId: api_v1_merchants_profiles_update
+      description: |-
+        ViewSet pour gérer les Marchands (CRUD).
+        L'accès est restreint aux administrateurs.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Marchand.
+        required: true
+      tags:
+      - Merchants
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MerchantRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MerchantRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MerchantRequest'
+        required: true
+      security:
+      - MerchantAuthentication: []
+      - CustomJWTAuthentication: []
+      - cookieAuth: []
+      - basicAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Merchant'
+          description: ''
+    patch:
+      operationId: api_v1_merchants_profiles_partial_update
+      description: |-
+        ViewSet pour gérer les Marchands (CRUD).
+        L'accès est restreint aux administrateurs.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Marchand.
+        required: true
+      tags:
+      - Merchants
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedMerchantRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedMerchantRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedMerchantRequest'
+      security:
+      - MerchantAuthentication: []
+      - CustomJWTAuthentication: []
+      - cookieAuth: []
+      - basicAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Merchant'
+          description: ''
+    delete:
+      operationId: api_v1_merchants_profiles_destroy
+      description: |-
+        ViewSet pour gérer les Marchands (CRUD).
+        L'accès est restreint aux administrateurs.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Marchand.
+        required: true
+      tags:
+      - Merchants
+      security:
+      - MerchantAuthentication: []
+      - CustomJWTAuthentication: []
+      - cookieAuth: []
+      - basicAuth: []
+      - tokenAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/merchants/transactions/:
+    get:
+      operationId: api_v1_merchants_transactions_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - Wallet
+      security:
+      - MerchantAuthentication: []
+      - CustomJWTAuthentication: []
+      - cookieAuth: []
+      - basicAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedTransactionList'
+          description: ''
+  /api/v1/merchants/transactions/{id}/:
+    get:
+      operationId: api_v1_merchants_transactions_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this transaction.
+        required: true
+      tags:
+      - Wallet
+      security:
+      - MerchantAuthentication: []
+      - CustomJWTAuthentication: []
+      - cookieAuth: []
+      - basicAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionDetail'
+          description: ''
+  /api/v1/merchants/wallets/:
+    get:
+      operationId: api_v1_merchants_wallets_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - Wallet
+      security:
+      - MerchantAuthentication: []
+      - CustomJWTAuthentication: []
+      - cookieAuth: []
+      - basicAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedWalletList'
+          description: ''
+  /api/v1/merchants/wallets/{id}/:
+    get:
+      operationId: api_v1_merchants_wallets_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this wallet.
+        required: true
+      tags:
+      - Wallet
+      security:
+      - MerchantAuthentication: []
+      - CustomJWTAuthentication: []
+      - cookieAuth: []
+      - basicAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wallet'
+          description: ''
+  /api/v1/notification/messages/:
+    get:
+      operationId: api_v1_notification_messages_list
+      parameters:
+      - in: query
+        name: created_at
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: created_at__gte
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: created_at__lte
+        schema:
+          type: string
+          format: date-time
+      - in: query
+        name: is_for
+        schema:
+          type: string
+          nullable: true
+          enum:
+          - auth
+          - other
+          - reset_pwd
+          - val_trans
+        description: |-
+          * `auth` - Authentication
+          * `val_trans` - Validation Transaction
+          * `reset_pwd` - Reset Password
+          * `other` - Other
+      - in: query
+        name: is_for__icontains
+        schema:
+          type: string
+      - in: query
+        name: message__icontains
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: user
+        schema:
+          type: integer
+      tags:
+      - Messages
+      security:
+      - MerchantAuthentication: []
+      - CustomJWTAuthentication: []
+      - cookieAuth: []
+      - basicAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedMessageList'
+          description: ''
+  /api/v1/notification/messages/{id}/:
+    get:
+      operationId: api_v1_notification_messages_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Message.
+        required: true
+      tags:
+      - Messages
+      security:
+      - MerchantAuthentication: []
+      - CustomJWTAuthentication: []
+      - cookieAuth: []
+      - basicAuth: []
+      - tokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+          description: ''
+  /api/v1/public/merchant-topup/:
+    post:
+      operationId: api_v1_public_merchant_topup_create
+      description: Endpoint public pour initier une recharge de portefeuille marchand.
+      summary: Initier un Top-Up Mobile Money public pour un marchand
+      tags:
+      - api
+      security:
+      - MerchantAuthentication: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/schema/:
+    get:
+      operationId: api_v1_schema_retrieve
+      description: |-
+        OpenApi3 schema for this API. Format can be selected via content negotiation.
+
+        - YAML: application/vnd.oai.openapi
+        - JSON: application/vnd.oai.openapi+json
+      parameters:
+      - in: query
+        name: format
+        schema:
+          type: string
+          enum:
+          - json
+          - yaml
+      - in: query
+        name: lang
+        schema:
+          type: string
+          enum:
+          - af
+          - ar
+          - ar-dz
+          - ast
+          - az
+          - be
+          - bg
+          - bn
+          - br
+          - bs
+          - ca
+          - ckb
+          - cs
+          - cy
+          - da
+          - de
+          - dsb
+          - el
+          - en
+          - en-au
+          - en-gb
+          - eo
+          - es
+          - es-ar
+          - es-co
+          - es-mx
+          - es-ni
+          - es-ve
+          - et
+          - eu
+          - fa
+          - fi
+          - fr
+          - fy
+          - ga
+          - gd
+          - gl
+          - he
+          - hi
+          - hr
+          - hsb
+          - hu
+          - hy
+          - ia
+          - id
+          - ig
+          - io
+          - is
+          - it
+          - ja
+          - ka
+          - kab
+          - kk
+          - km
+          - kn
+          - ko
+          - ky
+          - lb
+          - lt
+          - lv
+          - mk
+          - ml
+          - mn
+          - mr
+          - ms
+          - my
+          - nb
+          - ne
+          - nl
+          - nn
+          - os
+          - pa
+          - pl
+          - pt
+          - pt-br
+          - ro
+          - ru
+          - sk
+          - sl
+          - sq
+          - sr
+          - sr-latn
+          - sv
+          - sw
+          - ta
+          - te
+          - tg
+          - th
+          - tk
+          - tr
+          - tt
+          - udm
+          - ug
+          - uk
+          - ur
+          - uz
+          - vi
+          - zh-hans
+          - zh-hant
+      tags:
+      - api
+      security:
+      - MerchantAuthentication: []
+      - CustomJWTAuthentication: []
+      - cookieAuth: []
+      - basicAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/vnd.oai.openapi:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/yaml:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/vnd.oai.openapi+json:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v1/token/:
+    post:
+      operationId: api_v1_token_create
+      description: |-
+        Takes a set of user credentials and returns an access and refresh JSON web
+        token pair to prove the authentication of those credentials.
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPairRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPairRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPairRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenObtainPair'
+          description: ''
+  /api/v1/token/refresh/:
+    post:
+      operationId: api_v1_token_refresh_create
+      description: |-
+        Takes a refresh type JSON web token and returns an access type JSON web
+        token if the refresh token is valid.
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefresh'
+          description: ''
+  /api/v1/webhooks/payments/maxicash/:
+    post:
+      operationId: api_v1_webhooks_payments_maxicash_create
+      description: 'Endpoint pour recevoir les notifications de statut de paiement
+        du fournisseur externe (ex: MaxiCash). Cet endpoint est appelé par le service
+        tiers pour confirmer le statut (succès/échec) d''une transaction initiée par
+        un utilisateur, comme une recharge par carte de crédit.'
+      summary: Webhook pour les confirmations de paiement (MaxiCash)
+      tags:
+      - Webhooks
+      security:
+      - MerchantAuthentication: []
+      - CustomJWTAuthentication: []
+      - cookieAuth: []
+      - basicAuth: []
+      - tokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+components:
+  schemas:
+    BlankEnum:
+      enum:
+      - ''
+    BuyCredit:
+      type: object
+      properties:
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        devise_code:
+          type: string
+          maxLength: 3
+      required:
+      - amount
+      - devise_code
+    BuyCreditRequest:
+      type: object
+      properties:
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        devise_code:
+          type: string
+          minLength: 1
+          maxLength: 3
+      required:
+      - amount
+      - devise_code
+    Devise:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 50
+        codeISO:
+          type: string
+          maxLength: 3
+      required:
+      - codeISO
+      - id
+      - name
+    InitiateEmailVerification:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+      required:
+      - email
+    InitiateEmailVerificationRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+      required:
+      - email
+    InitiatePhoneVerification:
+      type: object
+      properties:
+        phone_number:
+          type: string
+          maxLength: 20
+      required:
+      - phone_number
+    InitiatePhoneVerificationRequest:
+      type: object
+      properties:
+        phone_number:
+          type: string
+          minLength: 1
+          maxLength: 20
+      required:
+      - phone_number
+    IsForEnum:
+      enum:
+      - auth
+      - val_trans
+      - reset_pwd
+      - other
+      type: string
+      description: |-
+        * `auth` - Authentication
+        * `val_trans` - Validation Transaction
+        * `reset_pwd` - Reset Password
+        * `other` - Other
+    LanguagePreferenceEnum:
+      enum:
+      - en
+      - fr
+      - es
+      type: string
+      description: |-
+        * `en` - English
+        * `fr` - French
+        * `es` - Spanish
+    Merchant:
+      type: object
+      description: |-
+        Serializer pour le modèle Merchant.
+        Les clés `public_key` et `merchant_secret` sont générées automatiquement et sont en lecture seule.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          description: Le nom commercial du marchand.
+          maxLength: 255
+        public_key:
+          type: string
+          format: uuid
+          readOnly: true
+          description: Clé publique pour les requêtes non authentifiées.
+        merchant_secret:
+          type: string
+          readOnly: true
+          description: Clé secrète pour l'authentification API (sera hachée).
+        owner:
+          allOf:
+          - $ref: '#/components/schemas/Nested'
+          readOnly: true
+        is_active:
+          type: boolean
+          description: Désigne si ce marchand est actif et peut traiter des transactions.
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - merchant_secret
+      - name
+      - owner
+      - public_key
+      - updated_at
+    MerchantRequest:
+      type: object
+      description: |-
+        Serializer pour le modèle Merchant.
+        Les clés `public_key` et `merchant_secret` sont générées automatiquement et sont en lecture seule.
+      properties:
+        name:
+          type: string
+          minLength: 1
+          description: Le nom commercial du marchand.
+          maxLength: 255
+        owner_id:
+          type: integer
+          writeOnly: true
+          nullable: true
+          description: ID de l'utilisateur propriétaire du marchand.
+        is_active:
+          type: boolean
+          description: Désigne si ce marchand est actif et peut traiter des transactions.
+      required:
+      - name
+    Message:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        message:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        is_sent:
+          type: boolean
+        phone:
+          type: string
+          nullable: true
+          maxLength: 255
+        is_for:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/IsForEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        user:
+          type: integer
+          nullable: true
+      required:
+      - created_at
+      - id
+      - message
+      - updated_at
+    Nested:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        password:
+          type: string
+          maxLength: 128
+        last_login:
+          type: string
+          format: date-time
+          nullable: true
+        is_superuser:
+          type: boolean
+          title: Superuser status
+          description: Designates that this user has all permissions without explicitly
+            assigning them.
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          title: Email address
+          maxLength: 254
+        is_staff:
+          type: boolean
+          title: Staff status
+          description: Designates whether the user can log into this admin site.
+        is_active:
+          type: boolean
+          title: Active
+          description: Designates whether this user should be treated as active. Unselect
+            this instead of deleting accounts.
+        date_joined:
+          type: string
+          format: date-time
+        role:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/RoleEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        phone:
+          type: string
+          maxLength: 20
+        is_phone_verified:
+          type: boolean
+        is_email_verified:
+          type: boolean
+        profile_image:
+          type: string
+          format: uri
+          nullable: true
+        date_updated:
+          type: string
+          format: date-time
+          readOnly: true
+        date_created:
+          type: string
+          format: date-time
+          readOnly: true
+        user:
+          type: integer
+          nullable: true
+        merchant:
+          type: string
+          format: uuid
+          nullable: true
+          description: Si cet utilisateur est un employé d'un marchand, liez-le ici.
+        country:
+          type: integer
+          nullable: true
+        city:
+          type: integer
+          nullable: true
+        groups:
+          type: array
+          items:
+            type: integer
+          description: The groups this user belongs to. A user will get all permissions
+            granted to each of their groups.
+        user_permissions:
+          type: array
+          items:
+            type: integer
+          description: Specific permissions for this user.
+      required:
+      - date_created
+      - date_updated
+      - id
+      - password
+      - phone
+      - username
+    NestedRequest:
+      type: object
+      properties:
+        password:
+          type: string
+          minLength: 1
+          maxLength: 128
+        last_login:
+          type: string
+          format: date-time
+          nullable: true
+        is_superuser:
+          type: boolean
+          title: Superuser status
+          description: Designates that this user has all permissions without explicitly
+            assigning them.
+        username:
+          type: string
+          minLength: 1
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          title: Email address
+          maxLength: 254
+        is_staff:
+          type: boolean
+          title: Staff status
+          description: Designates whether the user can log into this admin site.
+        is_active:
+          type: boolean
+          title: Active
+          description: Designates whether this user should be treated as active. Unselect
+            this instead of deleting accounts.
+        date_joined:
+          type: string
+          format: date-time
+        role:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/RoleEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        phone:
+          type: string
+          minLength: 1
+          maxLength: 20
+        is_phone_verified:
+          type: boolean
+        is_email_verified:
+          type: boolean
+        profile_image:
+          type: string
+          format: binary
+          nullable: true
+        user:
+          type: integer
+          nullable: true
+        merchant:
+          type: string
+          format: uuid
+          nullable: true
+          description: Si cet utilisateur est un employé d'un marchand, liez-le ici.
+        country:
+          type: integer
+          nullable: true
+        city:
+          type: integer
+          nullable: true
+        groups:
+          type: array
+          items:
+            type: integer
+          description: The groups this user belongs to. A user will get all permissions
+            granted to each of their groups.
+        user_permissions:
+          type: array
+          items:
+            type: integer
+          description: Specific permissions for this user.
+      required:
+      - password
+      - phone
+      - username
+    NullEnum:
+      enum:
+      - null
+    OTPLogin:
+      type: object
+      properties:
+        phone:
+          type: string
+          maxLength: 20
+        otp:
+          type: string
+          maxLength: 6
+      required:
+      - otp
+      - phone
+    OTPLoginRequest:
+      type: object
+      properties:
+        phone:
+          type: string
+          minLength: 1
+          maxLength: 20
+        otp:
+          type: string
+          minLength: 1
+          maxLength: 6
+      required:
+      - otp
+      - phone
+    OTPRequest:
+      type: object
+      properties:
+        phone:
+          type: string
+          maxLength: 20
+      required:
+      - phone
+    OTPRequestRequest:
+      type: object
+      properties:
+        phone:
+          type: string
+          minLength: 1
+          maxLength: 20
+      required:
+      - phone
+    PaginatedMessageList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Message'
+    PaginatedTransactionList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Transaction'
+    PaginatedUserList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+    PaginatedUserSettingsList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserSettings'
+    PaginatedWalletList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Wallet'
+    PasswordResetConfirm:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+          maxLength: 20
+        otp:
+          type: string
+          maxLength: 6
+      required:
+      - otp
+    PasswordResetConfirmRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+        phone:
+          type: string
+          minLength: 1
+          maxLength: 20
+        otp:
+          type: string
+          minLength: 1
+          maxLength: 6
+        password:
+          type: string
+          writeOnly: true
+          minLength: 8
+      required:
+      - otp
+      - password
+    PasswordResetRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+          maxLength: 20
+    PasswordResetRequestRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+        phone:
+          type: string
+          minLength: 1
+          maxLength: 20
+    PatchedMerchantRequest:
+      type: object
+      description: |-
+        Serializer pour le modèle Merchant.
+        Les clés `public_key` et `merchant_secret` sont générées automatiquement et sont en lecture seule.
+      properties:
+        name:
+          type: string
+          minLength: 1
+          description: Le nom commercial du marchand.
+          maxLength: 255
+        owner_id:
+          type: integer
+          writeOnly: true
+          nullable: true
+          description: ID de l'utilisateur propriétaire du marchand.
+        is_active:
+          type: boolean
+          description: Désigne si ce marchand est actif et peut traiter des transactions.
+    PatchedUserCreateUpdateRequest:
+      type: object
+      properties:
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+        username:
+          type: string
+          minLength: 1
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          title: Email address
+          maxLength: 254
+        phone:
+          type: string
+          minLength: 1
+          maxLength: 20
+        profile_image:
+          type: string
+          format: binary
+          nullable: true
+        merchant:
+          type: string
+          format: uuid
+          nullable: true
+          description: Si cet utilisateur est un employé d'un marchand, liez-le ici.
+        country:
+          type: integer
+          nullable: true
+        city:
+          type: integer
+          nullable: true
+    PayTypeEnum:
+      enum:
+      - 0
+      - 1
+      - 2
+      - 3
+      - 51
+      type: integer
+      description: |-
+        * `0` - MaxiCash
+        * `1` - Airtel Money
+        * `2` - MPSA
+        * `3` - Orange Money
+        * `51` - RakkaCash from BGDFI BANK
+    PaymentModeEnum:
+      enum:
+      - GATEWAY
+      - INSIDE
+      - API
+      type: string
+      description: |-
+        * `GATEWAY` - Gateway
+        * `INSIDE` - Inside
+        * `API` - API
+    RemoveCredit:
+      type: object
+      properties:
+        from_subscriber_number:
+          type: string
+          maxLength: 20
+        credit:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+      required:
+      - credit
+      - from_subscriber_number
+    RemoveCreditRequest:
+      type: object
+      properties:
+        from_subscriber_number:
+          type: string
+          minLength: 1
+          maxLength: 20
+        credit:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+      required:
+      - credit
+      - from_subscriber_number
+    RoleEnum:
+      enum:
+      - admin
+      - user
+      - superadmin
+      type: string
+      description: |-
+        * `admin` - Admin
+        * `user` - User
+        * `superadmin` - SuperAdmin
+    StatusEnum:
+      enum:
+      - PENDING
+      - PROCESSING
+      - SUCCESS
+      - FAILED
+      - CANCELLED
+      - 'ON'
+      - 'OFF'
+      - REFUNDED
+      type: string
+      description: |-
+        * `PENDING` - Pending
+        * `PROCESSING` - Processing
+        * `SUCCESS` - Success
+        * `FAILED` - Failed
+        * `CANCELLED` - Cancelled
+        * `ON` - On
+        * `OFF` - Off
+        * `REFUNDED` - Refunded
+    TokenObtainPair:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+          readOnly: true
+      required:
+      - access
+      - refresh
+    TokenObtainPairRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          writeOnly: true
+          minLength: 1
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - password
+      - username
+    TokenObtainWithPhone:
+      type: object
+      properties:
+        username:
+          type: string
+        phone:
+          type: string
+      required:
+      - phone
+    TokenObtainWithPhoneRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 1
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+        phone:
+          type: string
+          minLength: 1
+      required:
+      - password
+      - phone
+    TokenRefresh:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+      required:
+      - access
+    TokenRefreshRequest:
+      type: object
+      properties:
+        refresh:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - refresh
+    TopUpMobileMoney:
+      type: object
+      properties:
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        receiver_phone:
+          type: string
+          maxLength: 255
+        receiver_firstname:
+          type: string
+          maxLength: 50
+        receiver_lastname:
+          type: string
+          maxLength: 50
+        devise_code:
+          type: string
+          maxLength: 3
+      required:
+      - amount
+      - devise_code
+      - receiver_phone
+    TopUpMobileMoneyRequest:
+      type: object
+      properties:
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        receiver_phone:
+          type: string
+          minLength: 1
+          maxLength: 255
+        receiver_firstname:
+          type: string
+          minLength: 1
+          maxLength: 50
+        receiver_lastname:
+          type: string
+          minLength: 1
+          maxLength: 50
+        devise_code:
+          type: string
+          minLength: 1
+          maxLength: 3
+      required:
+      - amount
+      - devise_code
+      - receiver_phone
+    TopUpMobileMoneyStatus:
+      type: object
+      properties:
+        codeTransaction:
+          type: string
+        status:
+          type: string
+          readOnly: true
+      required:
+      - codeTransaction
+      - status
+    TopUpMobileMoneyStatusRequest:
+      type: object
+      properties:
+        codeTransaction:
+          type: string
+          minLength: 1
+      required:
+      - codeTransaction
+    Transaction:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        codeTransaction:
+          type: string
+          nullable: true
+          maxLength: 255
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,16}(?:\.\d{0,2})?$
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        type:
+          $ref: '#/components/schemas/TypeEnum'
+        typeOperation:
+          $ref: '#/components/schemas/TypeOperationEnum'
+        paymentMode:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/PaymentModeEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        commission:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        fees:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        extraCharges:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        reference:
+          type: string
+          nullable: true
+          maxLength: 255
+        provider_name:
+          type: string
+          nullable: true
+          maxLength: 100
+        provider_reference:
+          type: string
+          nullable: true
+          maxLength: 255
+        payement_url:
+          type: string
+          format: uri
+          nullable: true
+          maxLength: 500
+        metadata:
+          nullable: true
+        text:
+          type: string
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+          maxLength: 25
+        pay_type:
+          nullable: true
+          minimum: -2147483648
+          maximum: 2147483647
+          oneOf:
+          - $ref: '#/components/schemas/PayTypeEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+        devise:
+          type: integer
+        merchant:
+          type: string
+          format: uuid
+          nullable: true
+        user:
+          type: integer
+          nullable: true
+        source_wallet:
+          type: integer
+          nullable: true
+        destination_wallet:
+          type: integer
+          nullable: true
+        voucher:
+          type: integer
+          nullable: true
+      required:
+      - amount
+      - createdAt
+      - devise
+      - id
+      - type
+      - typeOperation
+      - updatedAt
+    TransactionDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          allOf:
+          - $ref: '#/components/schemas/User'
+          readOnly: true
+        wallet:
+          allOf:
+          - $ref: '#/components/schemas/Wallet'
+          readOnly: true
+        devise:
+          allOf:
+          - $ref: '#/components/schemas/Devise'
+          readOnly: true
+        codeTransaction:
+          type: string
+          nullable: true
+          maxLength: 255
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,16}(?:\.\d{0,2})?$
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        type:
+          $ref: '#/components/schemas/TypeEnum'
+        typeOperation:
+          $ref: '#/components/schemas/TypeOperationEnum'
+        paymentMode:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/PaymentModeEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        commission:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        fees:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        extraCharges:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        reference:
+          type: string
+          nullable: true
+          maxLength: 255
+        provider_name:
+          type: string
+          nullable: true
+          maxLength: 100
+        provider_reference:
+          type: string
+          nullable: true
+          maxLength: 255
+        payement_url:
+          type: string
+          format: uri
+          nullable: true
+          maxLength: 500
+        metadata:
+          nullable: true
+        text:
+          type: string
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+          maxLength: 25
+        pay_type:
+          nullable: true
+          minimum: -2147483648
+          maximum: 2147483647
+          oneOf:
+          - $ref: '#/components/schemas/PayTypeEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+        merchant:
+          type: string
+          format: uuid
+          nullable: true
+        source_wallet:
+          type: integer
+          nullable: true
+        destination_wallet:
+          type: integer
+          nullable: true
+        voucher:
+          type: integer
+          nullable: true
+      required:
+      - amount
+      - createdAt
+      - devise
+      - id
+      - type
+      - typeOperation
+      - updatedAt
+      - user
+      - wallet
+    TransactionSetStatusRequest:
+      type: object
+      description: Serializer pour valider le changement de statut manuel d'une transaction.
+      properties:
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+      required:
+      - status
+    TransferCredit:
+      type: object
+      properties:
+        to_subscriber_number:
+          type: string
+          maxLength: 20
+        credit:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+      required:
+      - credit
+      - to_subscriber_number
+    TransferCreditRequest:
+      type: object
+      properties:
+        to_subscriber_number:
+          type: string
+          minLength: 1
+          maxLength: 20
+        credit:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+      required:
+      - credit
+      - to_subscriber_number
+    TypeEnum:
+      enum:
+      - IN
+      - OUT
+      type: string
+      description: |-
+        * `IN` - In
+        * `OUT` - Out
+    TypeOperationEnum:
+      enum:
+      - MOMO
+      - BANKCARD
+      - VOUCHER
+      - TRANSFERT
+      - DEPOT
+      - CREDIT_PURCHASE
+      - TELCO
+      type: string
+      description: |-
+        * `MOMO` - Mobile Money
+        * `BANKCARD` - Bank Card
+        * `VOUCHER` - Voucher
+        * `TRANSFERT` - Transfer
+        * `DEPOT` - Deposit
+        * `CREDIT_PURCHASE` - Credit Purchase
+        * `TELCO` - Telco
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          title: Email address
+          maxLength: 254
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        phone:
+          type: string
+          maxLength: 20
+        role:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/RoleEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        is_active:
+          type: boolean
+          title: Active
+          description: Designates whether this user should be treated as active. Unselect
+            this instead of deleting accounts.
+      required:
+      - id
+      - phone
+      - username
+    UserCreateUpdate:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        last_login:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        is_superuser:
+          type: boolean
+          readOnly: true
+          title: Superuser status
+          description: Designates that this user has all permissions without explicitly
+            assigning them.
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          title: Email address
+          maxLength: 254
+        is_staff:
+          type: boolean
+          readOnly: true
+          title: Staff status
+          description: Designates whether the user can log into this admin site.
+        is_active:
+          type: boolean
+          readOnly: true
+          title: Active
+          description: Designates whether this user should be treated as active. Unselect
+            this instead of deleting accounts.
+        date_joined:
+          type: string
+          format: date-time
+          readOnly: true
+        role:
+          readOnly: true
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/RoleEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        phone:
+          type: string
+          maxLength: 20
+        is_phone_verified:
+          type: boolean
+          readOnly: true
+        is_email_verified:
+          type: boolean
+          readOnly: true
+        profile_image:
+          type: string
+          format: uri
+          nullable: true
+        date_updated:
+          type: string
+          format: date-time
+          readOnly: true
+        date_created:
+          type: string
+          format: date-time
+          readOnly: true
+        user:
+          type: integer
+          readOnly: true
+          nullable: true
+        merchant:
+          type: string
+          format: uuid
+          nullable: true
+          description: Si cet utilisateur est un employé d'un marchand, liez-le ici.
+        country:
+          type: integer
+          nullable: true
+        city:
+          type: integer
+          nullable: true
+        groups:
+          type: array
+          items:
+            type: integer
+          readOnly: true
+          description: The groups this user belongs to. A user will get all permissions
+            granted to each of their groups.
+        user_permissions:
+          type: array
+          items:
+            type: integer
+          readOnly: true
+          description: Specific permissions for this user.
+      required:
+      - date_created
+      - date_joined
+      - date_updated
+      - groups
+      - id
+      - is_active
+      - is_email_verified
+      - is_phone_verified
+      - is_staff
+      - is_superuser
+      - last_login
+      - phone
+      - role
+      - user
+      - user_permissions
+      - username
+    UserCreateUpdateRequest:
+      type: object
+      properties:
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+        username:
+          type: string
+          minLength: 1
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          title: Email address
+          maxLength: 254
+        phone:
+          type: string
+          minLength: 1
+          maxLength: 20
+        profile_image:
+          type: string
+          format: binary
+          nullable: true
+        merchant:
+          type: string
+          format: uuid
+          nullable: true
+          description: Si cet utilisateur est un employé d'un marchand, liez-le ici.
+        country:
+          type: integer
+          nullable: true
+        city:
+          type: integer
+          nullable: true
+      required:
+      - phone
+      - username
+    UserDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        settings:
+          $ref: '#/components/schemas/UserSettings'
+        last_login:
+          type: string
+          format: date-time
+          nullable: true
+        is_superuser:
+          type: boolean
+          title: Superuser status
+          description: Designates that this user has all permissions without explicitly
+            assigning them.
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          title: Email address
+          maxLength: 254
+        is_staff:
+          type: boolean
+          title: Staff status
+          description: Designates whether the user can log into this admin site.
+        is_active:
+          type: boolean
+          title: Active
+          description: Designates whether this user should be treated as active. Unselect
+            this instead of deleting accounts.
+        date_joined:
+          type: string
+          format: date-time
+        role:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/RoleEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        phone:
+          type: string
+          maxLength: 20
+        is_phone_verified:
+          type: boolean
+        is_email_verified:
+          type: boolean
+        profile_image:
+          type: string
+          format: uri
+          nullable: true
+        date_updated:
+          type: string
+          format: date-time
+          readOnly: true
+        date_created:
+          type: string
+          format: date-time
+          readOnly: true
+        user:
+          type: integer
+          nullable: true
+        merchant:
+          type: string
+          format: uuid
+          nullable: true
+          description: Si cet utilisateur est un employé d'un marchand, liez-le ici.
+        country:
+          type: integer
+          nullable: true
+        city:
+          type: integer
+          nullable: true
+        groups:
+          type: array
+          items:
+            type: integer
+          description: The groups this user belongs to. A user will get all permissions
+            granted to each of their groups.
+        user_permissions:
+          type: array
+          items:
+            type: integer
+          description: Specific permissions for this user.
+      required:
+      - date_created
+      - date_updated
+      - id
+      - phone
+      - settings
+      - username
+    UserSetRoleRequest:
+      type: object
+      description: Serializer pour valider le changement de rôle d'un utilisateur.
+      properties:
+        role:
+          $ref: '#/components/schemas/RoleEnum'
+      required:
+      - role
+    UserSetStatusRequest:
+      type: object
+      description: Serializer pour valider la mise à jour du statut (actif/inactif)
+        d'un utilisateur.
+      properties:
+        is_active:
+          type: boolean
+          description: Définir à `true` pour activer l'utilisateur, `false` pour le
+            bloquer.
+      required:
+      - is_active
+    UserSettings:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        receive_email_notifications:
+          type: boolean
+        receive_sms_notifications:
+          type: boolean
+        dark_mode:
+          type: boolean
+        two_factor_auth_enabled:
+          type: boolean
+        language_preference:
+          $ref: '#/components/schemas/LanguagePreferenceEnum'
+        user:
+          type: integer
+      required:
+      - id
+      - user
+    VerifyEmailOTP:
+      type: object
+      properties:
+        otp:
+          type: string
+          maxLength: 6
+      required:
+      - otp
+    VerifyEmailOTPRequest:
+      type: object
+      properties:
+        otp:
+          type: string
+          minLength: 1
+          maxLength: 6
+      required:
+      - otp
+    VerifyPhoneOTP:
+      type: object
+      properties:
+        otp:
+          type: string
+          maxLength: 6
+      required:
+      - otp
+    VerifyPhoneOTPRequest:
+      type: object
+      properties:
+        otp:
+          type: string
+          minLength: 1
+          maxLength: 6
+      required:
+      - otp
+    Wallet:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          allOf:
+          - $ref: '#/components/schemas/User'
+          readOnly: true
+        devise:
+          allOf:
+          - $ref: '#/components/schemas/Devise'
+          readOnly: true
+        balance:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,16}(?:\.\d{0,2})?$
+        merchant:
+          type: string
+          format: uuid
+          nullable: true
+      required:
+      - devise
+      - id
+      - merchant
+      - user
+    WalletRecharge:
+      type: object
+      properties:
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        devise_code:
+          type: string
+          maxLength: 3
+        codeTransaction:
+          type: string
+          readOnly: true
+      required:
+      - amount
+      - codeTransaction
+      - devise_code
+    WalletRechargeComplete:
+      type: object
+      description: Serializer for completing an asynchronous recharge.
+      properties:
+        transaction_id:
+          type: string
+          maxLength: 255
+        otp:
+          type: string
+          maxLength: 10
+      required:
+      - otp
+      - transaction_id
+    WalletRechargeCompleteRequest:
+      type: object
+      description: Serializer for completing an asynchronous recharge.
+      properties:
+        transaction_id:
+          type: string
+          minLength: 1
+          maxLength: 255
+        otp:
+          type: string
+          minLength: 1
+          maxLength: 10
+      required:
+      - otp
+      - transaction_id
+    WalletRechargeCreditCard:
+      type: object
+      properties:
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        devise_code:
+          type: string
+          maxLength: 3
+        card_number:
+          type: string
+          maxLength: 16
+          minLength: 13
+        card_date:
+          type: string
+          maxLength: 7
+        card_cvv:
+          type: string
+          maxLength: 4
+          minLength: 3
+        card_firstname:
+          type: string
+          maxLength: 50
+        card_lastname:
+          type: string
+          maxLength: 50
+        card_email:
+          type: string
+          format: email
+        card_phone:
+          type: string
+          maxLength: 20
+        success_url:
+          type: string
+          format: uri
+        fail_url:
+          type: string
+          format: uri
+        cancel_url:
+          type: string
+          format: uri
+      required:
+      - amount
+      - card_cvv
+      - card_date
+      - card_email
+      - card_firstname
+      - card_lastname
+      - card_number
+      - card_phone
+      - devise_code
+    WalletRechargeCreditCardRequest:
+      type: object
+      properties:
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        devise_code:
+          type: string
+          minLength: 1
+          maxLength: 3
+        card_number:
+          type: string
+          minLength: 13
+          maxLength: 16
+        card_date:
+          type: string
+          minLength: 1
+          maxLength: 7
+        card_cvv:
+          type: string
+          minLength: 3
+          maxLength: 4
+        card_firstname:
+          type: string
+          minLength: 1
+          maxLength: 50
+        card_lastname:
+          type: string
+          minLength: 1
+          maxLength: 50
+        card_email:
+          type: string
+          format: email
+          minLength: 1
+        card_phone:
+          type: string
+          minLength: 1
+          maxLength: 20
+        success_url:
+          type: string
+          format: uri
+          minLength: 1
+        fail_url:
+          type: string
+          format: uri
+          minLength: 1
+        cancel_url:
+          type: string
+          format: uri
+          minLength: 1
+      required:
+      - amount
+      - card_cvv
+      - card_date
+      - card_email
+      - card_firstname
+      - card_lastname
+      - card_number
+      - card_phone
+      - devise_code
+    WalletRechargeRequest:
+      type: object
+      properties:
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        devise_code:
+          type: string
+          minLength: 1
+          maxLength: 3
+      required:
+      - amount
+      - devise_code
+    WalletTransfer:
+      type: object
+      properties:
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        devise_code:
+          type: string
+          maxLength: 3
+        recipient_phone:
+          type: string
+          maxLength: 20
+        description:
+          type: string
+          maxLength: 255
+      required:
+      - amount
+      - devise_code
+      - recipient_phone
+    WalletTransferRequest:
+      type: object
+      properties:
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        devise_code:
+          type: string
+          minLength: 1
+          maxLength: 3
+        recipient_phone:
+          type: string
+          minLength: 1
+          maxLength: 20
+        description:
+          type: string
+          minLength: 1
+          maxLength: 255
+      required:
+      - amount
+      - devise_code
+      - recipient_phone
+    WalletTransferVerify:
+      type: object
+      properties:
+        transaction_id:
+          type: string
+          maxLength: 255
+        otp:
+          type: string
+          maxLength: 6
+      required:
+      - otp
+      - transaction_id
+    WalletTransferVerifyRequest:
+      type: object
+      properties:
+        transaction_id:
+          type: string
+          minLength: 1
+          maxLength: 255
+        otp:
+          type: string
+          minLength: 1
+          maxLength: 6
+      required:
+      - otp
+      - transaction_id
+  securitySchemes:
+    CustomJWTAuthentication:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: 'Token-based authentication with required JWT token in "Authorization:
+        Bearer &lt;JWT&gt;" header'
+    MerchantAuthentication:
+      type: apiKey
+      in: header
+      name: X-MERCHANT-ID
+      description: Authentification par clé API pour les marchands. Nécessite les
+        en-têtes `X-MERCHANT-ID` et `X-MERCHANT-SECRET`.
+    basicAuth:
+      type: http
+      scheme: basic
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
+    tokenAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: Token-based authentication with required prefix "Token"

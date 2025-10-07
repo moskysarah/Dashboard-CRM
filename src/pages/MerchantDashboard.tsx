@@ -1,48 +1,27 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useMemo } from "react";
 import DashboardLayout from "../layouts/dashboardLayout";
 import MerchantKPI from "../components/merchantKPI";
 import MerchantTransactions from "../components/merchantTransaction";
-import api from "../services/api";
-import { UserContext } from "../contexts/userContext";
-
-type Performance = {
-  merchantId: string;
-  merchantName: string;
-  subStore: string;
-  transactionsCount: number;
-  totalAmount: number;
-  success: number;
-  pending: number;
-  failed: number;
-};
+import { useMerchantPerformance } from "../hooks/useMerchantPerformance";
 
 const MerchantDashboard: React.FC = () => {
-  const { user } = useContext(UserContext);
-  const [performance, setPerformance] = useState<Performance[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { performanceData, loading, error, refresh } = useMerchantPerformance();
 
-  useEffect(() => {
-    const fetchPerformance = async () => {
-      try {
-        const response = await api.get("/merchants/performance", {
-          params: { role: user?.role },
-        });
-        setPerformance(response.data);
-      } catch (err) {
-        console.error("Erreur fetching performance:", err);
-      } finally {
-        setLoading(false);
-      }
+  const kpis = useMemo(() => {
+    return {
+      totalAmount: performanceData.reduce((sum, m) => sum + m.totalAmount, 0),
+      totalSuccess: performanceData.reduce((sum, m) => sum + m.success, 0),
+      totalPending: performanceData.reduce((sum, m) => sum + m.pending, 0),
+      totalFailed: performanceData.reduce((sum, m) => sum + m.failed, 0),
     };
-    fetchPerformance();
-  }, [user]);
+  }, [performanceData]);
 
   const exportCSV = () => {
     const csvContent =
       "data:text/csv;charset=utf-8," +
       [
         "Nom,Sous-magasin,Transactions,Ventes réussies,En attente,Échouées,Total (€)",
-        ...performance.map(
+        ...performanceData.map(
           (m) =>
             `${m.merchantName},${m.subStore},${m.transactionsCount},${m.success},${m.pending},${m.failed},${m.totalAmount}`
         ),
@@ -56,7 +35,11 @@ const MerchantDashboard: React.FC = () => {
     document.body.removeChild(link);
   };
 
-  if (loading) return <p className="p-6">Chargement des performances...</p>;
+  if (loading) {
+    return <DashboardLayout><p className="p-6">Chargement des performances...</p></DashboardLayout>;
+  }
+
+  if (error) return <DashboardLayout><p className="p-6 text-red-500">{error}</p></DashboardLayout>;
 
   return (
     <DashboardLayout>
@@ -64,33 +47,35 @@ const MerchantDashboard: React.FC = () => {
       <p className="text-gray-600 mt-4 ml-6">Performance et transactions des marchands.</p>
 
       {/* KPIs marchands */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6 ml-6 w-300 ">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6 ml-6">
         <MerchantKPI
           title="Ventes totales"
-          value={performance.reduce((sum, m) => sum + m.totalAmount, 0)}
+          value={kpis.totalAmount}
           color="bg-green-100 shadow text-green-700"
         />
         <MerchantKPI
           title="Transactions réussies"
-          value={performance.reduce((sum, m) => sum + m.success, 0)}
+          value={kpis.totalSuccess}
           color="bg-blue-100 shadow text-blue-700"
         />
         <MerchantKPI
           title="En attente"
-          value={performance.reduce((sum, m) => sum + m.pending, 0)}
+          value={kpis.totalPending}
           color="bg-yellow-100 shadow text-yellow-700"
         />
         <MerchantKPI
           title="Échouées"
-          value={performance.reduce((sum, m) => sum + m.failed, 0)}
+          value={kpis.totalFailed}
           color="bg-red-100 shadow text-red-700"
         />
       </div>
 
       {/* Suivi de performance */}
-      <div className="bg-white p-4 rounded-lg shadow mt-6 w-300 ml-6">
-        <h2 className="text-lg font-semibold mb-4">Suivi des performances</h2>
-        <div className="max-h-96 overflow-y-auto rounded-lg">
+      <div className="bg-white p-4 rounded-lg shadow mt-6 ml-6">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-semibold">Suivi des performances</h2>
+        </div>
+        <div className="max-h-96 overflow-y-auto overflow-x-auto rounded-lg">
           <table className="w-full text-left border-collapse">
             <thead className="border-b sticky top-0 text-center">
               <tr>
@@ -104,7 +89,7 @@ const MerchantDashboard: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {performance.map((m) => (
+              {performanceData.map((m) => (
                 <tr key={m.merchantId} className="border-b hover:bg-gray-50 text-center">
                   <td className="py-2 px-4">{m.merchantName}</td>
                   <td className="py-2 px-4">{m.subStore}</td>

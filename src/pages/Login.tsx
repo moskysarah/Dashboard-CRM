@@ -1,14 +1,17 @@
 import React, { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { UserContext } from "../contexts/userContext";
 import api from "../services/api";
 import googleLogo from "../assets/logo-google.jpg";
+import { useAuth } from "../store/auth";
+import { Button } from "../components/ui/Button";
+import { Input } from "../components/ui/Input";
+import { LOCAL_STORAGE_KEYS } from "../config/constants";
+import type { User } from "../types/domain";
 
 const Login = () => {
   const navigate = useNavigate();
-  
-  useContext(UserContext);
+  const login = useAuth((state) => state.login);
 
   // États login/register
   const [loginPhoneOrEmail, setLoginPhoneOrEmail] = useState("");
@@ -22,6 +25,12 @@ const Login = () => {
   const [registerRole, setRegisterRole] = useState<"Admin" | "Marchand" | "Distributeur" | "">("");
 
   const [otp, setOtp] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [otpError, setOtpError] = useState(false);
+
+  // États pour le verrouillage après échecs (gérés côté serveur désormais)
+  const [lockoutError, setLockoutError] = useState<string | null>(null);
+
   const [mode, setMode] = useState<"login" | "register" | "otp">("login");
 
   // réinitialiser champs 
@@ -38,7 +47,11 @@ const Login = () => {
       setRegisterRole("");
     }
     setOtp("");
+    setOtpError(false);
+    setLockoutError(null);
   }, [mode]);
+
+  // Suppression des effets liés au verrouillage côté client (géré côté serveur)
 
   // Validation aide
   const isValidPhone = (input: string) => /^\d{10}$/.test(input);
@@ -50,32 +63,39 @@ const Login = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    
-  // ici je recupere mon token temporaire apres que l'utilisateur se connecte 
+    setIsLoading(true);
 
     try {
       const res = await api.post("accounts/otp/request/", {
         phone: loginPhoneOrEmail,
         password: loginPassword,
       });
-       // je le stocke ici a localstorage ligne sous la clé tempaccesstoken
 
-      localStorage.setItem("tempAccessToken", res.data.tempToken);
-      localStorage.setItem("userPhone", loginPhoneOrEmail);
+      localStorage.setItem(LOCAL_STORAGE_KEYS.USER_PHONE, loginPhoneOrEmail);
 
       const maskedPhone = "•••••••••••••";
-      localStorage.setItem("maskedPhone", maskedPhone);
+      localStorage.setItem(LOCAL_STORAGE_KEYS.MASKED_PHONE, maskedPhone);
 
       setMode("otp");
+      setLockoutError(null);
     } catch (err: any) {
+      // Si le serveur retourne une erreur de verrouillage, affichez-la
+      if (err.response?.data?.lockout) {
+        setLockoutError(err.response.data.lockout);
+      } else {
+        setLockoutError(null);
+        alert(err.response?.data?.detail || "Identifiants incorrects.");
+      }
       console.error(err);
-      alert(err.response?.data?.detail || "Erreur lors de la connexion");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   // --- registre---
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
     if (
       !registerNom ||
       !registerPrenom ||
@@ -99,6 +119,8 @@ const Login = () => {
     } catch (err: any) {
       console.error(err);
       alert(err.response?.data?.detail || "Erreur lors de l'inscription");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -106,12 +128,14 @@ const Login = () => {
 
   const handleOtpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const phone = localStorage.getItem("userPhone");
-    const code = otp || localStorage.getItem("otpCode");
-    const tempToken = localStorage.getItem("tempAccessToken");
+    setIsLoading(true);
+    const phone = localStorage.getItem(LOCAL_STORAGE_KEYS.USER_PHONE);
+    const code = otp || localStorage.getItem(LOCAL_STORAGE_KEYS.OTP_CODE);
 
-    if (!phone || !code || !tempToken) {
-      alert("Veuillez entrer le numéro de téléphone et le code OTP.");
+    if (!phone || !code) {
+      alert("Une erreur est survenue. Veuillez recommencer le processus de connexion.");
+      setIsLoading(false);
+      setMode("login");
       return;
     }
    // la ligne qui valide le code apres se connecter
@@ -119,47 +143,45 @@ const Login = () => {
       const res = await api.post(
         "/accounts/otp/login/",
         { phone, otp: code }, 
-        {
-          headers: {
-            // Authorization: `Bearer ${tempToken}`, // token temporaire dans le header
-          },
-        }
       );
 
-      console.log(res)
       const response = res.data;
-      console.log(response)
-      if (res.status == 200) {
-        localStorage.setItem("accessToken", response.access);
-        localStorage.setItem("refreshToken", response.refresh);
-        localStorage.setItem("user", response.data);
-        
-        localStorage.setItem("user", JSON.stringify(response.data));
-        // localStorage.removeItem("tempAccessToken");
+      // La réponse de l'API doit contenir les tokens et les données utilisateur
+      if (res.status === 200 && response.access && response.refresh && response.data) {
+        // On appelle la fonction centralisée du store pour gérer la session
+        console.log("[SUCCESS] Connexion réussie. Réinitialisation du compteur de tentatives.");
 
-        // localStorage.setItem("maskedPhone", "•••••••••••••");
-        // const localUser = localStorage.getItem("user")
-        // const user = JSON.parse(localUser);
-        // setUser(user);
-        
+        login(response.data as User, {
+          access: response.access,
+          refresh: response.refresh,
+        });
+
         navigate("/dashboard");
-              }
-      else {
-        alert("OTP invalide ou expiré")
+      } else {
+        setOtpError(true);
       }
     } catch (err: any) {
       console.error(err);
-      alert(err.response?.data?.message || "OTP invalide ou expiré");
+      setOtpError(true);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   // --- Animation slide---
   const slide = {
-    initial: { x: "100%", opacity: 0 },
-    animate: { x: 0, opacity: 1 },
-    exit: { x: "-100%", opacity: 0 },
-    transition: { duration: 0.6, ease: "easeInOut" as const },
+    initial: { opacity: 0, x: -50 },
+    animate: { opacity: 1, x: 0 },
+    exit: { opacity: 0, x: 50 },
+    transition: { duration: 0.5, ease: "easeInOut" },
   };
+
+  const Spinner = () => (
+    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+    </svg>
+  );
 
   return (
     <div className="min-h-screen flex font-sans overflow-hidden">
@@ -171,44 +193,45 @@ const Login = () => {
             <motion.div key="login" {...slide} className="w-full max-w-sm text-center">
               <h2 className="text-3xl font-bold text-gray-800 mb-4">Se connecter</h2>
               <form onSubmit={handleLogin} className="space-y-4">
-                <input
+                <Input
                   type="text"
                   value={loginPhoneOrEmail}
                   onChange={(e) => setLoginPhoneOrEmail(e.target.value)}
                   placeholder="Téléphone ou Email"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500"
                 />
-                <input
+                <Input
                   type="password"
                   value={loginPassword}
                   onChange={(e) => setLoginPassword(e.target.value)}
                   placeholder="Mot de passe"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500"
                 />
                 <div className="text-right mb-2">
-                  <button
+                  <Button
                     type="button"
-                    className="text-sm text-indigo-600 hover:underline"
+                    variant="ghost"
+                    className="w-auto p-0 text-sm"
                     onClick={() => alert("Fonction mot de passe oublié")}
                   >
                     Mot de passe oublié ?
-                  </button>
+                  </Button>
                 </div>
                 <select
                   value={loginRole}
-                  onChange={(e) =>
-                    setLoginRole(e.target.value as "Admin" | "Marchand" | "Distributeur")
-                  }
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500"
+                  onChange={(e) => setLoginRole(e.target.value as any)}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"
                 >
-                  <option value="">-- Choisir un rôle --</option>
-                  <option value="Admin">Admin</option>
-                  <option value="Marchand">Marchand</option>
-                  <option value="Distributeur">Distributeur</option>
+                  <option value="">-- Rôle (non utilisé pour la connexion) --</option>
+                  <option value="admin">Admin</option>
+                  <option value="user">Utilisateur (Marchand/Distributeur)</option>
                 </select>
-                <button className="w-full bg-indigo-600 text-white py-2 rounded-lg font-semibold hover:bg-white hover:text-indigo-700 transition cursor-pointer">
-                  Se connecter
-                </button>
+                <Button type="submit" variant="primary" disabled={isLoading || !!lockoutError} className="flex justify-center items-center">
+                  {isLoading 
+                    ? <Spinner /> 
+                    : lockoutError
+                      ? lockoutError
+                      : 'Se connecter'
+                  }
+                </Button>
               </form>
 
               <div className="mt-4 flex justify-center items-center space-x-2">
@@ -229,49 +252,41 @@ const Login = () => {
             <motion.div key="register" {...slide} className="w-full max-w-sm text-center">
               <h2 className="text-3xl font-bold text-gray-800 mb-4">S'inscrire</h2>
               <form onSubmit={handleRegister} className="space-y-4">
-                <input
+                <Input
                   type="text"
                   value={registerNom}
                   onChange={(e) => setRegisterNom(e.target.value)}
                   placeholder="Nom"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500"
                 />
-                <input
+                <Input
                   type="text"
                   value={registerPrenom}
                   onChange={(e) => setRegisterPrenom(e.target.value)}
                   placeholder="Prénom"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500"
                 />
-                <input
+                <Input
                   type="text"
                   value={registerPhoneOrEmail}
                   onChange={(e) => setRegisterPhoneOrEmail(e.target.value)}
                   placeholder="Téléphone ou Email"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500"
                 />
-                <input
+                <Input
                   type="password"
                   value={registerPassword}
                   onChange={(e) => setRegisterPassword(e.target.value)}
                   placeholder="Mot de passe"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500"
                 />
                 <select
                   value={registerRole}
-                  onChange={(e) =>
-                    setRegisterRole(e.target.value as "Admin" | "Marchand" | "Distributeur")
-                  }
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500"
+                  onChange={(e) => setRegisterRole(e.target.value as any)}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"
                 >
                   <option value="">-- Choisir un rôle --</option>
-                  <option value="Admin">Admin</option>
-                  <option value="Marchand">Marchand</option>
-                  <option value="Distributeur">Distributeur</option>
+                  <option value="user">Utilisateur (Marchand/Distributeur)</option>
                 </select>
-                <button className="w-full bg-green-600 text-white py-2 rounded-lg font-semibold hover:bg-green-700 transition">
-                  CRÉER UN COMPTE
-                </button>
+                <Button type="submit" variant="success" disabled={isLoading} className="flex justify-center items-center">
+                  {isLoading ? <Spinner /> : 'CRÉER UN COMPTE'}
+                </Button>
               </form>
             </motion.div>
           )}
@@ -279,29 +294,41 @@ const Login = () => {
           {/* OTP */}
           {mode === "otp" && (
             <motion.div key="otp" {...slide} className="w-full max-w-sm text-center">
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">Entrer le code OTP</h2>
-              <form onSubmit={handleOtpSubmit} className="space-y-4">
-                <input
-                  type="text"
-                  readOnly
-                  value={localStorage.getItem("maskedPhone") || "•••••••••••••"}
-                  placeholder="Numéro masqué"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 hidden text-gray-500 text-center tracking-widest focus:ring-2 focus:ring-green-500"
-                />
-                <input
-                  type="text"
-                  value={otp}
-                  onChange={(e) => {
-                    setOtp(e.target.value);
-                    localStorage.setItem("otpCode", e.target.value);
-                  }}
-                  placeholder="Code OTP"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-500 text-center"
-                />
-                <button className="w-full bg-green-600 text-white py-2 rounded-lg font-semibold hover:bg-green-700 transition">
-                  Valider
-                </button>
-              </form>
+              {!otpError ? (
+                <>
+                  <h2 className="text-2xl font-bold text-gray-800 mb-4">Entrer le code OTP</h2>
+                  <form onSubmit={handleOtpSubmit} className="space-y-4">
+                    <Input
+                      type="text"
+                      readOnly
+                      value={localStorage.getItem(LOCAL_STORAGE_KEYS.MASKED_PHONE) || "•••••••••••••"}
+                      placeholder="Numéro masqué"
+                      className="hidden text-gray-500 text-center tracking-widest"
+                    />
+                    <Input
+                      type="text"
+                      value={otp}
+                      onChange={(e) => {
+                        setOtp(e.target.value);
+                        localStorage.setItem(LOCAL_STORAGE_KEYS.OTP_CODE, e.target.value);
+                      }}
+                      placeholder="Code OTP"
+                      className="text-center"
+                    />
+                    <Button type="submit" variant="success" disabled={isLoading} className="flex justify-center items-center">
+                      {isLoading ? <Spinner /> : 'Valider'}
+                    </Button>
+                  </form>
+                </>
+              ) : (
+                <div className="space-y-4">
+                  <h2 className="text-2xl font-bold text-red-600 mb-4">Échec de la validation</h2>
+                  <p className="text-gray-600">Le code OTP est invalide ou a expiré. Veuillez réessayer.</p>
+                  <Button onClick={() => setMode('login')} variant="primary">
+                    Retour à la connexion
+                  </Button>
+                </div>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
@@ -337,12 +364,9 @@ const Login = () => {
               Pour rester connecté(e) avec nous, veuillez vous connecter avec vos informations
               personnelles
             </p>
-            <button
-              onClick={() => setMode("register")}
-              className="border-2 border-white px-8 py-2 rounded-lg font-semibold hover:bg-white hover:text-indigo-600 transition"
-            >
+            <Button onClick={() => setMode("register")} variant="secondary" className="px-8">
               S'inscrire
-            </button>
+            </Button>
           </>
         )}
 
@@ -352,12 +376,9 @@ const Login = () => {
             <p className="mb-6 text-center max-w-sm">
               Veuillez vous enregistrer avec vos informations personnelles pour rester connecté
             </p>
-            <button
-              onClick={() => setMode("login")}
-              className="border-2 border-white px-8 py-2 rounded-lg font-semibold hover:bg-white hover:text-indigo-600 transition"
-            >
+            <Button onClick={() => setMode("login")} variant="secondary" className="px-8">
               Se connecter
-            </button>
+            </Button>
           </>
         )}
 

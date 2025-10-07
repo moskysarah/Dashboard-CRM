@@ -1,8 +1,9 @@
 // src/pages/Profile.tsx
 import React, { useEffect, useState, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import api from "../services/api";
-import { UserContext } from "../contexts/userContext";
+import { getProfile } from "../services/api";
+import { useAuth } from "../store/auth";
 
 interface ProfileData {
   name: string;
@@ -13,7 +14,9 @@ interface ProfileData {
 
 const Profile: React.FC = () => {
   const { t } = useTranslation();
-  const { user, setUser } = useContext(UserContext); // si tu utilises un contexte global
+  const navigate = useNavigate();
+  const user = useAuth((state) => state.user);
+  const logout = useAuth((state) => state.logout);
   const [profile, setProfile] = useState<ProfileData>({
     name: "",
     email: "",
@@ -25,29 +28,32 @@ const Profile: React.FC = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await api.get("/profile"); // ta route backend
+        const res = await getProfile();
         const data = res.data;
+        // Utilise les données de l'API ou celles du store en fallback
         setProfile({
-          name: data.name || (user as any)?.name || "sarah Ngoya",
-          email: data.email || (user as any)?.email || "sarahmosky@gmail.com",
-          role: data.role || user?.role || "User",
+          name: data.name || `${user?.first_name} ${user?.last_name}` || "Utilisateur",
+          email: data.email || user?.email || "Pas d'email",
+          role: data.role || user?.role || "user",
           avatarUrl: data.avatarUrl || "/images/default-avatar.png",
         });
-        // si tu veux mettre à jour le contexte global
-        if (setUser) setUser(data);
       } catch (error) {
         console.error("Erreur lors du chargement du profil :", error);
+        // En cas d'erreur, on utilise les données du store
+        if (user) {
+          setProfile({ name: `${user.first_name} ${user.last_name}`, email: user.email || '', role: user.role || 'user' });
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchProfile();
-  }, [user, setUser]);
+  }, [user]);
 
   const handleLogout = () => {
-    // Implement logout logic here, e.g., clear auth tokens, redirect, etc.
-    console.log("Logout clicked");
+    logout();
+    navigate("/login");
   };
 
   if (loading) return <p className="p-4">Chargement du profil...</p>;
