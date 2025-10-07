@@ -25,8 +25,11 @@ export const useTransactions = () => {
 
         try {
             // Choisir la route API en fonction du rôle de l'utilisateur
-            const isAdmin = user.role === 'admin' || user.role === 'superadmin';
-            const route = isAdmin ? '/admin-panel/transactions/' : '/me/transactions/';
+            // Seul le superadmin peut voir toutes les transactions des marchands.
+            // L'admin et l'utilisateur standard ne voient que les leurs.
+            const isSuperAdmin = user.role === 'superadmin';
+            // L'endpoint /admin-panel/transactions/ n'existe pas, on utilise /merchants/transactions/ comme défini dans l'API.
+            const route = isSuperAdmin ? '/merchants/transactions/' : '/me/transactions/';
             
             const res = await api.get<PaginatedTransactions>(route);
 

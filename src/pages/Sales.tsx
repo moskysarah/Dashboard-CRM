@@ -64,7 +64,7 @@ const Sales: React.FC = () => {
 
   return (
     <DashboardLayout>
-      <div className="h-[calc(100vh-80px)] p-6">
+      <div className="min-h-[calc(100vh-80px)] p-6">
         <h1 className="text-2xl font-bold mb-3">Ventes</h1>
         <p className="text-gray-600 mb-6">
           Statistiques et suivi des ventes mensuelles.

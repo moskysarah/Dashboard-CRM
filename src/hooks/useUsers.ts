@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getAdminUsers, patchAdminUser } from '../services/api';
 import type { User, UserRole } from '../types/domain';
+import { useAuth } from '../store/auth';
 
 // L'API renvoie une réponse paginée
 interface PaginatedUsers {
@@ -14,9 +15,16 @@ export const useUsers = () => {
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const userRole = useAuth((state) => state.user?.role);
 
     const fetchUsers = useCallback(async () => {
         setLoading(true);
+        // Seul un superadmin peut lister tous les utilisateurs
+        if (userRole !== 'superadmin') {
+            setError("Vous n'avez pas les droits pour voir la liste des utilisateurs.");
+            setLoading(false);
+            return;
+        }
         try {
             const res = await getAdminUsers();
             const paginatedResponse = res.data as PaginatedUsers;
@@ -29,13 +37,14 @@ export const useUsers = () => {
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [userRole]);
 
     useEffect(() => {
         fetchUsers();
     }, [fetchUsers]);
 
     const updateUser = useCallback(async (userId: number, data: Partial<User>) => {
+        if (userRole !== 'superadmin') return false;
         try {
             await patchAdminUser(userId.toString(), data);
             // Rafraîchir la liste pour voir les changements
@@ -45,7 +54,7 @@ export const useUsers = () => {
             console.error(`Erreur lors de la mise à jour de l'utilisateur ${userId}:`, err);
             return false;
         }
-    }, [fetchUsers]);
+    }, [fetchUsers, userRole]);
 
     const updateUserStatus = useCallback(async (userId: number, isActive: boolean) => {
         // L'API attend un PATCH sur l'utilisateur avec le champ is_active

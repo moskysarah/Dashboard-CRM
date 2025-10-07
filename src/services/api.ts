@@ -127,25 +127,28 @@ API.interceptors.response.use(
           return Promise.reject(_error);
         } finally {
           isRefreshing = false;
-export const refreshToken = (refresh: string) =>
-  API.post("/accounts/token/refresh/", { refresh });
+        }
+      }
     }
 
     return Promise.reject(error);
   }
-export const requestOTP = (phone: string, password?: string) =>
-  API.post("/accounts/otp/request/", password ? { phone, password } : { phone });
+);
+
 // ========================
 // REFRESH TOKEN
 // ========================
 export const refreshToken = (refresh: string) =>
   API.post("/token/refresh/", { refresh });
 
+export const requestOTP = (phone: string, password?: string) =>
+  API.post("/accounts/otp/request/", password ? { phone, password } : { phone });
+
 // AUTHENTIFICATION (PHONE + OTP)
 // ========================
 // L'API ne spécifie qu'un champ 'phone' pour la demande d'OTP.
-export const requestOTP = (phone: string, password?: string) =>
-  API.post("/accounts/otp/request/", { phone });
+// export const requestOTP = (phone: string, password?: string) =>
+//   API.post("/accounts/otp/request/", { phone });
 
 export const otpLogin = (phone: string, otp: string) =>
   API.post("/accounts/otp/login/", { phone, otp });
@@ -165,7 +168,7 @@ export const confirmResetPassword = (token: string, password: string) =>
 // PROFIL UTILISATEUR
 // ========================
 // L'API ne définit pas d'endpoint /me/profile/. On utilise l'endpoint pour récupérer un utilisateur par son ID.
-export const getProfile = (userId: string) => API.get(`/accounts/users/${userId}/`);
+export const getProfile = (userId: number) => API.get(`/accounts/users/${userId}/`);
 
 // ========================
 // PUBLIC
@@ -178,16 +181,15 @@ export const getPublicSchema = () => API.get("/schema/");
 export const getMerchants = () => API.get("/merchants/profiles/");
 export const getMerchantById = (id: string) => API.get(`/merchants/profiles/${id}/`);
 export const topupMerchant = (merchantId: string, amount: number) =>
-  API.post("/public/merchant-topup/", { merchantId, amount });
+  API.post("/public/merchant-topup/", { merchantId, amount }); // Note: Le body n'est pas défini dans l'API, mais la route existe.
 export const regenerateMerchantSecret = (merchantId: string) =>
   API.post(`/admin-panel/merchants/${merchantId}/regenerate-secret/`);
 
 // ========================
 // ADMIN PANEL
 // ========================
-export const getAdminTransactions = () => API.get("/admin-panel/transactions/");
-export const createAdminTransaction = (data: any) => // Non défini dans l'API, supposition logique
-  API.post("/admin-panel/transactions/", data); // L'API ne définit pas de POST ici.
+export const getAdminTransactions = () => API.get("/merchants/transactions/"); // L'API définit les transactions marchandes, pas un endpoint admin dédié.
+// La création de transaction via /admin-panel/ n'est pas définie dans l'API.
 
 export const getAdminUsers = () => API.get("/accounts/users/"); // L'admin a accès à tous les utilisateurs
 export const getAdminUserById = (id: string) =>
@@ -239,10 +241,10 @@ export const verifyMailOTP = (email: string, otp: string) =>
 // ========================
 // SMART (OTP/SECURITY)
 // ========================
-export const sendSmartOTP = (phone: string) => // Endpoint non défini dans l'API, on garde une supposition
-  API.post("/smart/send-otp/", { phone });
-export const verifySmartOTP = (phone: string, otp: string) => // Endpoint non défini dans l'API, on garde une supposition
-  API.post("/smart/verify-otp/", { phone, otp });
+// Les endpoints /smart/* n'existent pas dans l'API.
+// Utilisez les endpoints /accounts/initiate-phone-verification/ et /accounts/verify-phone-otp/
+export const sendSmartOTP = initiatePhoneVerification;
+export const verifySmartOTP = verifyPhoneOTP;
 
 // ========================
 // TRANSACTIONS
@@ -262,20 +264,20 @@ export const transferCredit = (to_subscriber_number: string, credit: string) =>
 // ========================
 // NOTIFICATIONS
 // ========================
-export const getNotifications = () => API.get("/notification/messages/"); // Les notifications sont des messages
+export const getNotifications = () => API.get("/notification/messages/");
 export const markNotificationRead = (id: string) =>
-  API.patch(`/notification/messages/${id}/`, { is_read: true }); // Supposition: PATCH pour marquer comme lu
+  API.patch(`/notification/messages/${id}/`, { is_read: true }); // L'API ne définit pas de PATCH, mais c'est une supposition logique.
 
 // ========================
 // MESSAGES
 // ========================
 export const getMessages = () => API.get("/notification/messages/");
 export const sendMessage = (data: { message: string; user?: number }) =>
-  API.post("/notification/messages/", data); // L'API attend 'user' (ID numérique), pas 'sender'.
+  API.post("/notification/messages/", data); // L'API ne définit pas de POST ici. C'est une supposition.
 
 // ========================
 // IT TICKETS
 // ========================
-export const fetchTicketsIT = () => API.get("/it/tickets/").then(res => res.data); // Endpoint non défini dans l'API.
+// L'endpoint /it/tickets/ n'est pas défini dans la spécification OpenAPI.
 
 export default API;

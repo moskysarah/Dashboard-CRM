@@ -6,7 +6,7 @@ import googleLogo from "../assets/logo-google.jpg";
 import { useAuth } from "../store/auth";
 import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
-import { LOCAL_STORAGE_KEYS, LOCKOUT_DURATIONS_IN_SECONDS } from "../config/constants";
+import { LOCAL_STORAGE_KEYS } from "../config/constants";
 import type { User } from "../types/domain";
 
 const Login = () => {
@@ -150,8 +150,6 @@ const Login = () => {
       if (res.status === 200 && response.access && response.refresh && response.data) {
         // On appelle la fonction centralisée du store pour gérer la session
         console.log("[SUCCESS] Connexion réussie. Réinitialisation du compteur de tentatives.");
-        setLoginAttempts(0); // Réinitialise les tentatives en cas de succès
-        setLockoutUntil(null);
 
         login(response.data as User, {
           access: response.access,
@@ -172,9 +170,10 @@ const Login = () => {
 
   // --- Animation slide---
   const slide = {
-        // On prend la durée correspondante, ou la dernière si on dépasse le nombre de paliers
-        const durationIndex = Math.min(newAttempts - 2, LOCKOUT_DURATIONS_IN_SECONDS.length - 1);
-        const lockoutDuration = LOCKOUT_DURATIONS_IN_SECONDS[durationIndex] * 1000;
+    initial: { opacity: 0, x: -50 },
+    animate: { opacity: 1, x: 0 },
+    exit: { opacity: 0, x: 50 },
+    transition: { duration: 0.5, ease: "easeInOut" },
   };
 
   const Spinner = () => (

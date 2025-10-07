@@ -19,7 +19,7 @@ const Finance: React.FC = () => {
         <p className="text-gray-600 mb-6">{t("finance_transactions_overview")}</p>
 
         {/* Cartes résumé */}
-        <div className="flex gap-6 mb-6">
+        <div className="flex flex-wrap gap-6 mb-6">
           <div className="flex-1 p-4 bg-green-100 rounded-2xl shadow">
             <h2 className="text-lg font-semibold">{t("total_revenue")}</h2>
             <p className="text-2xl font-bold text-green-700">{data?.totalRevenu ?? 0} $</p>

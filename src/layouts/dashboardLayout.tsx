@@ -150,7 +150,7 @@ const DashboardLayout: React.FC<Props> = ({ children }) => {
           </div>
         </header>
 
-        <main className="p-4 flex-1 overflow-y-auto h-[calc(100vh-64px)]">
+        <main className="p-4 flex-1 overflow-y-auto overflow-x-hidden h-[calc(100vh-64px)]">
              {children}
        </main>
       </div>

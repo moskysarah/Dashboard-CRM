@@ -12,7 +12,7 @@ const DistributorDashboard: React.FC = () => {
           Performance et transactions des distributeurs.
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 ml-2 w-300">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 ml-2">
           <DistributorKPI
             title="Ventes totales"
             value={1200}

@@ -81,7 +81,7 @@ const MerchantDashboard: React.FC = () => {
             🔄 Rafraîchir
           </button>
         </div>
-        <div className="max-h-96 overflow-y-auto rounded-lg">
+        <div className="max-h-96 overflow-y-auto overflow-x-auto rounded-lg">
           <table className="w-full text-left border-collapse">
             <thead className="border-b sticky top-0 text-center">
               <tr>
