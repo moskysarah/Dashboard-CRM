@@ -1,20 +1,22 @@
 import React from 'react';
 
-type ButtonVariant = 'primary' | 'secondary' | 'success' | 'danger' | 'ghost';
+type ButtonVariant = 'primary' | 'secondary' | 'success' | 'danger' | 'ghost'| 'link';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: ButtonVariant;
+  variant?: ButtonVariant | undefined;
   children: React.ReactNode;
+ 
 }
 
 const baseClasses = "w-full py-2 rounded-lg font-semibold transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed focus:ring-2 focus:ring-offset-2";
 
 const variantClasses: Record<ButtonVariant, string> = {
-  primary: "bg-indigo-600 text-white hover:bg-indigo-700",
+  primary: "bg-blue-500 text-white  hover:bg-white hover:text-blue-500 hover:border-1 border-blue-500",
   secondary: "border-2 border-white text-white hover:bg-white hover:text-indigo-600",
   success: "bg-green-600 text-white hover:bg-green-700",
   danger: "bg-red-500 text-white hover:bg-red-600",
   ghost: "bg-transparent text-indigo-600 hover:underline",
+  link : "bg-green-500 mt-4 text-white hover:bg-white hover:text-green-500 border-1 border-green-500"
 };
 
 export const Button: React.FC<ButtonProps> = ({ children, variant = 'primary', className, ...props }) => {

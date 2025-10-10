@@ -23,7 +23,7 @@ const MerchantTransactions: React.FC = () => {
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
-        const response = await api.get("/merchants/transactions", {
+        const response = await api.get("/me/transactions/", {
           params: { role: user?.role },
         });
         setTransactions(response.data);
