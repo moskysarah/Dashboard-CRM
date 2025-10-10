@@ -1,5 +1,5 @@
 // src/pages/Profile.tsx
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { getProfile } from "../services/api";
@@ -27,8 +27,9 @@ const Profile: React.FC = () => {
 
   useEffect(() => {
     const fetchProfile = async () => {
+      if (!user) return;
       try {
-        const res = await getProfile();
+        const res = await getProfile(user.id);
         const data = res.data;
         // Utilise les données de l'API ou celles du store en fallback
         setProfile({

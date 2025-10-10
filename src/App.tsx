@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { RouterProvider } from "react-router-dom";
 import { router } from "./router";
-import { UserProvider } from "./contexts/userContext";
 import { useAuth } from "./store/auth";
 
 const App = () => {

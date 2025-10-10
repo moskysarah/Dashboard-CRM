@@ -1,6 +1,6 @@
 import React from "react";
 import { useTransactions } from "../../hooks/useTransactions";
-import type { Transaction, TransactionStatus } from "../../types/domain";
+import type { TransactionStatus } from "../../types/domain";
 
 const statusColors: Record<TransactionStatus, string> = {
   SUCCESS: "bg-green-100 text-green-600",
