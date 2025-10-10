@@ -5,7 +5,7 @@ import MerchantTransactions from "../components/merchantTransaction";
 import { useMerchantPerformance } from "../hooks/useMerchantPerformance";
 
 const MerchantDashboard: React.FC = () => {
-  const { performanceData, loading, error, refresh } = useMerchantPerformance();
+  const { performanceData, loading, error } = useMerchantPerformance();
 
   const kpis = useMemo(() => {
     return {

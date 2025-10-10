@@ -19,8 +19,7 @@
     "noUncheckedSideEffectImports": true,
     "allowJs": true,
     "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true,
-    "types": ["react", "react-dom"]
+    "allowSyntheticDefaultImports": true
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["node_modules", "dist"]

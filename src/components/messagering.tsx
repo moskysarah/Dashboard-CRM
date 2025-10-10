@@ -1,56 +1,64 @@
 import React, { useState, useEffect } from "react";
-import type { Message } from "../services/messages";
-import { fetchMessages, postMessage } from "../services/messages";
-import { useTranslation } from "react-i18next";
+import { useTranslationContext } from "../contexts/translateContext";
+import API from "../services/api";
+
+interface Message {
+  id: number;
+  message: string;
+  sender: string;
+  date: string;
+}
 
 const Messaging: React.FC = () => {
-  const { t } = useTranslation();
+  const { translate } = useTranslationContext();
   const [msgs, setMsgs] = useState<Message[]>([]);
   const [newMsg, setNewMsg] = useState("");
   const [loading, setLoading] = useState(true);
+  const [placeholder, setPlaceholder] = useState("Écrire un message...");
 
   useEffect(() => {
-    fetchMessages()
-      .then((data) => {
-        setMsgs(data);
+    // Traduction synchrone si possible
+    translate("write_message").then((res) => setPlaceholder(res));
+
+    const fetchMessages = async () => {
+      try {
+        const response = await API.get("/notification/messages/");
+        setMsgs(response.data);
+      } catch (error) {
+        console.error("Erreur fetch messages:", error);
+      } finally {
         setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, []);
+      }
+    };
+
+    fetchMessages();
+  }, [translate]);
 
   const sendMessage = async () => {
-    if (newMsg.trim() === "") return;
+    if (!newMsg.trim()) return;
 
-    //ajout de tous les champs du type Message
-    const message: Omit<Message, "id" | "timestamp"> = {
-      sender: t("you"),
-      date: new Date().toISOString().slice(0, 16).replace("T", " "),
+    const message = {
       message: newMsg,
-      create_at: "",
-      update_at: "",
-      is_sent: false,
-      phone: "",
-      is_for: "",
-      User: 0
+      sender: await translate("you"),
+      date: new Date().toISOString().slice(0, 16).replace("T", " "),
+      user: 0, // à adapter selon ton backend
     };
 
     try {
-      const saved = await postMessage(message);
-      if (saved) {
-        setMsgs((prev) => [...prev, saved]);
-        setNewMsg("");
-      }
+      const response = await API.post("/notification/messages/", message);
+      setMsgs((prev) => [...prev, response.data]);
+      setNewMsg("");
     } catch (error) {
-      console.error("Error sending message:", error);
+      console.error("Erreur envoi message:", error);
     }
   };
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow mt-6">
-      <h2 className="text-lg font-semibold mb-4">{t("messaging")}</h2>
+    <div className="bg-white p-4 rounded-lg shadow mt-6 w-full md:w-2/3 lg:w-1/2 mx-auto">
+      <h2 className="text-lg font-semibold mb-4">{translate("messaging")}</h2>
 
       {loading ? (
-        <p>{t("loading")}</p>
+        <p>{translate("loading")}</p>
       ) : (
         <div className="max-h-60 overflow-y-auto mb-4">
           {msgs.map((m) => (
@@ -69,13 +77,13 @@ const Messaging: React.FC = () => {
           value={newMsg}
           onChange={(e) => setNewMsg(e.target.value)}
           className="flex-1 border rounded px-2 py-1"
-          placeholder={t("write_message")}
+          placeholder={placeholder}
         />
         <button
           onClick={sendMessage}
           className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
         >
-          {t("send")}
+          {translate("send")}
         </button>
       </div>
     </div>

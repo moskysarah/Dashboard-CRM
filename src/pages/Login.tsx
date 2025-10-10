@@ -1,8 +1,11 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, easeInOut } from "framer-motion";
 import api from "../services/api";
 import googleLogo from "../assets/logo-google.jpg";
+import loginImage from "../assets/two_person_whith_phone-removebg-preview.png";
+import registerImage from "../assets/man_who_point_hand-removebg-preview.png";
+import girlPhoneImage from "../assets/girl-showing-phone.png";
 import { useAuth } from "../store/auth";
 import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
@@ -66,7 +69,7 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const res = await api.post("accounts/otp/request/", {
+      await api.post("accounts/otp/request/", {
         phone: loginPhoneOrEmail,
         password: loginPassword,
       });
@@ -79,7 +82,7 @@ const Login = () => {
       setMode("otp");
       setLockoutError(null);
     } catch (err: any) {
-      // Si le serveur retourne une erreur de verrouillage, affichez-la
+      // Si le serveur retourne une erreur 
       if (err.response?.data?.lockout) {
         setLockoutError(err.response.data.lockout);
       } else {
@@ -107,7 +110,7 @@ const Login = () => {
     }
 
     try {
-      await api.post("/accounts/", {
+      await api.post("/accounts/users", {
         first_name: registerNom,
         last_name: registerPrenom,
         username: registerPhoneOrEmail,
@@ -124,7 +127,7 @@ const Login = () => {
     }
   };
 
-  // --- validation otp--- la ligne je repere le token final quand l'otp est correcte
+  // --- validation otp--- la ligne je recupere le token final quand l'otp est correcte
 
   const handleOtpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -140,20 +143,19 @@ const Login = () => {
     }
    // la ligne qui valide le code apres se connecter
     try {
-      const res = await api.post(
+      const response = await api.post(
         "/accounts/otp/login/",
-        { phone, otp: code }, 
+        { phone, otp: code },
       );
 
-      const response = res.data;
-      // La réponse de l'API doit contenir les tokens et les données utilisateur
-      if (res.status === 200 && response.access && response.refresh && response.data) {
+      // La réponse de l'API contiendra les contenir les tokens et les données utilisateur
+      if (response.status === 200 && response.data.access && response.data.refresh && response.data.data) {
         // On appelle la fonction centralisée du store pour gérer la session
         console.log("[SUCCESS] Connexion réussie. Réinitialisation du compteur de tentatives.");
 
-        login(response.data as User, {
-          access: response.access,
-          refresh: response.refresh,
+        login(response.data.data as User, {
+          access: response.data.access,
+          refresh: response.data.refresh,
         });
 
         navigate("/dashboard");
@@ -173,7 +175,7 @@ const Login = () => {
     initial: { opacity: 0, x: -50 },
     animate: { opacity: 1, x: 0 },
     exit: { opacity: 0, x: 50 },
-    transition: { duration: 0.5, ease: "easeInOut" },
+    transition: { duration: 0.5, ease: easeInOut },
   };
 
   const Spinner = () => (
@@ -342,10 +344,10 @@ const Login = () => {
               key={mode + "-image"}
               src={
                 mode === "login"
-                  ? "src/assets/two_person_whith_phone-removebg-preview.png"
+                  ?loginImage 
                   : mode === "register"
-                  ? "src/assets/man_who_point_hand-removebg-preview.png"
-                  : "src/assets/girl-showing-phone.png"
+                  ? registerImage
+                  : girlPhoneImage
               }
               alt={mode}
               className="w-60 mb-6 rounded-full"

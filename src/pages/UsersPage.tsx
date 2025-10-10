@@ -104,7 +104,19 @@ const UsersPage: React.FC = () => {
                     <tr key={u.id} className="hover:bg-gray-50 transition-colors">
                       <td className="px-3 py-2 text-center">
                         <div className="flex justify-center items-center">
-                          <img src={u.profile_image || '/images/default-avatar.png'} alt={u.username} className="w-8 h-8 rounded-full" />
+                          {u.profile_image ? (
+                            <img
+                              src={u.profile_image}
+                              alt={u.username}
+                              className="w-8 h-8 rounded-full"
+                            />
+                          ) : (
+                            <div
+                              className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold ${['bg-red-500', 'bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-purple-500', 'bg-pink-500'][u.username.charCodeAt(0) % 6]}`}
+                            >
+                              {u.username[0].toUpperCase()}
+                            </div>
+                          )}
                         </div>
                       </td>
                       <td className="px-3 py-2 whitespace-nowrap font-medium">{capitalize(`${u.first_name || ''} ${u.last_name || ''}`.trim() || u.username)}</td>

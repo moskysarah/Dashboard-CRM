@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import api from "../services/api";
 import { UserContext } from "../contexts/userContext";
+import { useTranslationContext } from "../contexts/translateContext";
 
 type Transaction = {
   id: string;
@@ -12,10 +13,13 @@ type Transaction = {
 
 const MerchantTransactions: React.FC = () => {
   const { user } = useContext(UserContext);
+  const { translate } = useTranslationContext();
+
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [filter, setFilter] = useState<"Tous" | "Réussi" | "En attente" | "Échoué">("Tous");
   const [loading, setLoading] = useState(true);
 
+  // Fetch transactions
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
@@ -36,44 +40,48 @@ const MerchantTransactions: React.FC = () => {
   const filteredTransactions =
     filter === "Tous" ? transactions : transactions.filter((t) => t.status === filter);
 
-  if (loading) return <p className="p-6">Chargement des transactions...</p>;
+  if (loading) return <p className="p-6">{translate("Chargement des transactions...")}</p>;
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow mt-6 ml-6 w-300">
-      <h2 className="text-lg font-semibold mb-4">Transactions Marchand</h2>
-      <div className="mb-4 flex gap-2">
-        {["Tous", "Réussi", "En attente", "Échoué"].map((status) => (
+    <div className="bg-white p-4 rounded-lg shadow mt-6 w-full overflow-x-auto">
+      <h2 className="text-lg font-semibold mb-4">{translate("Transactions Marchand")}</h2>
+
+      <div className="mb-4 flex gap-2 flex-wrap">
+        {(["Tous", "Réussi", "En attente", "Échoué"] as const).map((status) => (
           <button
             key={status}
-            onClick={() => setFilter(status as any)}
+            onClick={() => setFilter(status)}
             className={`px-3 py-1 rounded ${
               filter === status ? "bg-blue-500 text-white" : "bg-gray-200"
             }`}
           >
-            {status}
+            {translate(status)}
           </button>
         ))}
       </div>
-      <table className="w-full text-left border-collapse">
-        <thead>
-          <tr className="border-b">
-            <th className="py-2">Produit</th>
-            <th className="py-2">Montant ($)</th>
-            <th className="py-2">Statut</th>
-            <th className="py-2">Date</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredTransactions.map((t) => (
-            <tr key={t.id} className="border-b hover:bg-gray-50">
-              <td className="py-2">{t.product}</td>
-              <td className="py-2">{t.amount}</td>
-              <td className="py-2">{t.status}</td>
-              <td className="py-2">{t.date}</td>
+
+      <div className="overflow-x-auto">
+        <table className="w-full text-left border-collapse min-w-[600px]">
+          <thead>
+            <tr className="border-b">
+              <th className="py-2">{translate("Produit")}</th>
+              <th className="py-2">{translate("Montant ($)")}</th>
+              <th className="py-2">{translate("Statut")}</th>
+              <th className="py-2">{translate("Date")}</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {filteredTransactions.map((t) => (
+              <tr key={t.id} className="border-b hover:bg-gray-50">
+                <td className="py-2">{t.product}</td>
+                <td className="py-2">{t.amount}</td>
+                <td className="py-2">{translate(t.status)}</td>
+                <td className="py-2">{t.date}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
