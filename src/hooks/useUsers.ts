@@ -18,7 +18,7 @@ export const useUsers = () => {
     // États pour la pagination
     const [currentPage, setCurrentPage] = useState(1);
     const [totalUsers, setTotalUsers] = useState(0);
-    const [pageSize, setPageSize] = useState(10); // Nombre d'utilisateurs par page
+    const [pageSize] = useState(10); // Nombre d'utilisateurs par page
     const user = useAuth((state) => state.user);
     const userRole = user?.role;
 

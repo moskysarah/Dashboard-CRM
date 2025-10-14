@@ -1,15 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import api, { getMessages, sendMessage as postMessage } from '../services/api';
+import { getMessages, sendMessage as postMessage } from '../services/api';
 import { useAuth } from '../store/auth';
 import type { Message } from '../types/domain';
-
-// L'API renvoie une réponse paginée
-interface PaginatedMessages {
-    count: number;
-    next: string | null;
-    previous: string | null;
-    results: Message[];
-}
 
 export const useMessages = () => {
     const [messages, setMessages] = useState<Message[]>([]);
@@ -46,7 +38,7 @@ export const useMessages = () => {
             // Utilisation de la fonction d'API centralisée
             await postMessage({
                 message: content,
-                sender: user.id.toString(), // L'API attend un sender
+                user: user.id,
             });
             // Après l'envoi, on rafraîchit la liste pour voir le nouveau message
             await fetchMessages();

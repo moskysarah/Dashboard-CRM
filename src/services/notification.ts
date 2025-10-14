@@ -1,22 +1,25 @@
+// src/services/notificationService.ts
+import api from "../services/api"; // ton instance Axios (déjà utilisée ailleurs)
 
-import api from "./api"; 
-
-//  la structure Notification
 export interface Notification {
-  id: string;
+  id: number;
   message: string;
-  read: boolean;
-  date: string;
-  timestamp: string;
+  created_at: string;
+  updated_at: string;
+  is_sent: boolean;
+  phone: string;
+  is_for: string;
+  user: number;
 }
 
-// je récupérer toutes les notifications depuis l’api
-export const fetchNotifications = async (): Promise<Notification[]> => {
-  const response = await api.get("/notifications");
-  return response.data;
-};
+export interface NotificationResponse {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: Notification[];
+}
 
-// marquer une notification comme lue
-export const markNotificationAsRead = async (id: string): Promise<void> => {
-  await api.patch(`/notifications/${id}`, { read: true });
-};
+export async function getNotifications(): Promise<NotificationResponse> {
+  const response = await api.get<NotificationResponse>("/notification/messages");
+  return response.data;
+}

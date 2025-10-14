@@ -1,8 +1,10 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import api from "../services/api";
-import googleLogo from "../assets/logo-google.jpg";
+import twoPersonImage from "../assets/two_person_whith_phone-removebg-preview.png";
+import manPointImage from "../assets/man_who_point_hand-removebg-preview.png";
+import girlPhoneImage from "../assets/girl-showing-phone.png";
 import { useAuth } from "../store/auth";
 import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
@@ -13,78 +15,116 @@ const Login = () => {
   const navigate = useNavigate();
   const login = useAuth((state) => state.login);
 
-  // États login/register
   const [loginPhoneOrEmail, setLoginPhoneOrEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
-  const [loginRole, setLoginRole] = useState<"Admin" | "Marchand" | "Distributeur" | "">("");
+  const [loginRole, setLoginRole] = useState<"Admin" | "Marchand" | "Distributeur" | "Utilisateur">("Marchand");
 
   const [registerNom, setRegisterNom] = useState("");
   const [registerPrenom, setRegisterPrenom] = useState("");
   const [registerPhoneOrEmail, setRegisterPhoneOrEmail] = useState("");
   const [registerPassword, setRegisterPassword] = useState("");
-  const [registerRole, setRegisterRole] = useState<"Admin" | "Marchand" | "Distributeur" | "">("");
+  const [registerRole, setRegisterRole] = useState<"Admin" | "Marchand" | "Distributeur" | "Utilisateur">("Marchand");
 
   const [otp, setOtp] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [otpError, setOtpError] = useState(false);
 
-  // États pour le verrouillage après échecs (gérés côté serveur désormais)
-  const [lockoutError, setLockoutError] = useState<string | null>(null);
 
-  const [mode, setMode] = useState<"login" | "register" | "otp">("login");
+  const [otpAttempts, setOtpAttempts] = useState(0);
+  const [isLocked, setIsLocked] = useState(false);
+  const [lockoutTime, setLockoutTime] = useState(0);
+  const [timerId, setTimerId] = useState<number | null>(null);
 
-  // réinitialiser champs 
+  const [loginError, setLoginError] = useState("");
+
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
+  const [forgotPhoneOrEmail, setForgotPhoneOrEmail] = useState("");
+
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [resetPasswordError, setResetPasswordError] = useState("");
+
+  const [mode, setMode] = useState<"login" | "register" | "otp" | "forgot" | "resetPassword">("login");
+
+  // Réinitialisation des champs à chaque montage du composant
+  useEffect(() => {
+    setLoginPhoneOrEmail("");
+    setLoginPassword("");
+    setLoginRole("Marchand");
+    setRegisterNom("");
+    setRegisterPrenom("");
+    setRegisterPhoneOrEmail("");
+    setRegisterPassword("");
+    setRegisterRole("Marchand");
+    setOtp("");
+    setForgotPhoneOrEmail("");
+    setNewPassword("");
+    setConfirmNewPassword("");
+    setMode("login");
+    setLoginError("");
+    setOtpError(false);
+    setResetPasswordError("");
+    setOtpAttempts(0);
+    setIsLocked(false);
+    setLockoutTime(0);
+    if (timerId) clearInterval(timerId);
+    setTimerId(null);
+    setIsForgotPassword(false);
+  }, []);
+
+  // Réinitialisation des champs
   useEffect(() => {
     if (mode === "login") {
       setLoginPhoneOrEmail("");
       setLoginPassword("");
-      setLoginRole("");
+      setLoginRole("Marchand");
     } else if (mode === "register") {
-      setRegisterNom("");
-      setRegisterPrenom("");
-      setRegisterPhoneOrEmail("");
-      setRegisterPassword("");
-      setRegisterRole("");
+      // Reset register fields if needed
     }
-    setOtp("");
-    setOtpError(false);
-    setLockoutError(null);
   }, [mode]);
 
-  // Suppression des effets liés au verrouillage côté client (géré côté serveur)
+  // Cleanup du timer
+  useEffect(() => {
+    return () => {
+      if (timerId) clearInterval(timerId);
+    };
+  }, [timerId]);
 
-  // Validation aide
+  // Validation email/téléphone
   const isValidPhone = (input: string) => /^\d{10}$/.test(input);
   const isValidEmail = (input: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input);
   const validatePhoneOrEmail = (input: string) => isValidPhone(input) || isValidEmail(input);
 
-  // --- c'
-
+  // 🔹 LOGIN
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-
+    setLoginError("");
     setIsLoading(true);
 
     try {
-      const res = await api.post("accounts/otp/request/", {
+      await api.post("accounts/otp/request/", {
         phone: loginPhoneOrEmail,
         password: loginPassword,
       });
 
       localStorage.setItem(LOCAL_STORAGE_KEYS.USER_PHONE, loginPhoneOrEmail);
 
-      const maskedPhone = "•••••••••••••";
-      localStorage.setItem(LOCAL_STORAGE_KEYS.MASKED_PHONE, maskedPhone);
+      const maskedPhone = isValidPhone(loginPhoneOrEmail)
+        ? loginPhoneOrEmail.replace(/(\d{3})(\d{3})(\d{4})/, "$1***$2***$3")
+        : loginPhoneOrEmail.replace(/(.{3})(.*)(@.*)/, "$1***$3");
 
+      localStorage.setItem(LOCAL_STORAGE_KEYS.MASKED_PHONE, maskedPhone);
       setMode("otp");
-      setLockoutError(null);
-    } catch (err: any) {
-      // Si le serveur retourne une erreur de verrouillage, affichez-la
-      if (err.response?.data?.lockout) {
-        setLockoutError(err.response.data.lockout);
+    } catch (err: unknown) {
+      if (err instanceof Error && 'response' in err && err.response) {
+        const response = err.response as any;
+        if (response?.data?.lockout) {
+          setLoginError(response.data.lockout);
+        } else {
+          setLoginError(response?.data?.detail || "Identifiants incorrects.");
+        }
       } else {
-        setLockoutError(null);
-        alert(err.response?.data?.detail || "Identifiants incorrects.");
+        setLoginError("Erreur inconnue lors de la connexion.");
       }
       console.error(err);
     } finally {
@@ -92,7 +132,7 @@ const Login = () => {
     }
   };
 
-  // --- registre---
+  //  REGISTER
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -100,32 +140,71 @@ const Login = () => {
       !registerNom ||
       !registerPrenom ||
       !validatePhoneOrEmail(registerPhoneOrEmail) ||
-      !registerPassword
+      !registerPassword ||
+      !registerRole
     ) {
       alert("Veuillez remplir correctement tous les champs.");
+      setIsLoading(false);
       return;
     }
 
     try {
-      await api.post("/accounts/", {
+      await api.post("/accounts/users", {
         first_name: registerNom,
         last_name: registerPrenom,
         username: registerPhoneOrEmail,
         password: registerPassword,
+        role: registerRole,
       });
 
-      alert("Compte créé avec succès ");
+      alert("Compte créé avec succès !");
       setMode("login");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      alert(err.response?.data?.detail || "Erreur lors de l'inscription");
+      if (err instanceof Error && 'response' in err && err.response) {
+        const response = err.response as any;
+        alert(response?.data?.detail || "Erreur lors de l'inscription");
+      } else {
+        alert("Erreur inconnue lors de l'inscription");
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
-  // --- validation otp--- la ligne je repere le token final quand l'otp est correcte
+  //  FORGOT PASSWORD
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    if (!validatePhoneOrEmail(forgotPhoneOrEmail)) {
+      alert("Veuillez saisir un téléphone ou email valide.");
+      setIsLoading(false);
+      return;
+    }
 
+    try {
+      await api.post("accounts/otp/request/", {
+        phone: forgotPhoneOrEmail,
+      });
+
+      localStorage.setItem(LOCAL_STORAGE_KEYS.USER_PHONE, forgotPhoneOrEmail);
+
+      const maskedPhone = isValidPhone(forgotPhoneOrEmail)
+        ? forgotPhoneOrEmail.replace(/(\d{3})(\d{3})(\d{4})/, "$1***$2***$3")
+        : forgotPhoneOrEmail.replace(/(.{3})(.*)(@.*)/, "$1***$3");
+
+      localStorage.setItem(LOCAL_STORAGE_KEYS.MASKED_PHONE, maskedPhone);
+      setIsForgotPassword(true);
+      setMode("otp");
+    } catch (err: unknown) {
+      console.error(err);
+      alert("Erreur lors de l'envoi de l'OTP. Veuillez réessayer.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  //  OTP VALIDATION
   const handleOtpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -133,62 +212,156 @@ const Login = () => {
     const code = otp || localStorage.getItem(LOCAL_STORAGE_KEYS.OTP_CODE);
 
     if (!phone || !code) {
-      alert("Une erreur est survenue. Veuillez recommencer le processus de connexion.");
+      alert("Une erreur est survenue. Veuillez recommencer la connexion.");
       setIsLoading(false);
       setMode("login");
       return;
     }
-   // la ligne qui valide le code apres se connecter
+
     try {
-      const res = await api.post(
-        "/accounts/otp/login/",
-        { phone, otp: code }, 
-      );
+      if (isForgotPassword) {
+        // mot de passe oublier, code valide  OTP pour reinitialiser le mot de passe
+        const res = await api.post("/accounts/password-reset/confirm/", { phone, otp: code });
+        if (res.status === 200) {
+          localStorage.setItem(LOCAL_STORAGE_KEYS.OTP_CODE, code); // restore OTP comme token de reinitialisation
+          setMode("resetPassword");
+        } else {
+          setOtpError(true);
+        }
+      } else {
+        // Normal login
+        const res = await api.post("/accounts/otp/login/", { phone, otp: code });
+        const response = res.data;
 
-      const response = res.data;
-      // La réponse de l'API doit contenir les tokens et les données utilisateur
-      if (res.status === 200 && response.access && response.refresh && response.data) {
-        // On appelle la fonction centralisée du store pour gérer la session
-        console.log("[SUCCESS] Connexion réussie. Réinitialisation du compteur de tentatives.");
+        if (res.status === 200 && response.access && response.refresh && response.data) {
+          console.log("[SUCCESS] Connexion réussie ");
+          setOtpAttempts(0);
+          setIsLocked(false);
+          setLockoutTime(0);
+          if (timerId) clearInterval(timerId);
 
-        login(response.data as User, {
-          access: response.access,
-          refresh: response.refresh,
-        });
+          login(response.data as User, {
+            access: response.access,
+            refresh: response.refresh,
+          });
 
-        navigate("/dashboard");
+          navigate("/dashboard");
+        } else {
+          setOtpError(true);
+          const newAttempts = otpAttempts + 1;
+          setOtpAttempts(newAttempts);
+          if (newAttempts >= 2) {
+            const lockoutDuration = 30 * Math.pow(2, newAttempts - 2); // 30s, 60s, 120s, etc.
+            setIsLocked(true);
+            setLockoutTime(lockoutDuration);
+            const id = setInterval(() => {
+              setLockoutTime((prev) => {
+                if (prev <= 1) {
+                  setIsLocked(false);
+                  setOtpAttempts(0);
+                  clearInterval(id);
+                }
+                return prev - 1;
+              });
+            }, 1000);
+            setTimerId(id);
+          }
+        }
+      }
+    } catch (err: unknown) {
+      console.error(err);
+      if (isForgotPassword) {
+        setOtpError(true);
       } else {
         setOtpError(true);
+        const newAttempts = otpAttempts + 1;
+        setOtpAttempts(newAttempts);
+        if (newAttempts >= 2) {
+          const lockoutDuration = 30 * Math.pow(2, newAttempts - 2); // 30s, 60s, 120s, etc.
+          setIsLocked(true);
+          setLockoutTime(lockoutDuration);
+          const id = setInterval(() => {
+            setLockoutTime((prev) => {
+              if (prev <= 1) {
+                setIsLocked(false);
+                setOtpAttempts(0);
+                clearInterval(id);
+                return 0;
+              }
+              return prev - 1;
+            });
+          }, 1000);
+          setTimerId(id);
+        }
       }
-    } catch (err: any) {
-      console.error(err);
-      setOtpError(true);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // --- Animation slide---
+  //  RESET PASSWORD
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setResetPasswordError("");
+    if (newPassword !== confirmNewPassword) {
+      setResetPasswordError("Le nouveau mot de passe ne correspod pas.");
+      return;
+    }
+    if (newPassword.length < 8) {
+      setResetPasswordError("Le mot de passe doit contenir au moins 8 caractères.");
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const phone = localStorage.getItem(LOCAL_STORAGE_KEYS.USER_PHONE);
+      const otpToken = localStorage.getItem(LOCAL_STORAGE_KEYS.OTP_CODE);
+      await api.post("/accounts/reset-password/", {
+        phone,
+        otp: otpToken,
+        new_password: newPassword
+      });
+      alert("Mot de passe réinitialisé avec succès !");
+      setMode("login");
+      // Clear stored data
+      localStorage.removeItem(LOCAL_STORAGE_KEYS.OTP_CODE);
+    } catch (error: any) {
+      console.error("Erreur lors de la réinitialisation du mot de passe :", error);
+      setResetPasswordError(error.response?.data?.detail || "Erreur lors de la réinitialisation du mot de passe.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const slide = {
     initial: { opacity: 0, x: -50 },
     animate: { opacity: 1, x: 0 },
     exit: { opacity: 0, x: 50 },
-    transition: { duration: 0.5, ease: "easeInOut" },
+    transition: { duration: 0.5 },
   };
 
   const Spinner = () => (
-    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+    <svg
+      className="animate-spin h-5 w-5 text-white"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+    >
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+      <path
+        className="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 
+        5.291A7.962 7.962 0 014 12H0c0 
+        3.042 1.135 5.824 3 7.938l3-2.647z"
+      />
     </svg>
   );
 
   return (
     <div className="min-h-screen flex font-sans overflow-hidden">
-      {/* partie gauche : formulaire */}
+      {/* Partie gauche : formulaire */}
       <div className="w-1/2 flex flex-col justify-center items-center p-10 bg-white shadow-lg relative">
         <AnimatePresence mode="wait">
-          {/* LOGIN */}
           {mode === "login" && (
             <motion.div key="login" {...slide} className="w-full max-w-sm text-center">
               <h2 className="text-3xl font-bold text-gray-800 mb-4">Se connecter</h2>
@@ -200,54 +373,43 @@ const Login = () => {
                   placeholder="Téléphone ou Email"
                 />
                 <Input
-                  type="password"
+                  isPassword
                   value={loginPassword}
                   onChange={(e) => setLoginPassword(e.target.value)}
                   placeholder="Mot de passe"
                 />
-                <div className="text-right mb-2">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    className="w-auto p-0 text-sm"
-                    onClick={() => alert("Fonction mot de passe oublié")}
+                <div className="text-left w-full">
+                  <select
+                    value={loginRole}
+                    onChange={(e) => setLoginRole(e.target.value as "Admin" | "Marchand" | "Distributeur" | "Utilisateur")}
+                    className="w-full p-2 border border-gray-300 rounded-md"
                   >
-                    Mot de passe oublié ?
-                  </Button>
+                    <option value="">-- Sélectionner un rôle --</option>
+                    <option value="Admin">Admin</option>
+                    <option value="Distributeur">Distributeur</option>
+                    <option value="Utilisateur">Utilisateur</option>
+                  </select>
                 </div>
-                <select
-                  value={loginRole}
-                  onChange={(e) => setLoginRole(e.target.value as any)}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"
+
+                {loginError && <p className="text-red-500 text-sm">{loginError}</p>}
+                <Button
+                  type="submit"
+                  variant="primary"
+                  disabled={isLoading || isLocked}
+                  className="flex justify-center items-center"
                 >
-                  <option value="">-- Rôle (non utilisé pour la connexion) --</option>
-                  <option value="admin">Admin</option>
-                  <option value="user">Utilisateur (Marchand/Distributeur)</option>
-                </select>
-                <Button type="submit" variant="primary" disabled={isLoading || !!lockoutError} className="flex justify-center items-center">
-                  {isLoading 
-                    ? <Spinner /> 
-                    : lockoutError
-                      ? lockoutError
-                      : 'Se connecter'
-                  }
+                  {isLoading ? <Spinner /> : "Se connecter"}
+                </Button>
+                <Button onClick={() => setMode("register")} variant="ghost">
+                  S'inscrire
+                </Button>
+                <Button onClick={() => setMode("forgot")} variant="ghost">
+                  Mot de passe oublié ?
                 </Button>
               </form>
-
-              <div className="mt-4 flex justify-center items-center space-x-2">
-                <button
-                  type="button"
-                  className="flex items-center border border-gray-300 rounded-lg px-4 py-2 hover:bg-gray-100 transition"
-                  onClick={() => alert("Login avec Google")}
-                >
-                  <img src={googleLogo} alt="Google" className="w-6 h-6 mr-2" />
-                  Se connecter avec Google
-                </button>
-              </div>
             </motion.div>
           )}
 
-          {/* REGISTER */}
           {mode === "register" && (
             <motion.div key="register" {...slide} className="w-full max-w-sm text-center">
               <h2 className="text-3xl font-bold text-gray-800 mb-4">S'inscrire</h2>
@@ -271,42 +433,87 @@ const Login = () => {
                   placeholder="Téléphone ou Email"
                 />
                 <Input
-                  type="password"
+                  isPassword
                   value={registerPassword}
                   onChange={(e) => setRegisterPassword(e.target.value)}
                   placeholder="Mot de passe"
                 />
-                <select
-                  value={registerRole}
-                  onChange={(e) => setRegisterRole(e.target.value as any)}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 outline-none"
+                <div className="text-left w-full">
+                  
+                  <select
+                    value={registerRole}
+                    onChange={(e) => setRegisterRole(e.target.value as "Admin" | "Marchand" | "Distributeur" | "Utilisateur")}
+                    className="w-full p-2 border border-gray-300 rounded-md"
+                  >
+                    <option value="">-- Sélectionner un rôle --</option>
+                    <option value="Admin">Admin</option>
+                    <option value="Marchand">Marchand</option>
+                    <option value="Distributeur">Distributeur</option>
+                    <option value="Utilisateur">Utilisateur</option>
+                  </select>
+                </div>
+                <Button
+                  type="submit"
+                  variant="primary"
+                  disabled={isLoading}
+                  className="flex justify-center items-center"
                 >
-                  <option value="">-- Choisir un rôle --</option>
-                  <option value="user">Utilisateur (Marchand/Distributeur)</option>
-                </select>
-                <Button type="submit" variant="success" disabled={isLoading} className="flex justify-center items-center">
-                  {isLoading ? <Spinner /> : 'CRÉER UN COMPTE'}
+                  {isLoading ? <Spinner /> : "S'inscrire"}
+                </Button>
+                <Button onClick={() => setMode("login")} variant="ghost">
+                  Retour à la connexion
                 </Button>
               </form>
             </motion.div>
           )}
 
-          {/* OTP */}
+          {mode === "forgot" && (
+            <motion.div key="forgot" {...slide} className="w-full max-w-sm text-center">
+              <h2 className="text-3xl font-bold text-gray-800 mb-4">Mot de passe oublié</h2>
+              <form onSubmit={handleForgotPassword} className="space-y-4">
+                <Input
+                  type="text"
+                  value={forgotPhoneOrEmail}
+                  onChange={(e) => setForgotPhoneOrEmail(e.target.value)}
+                  placeholder="Téléphone ou Email"
+                />
+                <Button
+                  type="submit"
+                  variant="primary"
+                  disabled={isLoading}
+                  className="flex justify-center items-center"
+                >
+                  {isLoading ? <Spinner /> : "Envoyer OTP"}
+                </Button>
+                <Button onClick={() => setMode("login")} variant="ghost">
+                  Retour à la connexion
+                </Button>
+              </form>
+            </motion.div>
+          )}
+
           {mode === "otp" && (
             <motion.div key="otp" {...slide} className="w-full max-w-sm text-center">
-              {!otpError ? (
+              {isLocked ? (
+                <div className="space-y-4">
+                  <h2 className="text-2xl font-bold text-red-600 mb-4">
+                    Trop de tentatives
+                  </h2>
+                  <p className="text-gray-600">
+                    Vous avez dépassé le nombre de tentatives autorisées. Veuillez attendre {lockoutTime} secondes avant de réessayer.
+                  </p>
+                  <Button onClick={() => setMode("login")} variant="primary">
+                    Retour à la connexion
+                  </Button>
+                </div>
+              ) : !otpError ? (
                 <>
-                  <h2 className="text-2xl font-bold text-gray-800 mb-4">Entrer le code OTP</h2>
+                  <h2 className="text-2xl font-bold text-gray-800 mb-4">
+                    {isForgotPassword ? "Réinitialiser le mot de passe" : "Entrer le code OTP"}
+                  </h2>
                   <form onSubmit={handleOtpSubmit} className="space-y-4">
                     <Input
-                      type="text"
-                      readOnly
-                      value={localStorage.getItem(LOCAL_STORAGE_KEYS.MASKED_PHONE) || "•••••••••••••"}
-                      placeholder="Numéro masqué"
-                      className="hidden text-gray-500 text-center tracking-widest"
-                    />
-                    <Input
-                      type="text"
+                      type="password"
                       value={otp}
                       onChange={(e) => {
                         setOtp(e.target.value);
@@ -315,26 +522,72 @@ const Login = () => {
                       placeholder="Code OTP"
                       className="text-center"
                     />
-                    <Button type="submit" variant="success" disabled={isLoading} className="flex justify-center items-center">
-                      {isLoading ? <Spinner /> : 'Valider'}
+                    <Button
+                      type="submit"
+                      variant="success"
+                      disabled={isLoading || isLocked}
+                      className="flex justify-center items-center"
+                    >
+                      {isLoading ? <Spinner /> : isForgotPassword ? "Réinitialiser" : "Valider"}
+                    </Button>
+                    <Button onClick={() => setMode("login")} variant="ghost">
+                      Retour
                     </Button>
                   </form>
                 </>
               ) : (
                 <div className="space-y-4">
-                  <h2 className="text-2xl font-bold text-red-600 mb-4">Échec de la validation</h2>
-                  <p className="text-gray-600">Le code OTP est invalide ou a expiré. Veuillez réessayer.</p>
-                  <Button onClick={() => setMode('login')} variant="primary">
+                  <h2 className="text-2xl font-bold text-red-600 mb-4">
+                    Échec de la validation
+                  </h2>
+                  <p className="text-gray-600">
+                    Le code OTP est invalide ou a expiré. Veuillez réessayer.
+                  </p>
+                  <Button onClick={() => setMode("login")} variant="primary">
                     Retour à la connexion
                   </Button>
                 </div>
               )}
             </motion.div>
           )}
+
+          {mode === "resetPassword" && (
+            <motion.div key="resetPassword" {...slide} className="w-full max-w-sm text-center">
+              <h2 className="text-3xl font-bold text-gray-800 mb-4">Nouveau mot de passe</h2>
+              <form onSubmit={handleResetPassword} className="space-y-4">
+                <Input
+                  isPassword
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Nouveau mot de passe"
+                  required
+                />
+                <Input
+                  isPassword
+                  value={confirmNewPassword}
+                  onChange={(e) => setConfirmNewPassword(e.target.value)}
+                  placeholder="Confirmer le nouveau mot de passe"
+                  required
+                />
+                {resetPasswordError && <p className="text-red-500 text-sm">{resetPasswordError}</p>}
+                <Button
+                  type="submit"
+                  variant="primary"
+                  disabled={isLoading}
+                  className="flex justify-center items-center"
+                >
+                  {isLoading ? <Spinner /> : "Réinitialiser le mot de passe"}
+                </Button>
+                <Button onClick={() => setMode("login")} variant="ghost">
+                  Retour à la connexion
+                </Button>
+              </form>
+            </motion.div>
+          )}
         </AnimatePresence>
       </div>
 
-      {/* partie droite */}
+      {/* Partie droite */}
       <div className="w-1/2 bg-[#0176D3] text-white flex flex-col justify-center items-center p-10 relative">
         <AnimatePresence mode="wait">
           {mode && (
@@ -342,17 +595,17 @@ const Login = () => {
               key={mode + "-image"}
               src={
                 mode === "login"
-                  ? "src/assets/two_person_whith_phone-removebg-preview.png"
+                  ? twoPersonImage
                   : mode === "register"
-                  ? "src/assets/man_who_point_hand-removebg-preview.png"
-                  : "src/assets/girl-showing-phone.png"
+                  ? manPointImage
+                  : girlPhoneImage
               }
               alt={mode}
               className="w-60 mb-6 rounded-full"
               initial={{ y: -50, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: -50, opacity: 0 }}
-              transition={{ duration: 0.8, ease: "easeInOut" }}
+              transition={{ duration: 0.8 }}
             />
           )}
         </AnimatePresence>
@@ -361,24 +614,18 @@ const Login = () => {
           <>
             <h2 className="text-4xl font-bold mb-4">Bonjour!</h2>
             <p className="mb-6 text-center max-w-sm">
-              Pour rester connecté(e) avec nous, veuillez vous connecter avec vos informations
-              personnelles
+              Pour rester connecté(e) avec nous, veuillez vous connecter avec vos
+              informations personnelles
             </p>
-            <Button onClick={() => setMode("register")} variant="secondary" className="px-8">
-              S'inscrire
-            </Button>
           </>
         )}
 
         {mode === "register" && (
           <>
-            <h2 className="text-4xl font-bold mb-4">Bon retour!</h2>
+            <h2 className="text-4xl font-bold mb-4">Créer un compte</h2>
             <p className="mb-6 text-center max-w-sm">
-              Veuillez vous enregistrer avec vos informations personnelles pour rester connecté
+              Rejoignez notre plateforme en créant un compte. Choisissez votre rôle et commencez dès maintenant.
             </p>
-            <Button onClick={() => setMode("login")} variant="secondary" className="px-8">
-              Se connecter
-            </Button>
           </>
         )}
 

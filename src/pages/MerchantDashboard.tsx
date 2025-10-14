@@ -1,11 +1,35 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import DashboardLayout from "../layouts/dashboardLayout";
 import MerchantKPI from "../components/merchantKPI";
 import MerchantTransactions from "../components/merchantTransaction";
-import { useMerchantPerformance } from "../hooks/useMerchantPerformance";
+import api from "../services/api";
+import * as XLSX from "xlsx";
+import T from "../components/T";
+import type { MerchantPerformanceData } from "../hooks/useMerchantPerformance";
 
 const MerchantDashboard: React.FC = () => {
-  const { performanceData, loading, error, refresh } = useMerchantPerformance();
+  const [performanceData, setPerformanceData] = useState<MerchantPerformanceData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchPerformance = async () => {
+      setLoading(true);
+      try {
+        const response = await api.get("/merchants/performance");
+        setPerformanceData(response.data);
+        setError(null);
+      } catch (err) {
+        console.error("Erreur lors du chargement des performances des marchands:", err);
+        setError("Impossible de charger les performances.");
+        setPerformanceData([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPerformance();
+  }, []);
 
   const kpis = useMemo(() => {
     return {
@@ -35,36 +59,51 @@ const MerchantDashboard: React.FC = () => {
     document.body.removeChild(link);
   };
 
+  const exportExcel = () => {
+    const worksheet = XLSX.utils.json_to_sheet(performanceData.map(m => ({
+      "Nom": m.merchantName,
+      "Sous-magasin": m.subStore,
+      "Transactions": m.transactionsCount,
+      "Ventes réussies": m.success,
+      "En attente": m.pending,
+      "Échouées": m.failed,
+      "Total (€)": m.totalAmount
+    })));
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Rapport Performance");
+    XLSX.writeFile(workbook, "rapport_performance_merchants.xlsx");
+  };
+
   if (loading) {
-    return <DashboardLayout><p className="p-6">Chargement des performances...</p></DashboardLayout>;
+    return <DashboardLayout><p className="p-6"><T>Chargement des performances...</T></p></DashboardLayout>;
   }
 
   if (error) return <DashboardLayout><p className="p-6 text-red-500">{error}</p></DashboardLayout>;
 
   return (
     <DashboardLayout>
-      <h1 className="text-2xl font-bold mt-6 ml-6">Marchand</h1>
-      <p className="text-gray-600 mt-4 ml-6">Performance et transactions des marchands.</p>
+      <h1 className="text-2xl font-bold mt-6 ml-6"><T>Marchand</T></h1>
+      <p className="text-gray-600 mt-4 ml-6"><T>Performance et transactions des marchands.</T></p>
 
       {/* KPIs marchands */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6 ml-6">
         <MerchantKPI
-          title="Ventes totales"
+          title={<T>Ventes totales</T>}
           value={kpis.totalAmount}
           color="bg-green-100 shadow text-green-700"
         />
         <MerchantKPI
-          title="Transactions réussies"
+          title={<T>Transactions réussies</T>}
           value={kpis.totalSuccess}
           color="bg-blue-100 shadow text-blue-700"
         />
         <MerchantKPI
-          title="En attente"
+          title={<T>En attente</T>}
           value={kpis.totalPending}
           color="bg-yellow-100 shadow text-yellow-700"
         />
         <MerchantKPI
-          title="Échouées"
+          title={<T>Échouées</T>}
           value={kpis.totalFailed}
           color="bg-red-100 shadow text-red-700"
         />
@@ -73,19 +112,19 @@ const MerchantDashboard: React.FC = () => {
       {/* Suivi de performance */}
       <div className="bg-white p-4 rounded-lg shadow mt-6 ml-6">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold">Suivi des performances</h2>
+          <h2 className="text-lg font-semibold"><T>Suivi des performances</T></h2>
         </div>
         <div className="max-h-96 overflow-y-auto overflow-x-auto rounded-lg">
           <table className="w-full text-left border-collapse">
             <thead className="border-b sticky top-0 text-center">
               <tr>
-                <th className="py-2 px-4">Nom</th>
-                <th className="py-2 px-4">Sous-magasin</th>
-                <th className="py-2 px-4">Transactions</th>
-                <th className="py-2 px-4">Succès</th>
-                <th className="py-2 px-4">En attente</th>
-                <th className="py-2 px-4">Échouées</th>
-                <th className="py-2 px-4">Total (€)</th>
+                <th className="py-2 px-4"><T>Nom</T></th>
+                <th className="py-2 px-4"><T>Sous-magasin</T></th>
+                <th className="py-2 px-4"><T>Transactions</T></th>
+                <th className="py-2 px-4"><T>Succès</T></th>
+                <th className="py-2 px-4"><T>En attente</T></th>
+                <th className="py-2 px-4"><T>Échouées</T></th>
+                <th className="py-2 px-4"><T>Total (€)</T></th>
               </tr>
             </thead>
             <tbody>
@@ -104,12 +143,20 @@ const MerchantDashboard: React.FC = () => {
           </table>
         </div>
 
-        <button
-          onClick={exportCSV}
-          className="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-        >
-          Exporter CSV
-        </button>
+        <div className="mt-4 flex gap-2">
+          <button
+            onClick={exportCSV}
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          >
+            <T>Exporter CSV</T>
+          </button>
+          <button
+            onClick={exportExcel}
+            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+          >
+            <T>Exporter Excel</T>
+          </button>
+        </div>
       </div>
 
       {/* Transactions des marchands */}

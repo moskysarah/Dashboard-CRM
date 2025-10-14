@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { RouterProvider } from "react-router-dom";
 import { router } from "./router";
-import { UserProvider } from "./contexts/userContext";
 import { useAuth } from "./store/auth";
+import { TranslateProvider } from "./contexts/translateContext";
 
 const App = () => {
   // Cet état garantit que nous attendons la fin de l'hydratation du store Zustand.
@@ -27,7 +27,11 @@ const App = () => {
     return <div className="flex items-center justify-center h-screen">Chargement de l'application...</div>;
   }
 
-  return <RouterProvider router={router} />;
+  return (
+    <TranslateProvider>
+      <RouterProvider router={router} />
+    </TranslateProvider>
+  );
 };
 
 export default App;

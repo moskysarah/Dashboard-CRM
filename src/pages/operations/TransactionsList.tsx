@@ -1,6 +1,6 @@
 import React from "react";
 import { useTransactions } from "../../hooks/useTransactions";
-import type { Transaction, TransactionStatus } from "../../types/domain";
+import type { TransactionStatus } from "../../types/domain";
 
 const statusColors: Record<TransactionStatus, string> = {
   SUCCESS: "bg-green-100 text-green-600",
@@ -14,7 +14,7 @@ const statusColors: Record<TransactionStatus, string> = {
 };
 
 const TransactionsList: React.FC = () => {
-  const { transactions, loading, error, refreshTransactions } = useTransactions();
+  const { transactions, loading, error } = useTransactions();
 
   if (loading) {
     return <p className="text-center py-4">Chargement des transactions...</p>;
@@ -26,15 +26,6 @@ const TransactionsList: React.FC = () => {
 
   return (
     <div className="overflow-x-auto">
-      <div className="flex justify-between items-center py-2">
-        <button
-          onClick={refreshTransactions}
-          className="bg-blue-500 text-white text-xs font-semibold px-3 py-1 rounded-md hover:bg-blue-600 transition"
-        >
-          🔄 Rafraîchir
-        </button>
-      </div>
-
       <table className="min-w-full text-center divide-y divide-gray-200 text-xs sm:text-sm">
         <thead className="bg-gray-50">
           <tr>

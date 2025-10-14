@@ -1,4 +1,4 @@
-import getAnalytics from "./api"; // ✅ Correction : import par défaut
+
 
 export interface FinanceData {
   month: string;
@@ -9,13 +9,20 @@ export interface FinanceData {
 export interface SalesData {
   product: string;
   value: number;
+  [key: string]: any;
 }
 
 export const fetchFinanceData = async (): Promise<FinanceData[]> => {
   try {
-    const response = await getAnalytics({});
-    // Vérifie que les données existent avant de les renvoyer
-    return response?.data?.finance || [];
+    // Mock data for finance
+    return [
+      { month: "Jan", revenue: 4000, expenses: 2400 },
+      { month: "Feb", revenue: 3000, expenses: 1398 },
+      { month: "Mar", revenue: 2000, expenses: 9800 },
+      { month: "Apr", revenue: 2780, expenses: 3908 },
+      { month: "May", revenue: 1890, expenses: 4800 },
+      { month: "Jun", revenue: 2390, expenses: 3800 },
+    ];
   } catch (error) {
     console.error("Erreur lors du chargement des données financières :", error);
     return [];
@@ -24,9 +31,13 @@ export const fetchFinanceData = async (): Promise<FinanceData[]> => {
 
 export const fetchSalesData = async (): Promise<SalesData[]> => {
   try {
-    const response = await getAnalytics({});
-    // Vérifie que les données existent avant de les renvoyer
-    return response?.data?.sales || [];
+    // Mock data for sales
+    return [
+      { product: "Produit A", value: 400 },
+      { product: "Produit B", value: 300 },
+      { product: "Produit C", value: 200 },
+      { product: "Produit D", value: 100 },
+    ];
   } catch (error) {
     console.error("Erreur lors du chargement des ventes :", error);
     return [];

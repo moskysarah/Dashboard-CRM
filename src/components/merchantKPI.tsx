@@ -2,7 +2,7 @@
 import React from "react";
 
 type KPIProps = {
-  title: string;
+  title: string | React.ReactNode;
   value: number;
   color?: string;
 };

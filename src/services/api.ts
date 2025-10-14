@@ -93,7 +93,7 @@ API.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if ((error.response?.status === 401 || error.response?.status === 419) && !originalRequest._retry) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
@@ -163,6 +163,10 @@ export const resetPassword = (email: string) =>
 
 export const confirmResetPassword = (token: string, password: string) =>
   API.post("/accounts/password-reset/confirm/", { token, password });
+
+// cette route n'existe pas 
+export const changePassword = (oldPassword: string, newPassword: string) =>
+  API.post("/accounts/change-password/", { old_password: oldPassword, new_password: newPassword });
 
 // ========================
 // PROFIL UTILISATEUR
@@ -281,5 +285,38 @@ export const sendMessage = (data: { message: string; user?: number }) =>
 // IT TICKETS
 // ========================
 // L'endpoint /it/tickets/ n'est pas défini dans la spécification OpenAPI.
+
+// ========================
+// DISTRIBUTORS
+// ========================
+export const getDistributors = () => API.get("/distributors");
+export const updateDistributor = (id: string, data: any) =>
+  API.put(`/distributors/${id}`, data);
+
+
+export const createDistributor = (data: any) => API.post("/distributors", data);
+export const deleteDistributor = (id: string) => API.delete(`/distributors/${id}`);
+// ========================
+// SALES
+// ========================
+export const getSales = () => API.get("/sales");
+export const createSale = (data: any) => API.post("/sales", data);
+
+// ========================
+// TRANSACTIONS (SPECIFIC FUNCTIONS)
+// ========================
+export const getMerchantTransactions = () => API.get("/me/transactions/");
+export const getUserTransactions = () => API.get("/me/transactions/");
+
+// ========================
+// MERCHANT PERFORMANCE
+// ========================
+/*
+export const getMerchantPerformance = () => API.get("/merchants/performance");
+*/
+// ========================
+// FINANCE OVERVIEW
+// ========================
+export const getFinanceOverview = () => API.get("/analytics/overview/");
 
 export default API;

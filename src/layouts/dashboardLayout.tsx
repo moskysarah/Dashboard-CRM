@@ -1,128 +1,133 @@
 // src/layouts/DashboardLayout.tsx
 import type { ReactNode } from "react";
 import { Sidebar } from "../components/Sidebar";
-import { useState, useEffect, useContext } from "react";
-import { Bell, Mail } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Bell, Mail, Globe } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { useTranslation } from "react-i18next";
 import { useAuth } from "../store/auth";
+import { getNotifications, type Notification } from "../services/notification";
+import { useTranslate } from "../contexts/translateContext";
+import T from "../components/T";
 
 type Props = {
   children?: ReactNode;
 };
 
-type Notification = {
-  id: number;
-  message: string;
-  read: boolean;
-};
-
-type Message = {
-  id: number;
-  from: string;
-  content: string;
-  read: boolean;
-};
-
 const DashboardLayout: React.FC<Props> = ({ children }) => {
   const { user, logout } = useAuth();
+  const { language, setLanguage } = useTranslate();
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [messages, setMessages] = useState<Message[]>([]);
   const [notifOpen, setNotifOpen] = useState(false);
-  const [msgOpen, setMsgOpen] = useState(false);
+  const [langOpen, setLangOpen] = useState(false);
   const navigate = useNavigate();
-  const { t, i18n } = useTranslation();
-
-  const changeLanguage = (lang: string) => {
-    i18n.changeLanguage(lang);
-  };
 
   const handleLogout = () => {
     logout();
     navigate("/login");
   };
 
+  // Charger les notifications depuis ton API
   useEffect(() => {
-    const notifInterval = setInterval(() => {
-      setNotifications(prev => [
-        { id: prev.length + 1, message: `Nouvelle notification ${prev.length + 1}`, read: false },
-        ...prev,
-      ]);
-    }, 8000);
-
-    const msgInterval = setInterval(() => {
-      setMessages(prev => [
-        { id: prev.length + 1, from: ["Alice", "Bob", "Charlie"][Math.floor(Math.random() * 3)], content: `Message aléatoire ${prev.length + 1}`, read: false },
-        ...prev,
-      ]);
-    }, 10000);
-
-    return () => {
-      clearInterval(notifInterval);
-      clearInterval(msgInterval);
+    const loadNotifications = async () => {
+      try {
+        const data = await getNotifications();
+        setNotifications(data.results);
+      } catch (error) {
+        console.error("Erreur lors du chargement des notifications:", error);
+      }
     };
+
+    loadNotifications();
+    const interval = setInterval(loadNotifications, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   const markNotifRead = (id: number) => {
-    setNotifications(prev => prev.map(n => (n.id === id ? { ...n, read: true } : n)));
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, is_sent: true } : n))
+    );
   };
 
-  const markMsgRead = (id: number) => {
-    setMessages(prev => prev.map(m => (m.id === id ? { ...m, read: true } : m)));
+  // 🎨 Génère une couleur dynamique basée sur le nom de l'utilisateur
+  const getProfileColor = (name: string): string => {
+    const colors = [
+      "bg-blue-500",
+      "bg-green-500",
+      "bg-purple-500",
+      "bg-pink-500",
+      "bg-indigo-500",
+      "bg-yellow-500",
+      "bg-red-500",
+      "bg-teal-500",
+    ];
+    const index = name ? name.charCodeAt(0) % colors.length : 0;
+    return colors[index];
+  };
+
+  // 🧍 Génère la lettre de profil
+  const getInitial = (name: string): string => {
+    return name ? name.charAt(0).toUpperCase() : "?";
   };
 
   return (
-  <div className="flex h-screen bg-gray-100 max-w-screen">
-    <Sidebar />
+    <div className="flex h-screen bg-gray-100 max-w-screen">
+      <Sidebar />
 
-    <div className="flex-1 flex flex-col">
-      <header className="bg-white shadow border-b border-blue-200 p-4 flex justify-between items-center h-16 max-w-full">
-        <h2 className="font-bold">Dashboard</h2>
+      <div className="flex-1 flex flex-col">
+        <header className="bg-white shadow border-b border-blue-200 p-2 md:p-4 flex flex-wrap justify-between items-center h-16 md:h-20 max-w-full">
+          <h2 className="font-bold text-sm md:text-base"><T>Dashboard</T></h2>
 
-        <div className="flex items-center gap-4">
-          {/* Profil utilisateur */}
-          {user && (
-            <div className="flex items-center gap-2 bg-gray-100 px-3 py-1 rounded-full">
-              <img
-                src={user.profile_image || '/images/default-avatar.png'}
-                alt="Avatar"
-                className="w-10 h-10 rounded-full border-2 border-gray-300"
-              />
-              <div className="text-left">
-                <p className="font-semibold text-sm">{user.username}</p>
-                <p className="text-xs text-gray-500">{user.role}</p>
+          <div className="flex items-center gap-2 md:gap-4">
+            {/* Profil utilisateur */}
+            {user && (
+              <div className="flex items-center gap-2 bg-gray-100 px-2 md:px-3 py-1 rounded-full">
+                {user.profile_image ? (
+                  <img
+                    src={user.profile_image}
+                    alt="Avatar"
+                    className="w-8 md:w-10 h-8 md:h-10 rounded-full border-2 border-gray-300 object-cover"
+                  />
+                ) : (
+                  <div
+                    className={`w-8 md:w-10 h-8 md:h-10 rounded-full flex items-center justify-center text-white font-semibold border-2 border-gray-300 ${getProfileColor(
+                      user.username || "U"
+                    )}`}
+                  >
+                    {getInitial(user.username || "U")}
+                  </div>
+                )}
+
+                <div className="text-left hidden md:block">
+                  <p className="font-semibold text-sm">{user.username}</p>
+                  <p className="text-xs text-gray-500">{user.role}</p>
+                </div>
               </div>
-            </div>
-          )}
-
-          {/* Sélecteur de langue */}
-          <select
-            onChange={(e) => changeLanguage(e.target.value)}
-            className="border rounded px-2 py-1"
-          >
-            <option value="fr">Français</option>
-            <option value="en">English</option>
-          </select>
-
-
-     
+            )}
 
             {/* Notifications */}
             <div className="relative">
               <button className="relative" onClick={() => setNotifOpen(!notifOpen)}>
-                <Bell size={24} />
-                {notifications.some(n => !n.read) && <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full" />}
+                <Bell size={20} />
+                {notifications.some((n) => !n.is_sent) && (
+                  <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full" />
+                )}
               </button>
+
               {notifOpen && (
-                <div className="absolute right-0 mt-2 w-64 bg-white shadow-lg border rounded p-2 z-10">
-                  {notifications.length === 0 && <p>{t("notifications")}</p>}
-                  {notifications.map(n => (
+                <div className="absolute right-0 mt-2 w-56 md:w-64 bg-white shadow-lg border rounded p-2 z-10">
+                  {notifications.length === 0 && <p><T>Aucune notification</T></p>}
+                  {notifications.map((n) => (
                     <div
                       key={n.id}
-                      className={`p-2 border-b cursor-pointer ${n.read ? "bg-gray-100" : "bg-white"}`}
+                      className={`p-2 border-b cursor-pointer text-sm ${
+                        n.is_sent ? "bg-gray-100" : "bg-white"
+                      }`}
                       onClick={() => markNotifRead(n.id)}
                     >
                       {n.message}
+                      <p className="text-xs text-gray-400 mt-1">
+                        {new Date(n.created_at).toLocaleString()}
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -132,27 +137,55 @@ const DashboardLayout: React.FC<Props> = ({ children }) => {
             {/* Messages */}
             <div className="relative">
               <Link to="/messages">
-                <button className="relative" onClick={() => setMsgOpen(false)}>
-                  <Mail size={24} />
-                  {messages.some(m => !m.read) && <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full" />}
+                <button className="relative">
+                  <Mail size={20} />
                 </button>
               </Link>
-              {/* La logique du dropdown de messages est retirée pour privilégier la page dédiée */}
+            </div>
+
+            {/* Language Selector */}
+            <div className="relative">
+              <button className="relative" onClick={() => setLangOpen(!langOpen)}>
+                <Globe size={20} />
+              </button>
+
+              {langOpen && (
+                <div className="absolute right-0 mt-2 w-32 bg-white shadow-lg border rounded p-2 z-10">
+                  <button
+                    className={`block w-full text-left px-2 py-1 text-sm hover:bg-gray-100 ${language === 'fr' ? 'bg-blue-100' : ''}`}
+                    onClick={() => { setLanguage('fr'); setLangOpen(false); }}
+                  >
+                    <T>Français</T>
+                  </button>
+                  <button
+                    className={`block w-full text-left px-2 py-1 text-sm hover:bg-gray-100 ${language === 'en' ? 'bg-blue-100' : ''}`}
+                    onClick={() => { setLanguage('en'); setLangOpen(false); }}
+                  >
+                    <T>English</T>
+                  </button>
+                  <button
+                    className={`block w-full text-left px-2 py-1 text-sm hover:bg-gray-100 ${language === 'ar' ? 'bg-blue-100' : ''}`}
+                    onClick={() => { setLanguage('ar'); setLangOpen(false); }}
+                  >
+                    <T>العربية</T>
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Déconnexion */}
             <button
               onClick={handleLogout}
-              className="ml-auto mr-6 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+              className="bg-red-500 text-white px-2 md:px-3 py-1 rounded hover:bg-red-600 text-sm"
             >
-              {t("logout")}
+              <T>logout</T>
             </button>
           </div>
         </header>
 
-        <main className="p-4 flex-1 overflow-y-auto overflow-x-hidden h-[calc(100vh-64px)]">
-             {children}
-       </main>
+        <main className="p-2 md:p-4 flex-1 overflow-y-auto overflow-x-hidden h-[calc(100vh-64px)] md:h-[calc(100vh-80px)]">
+          {children}
+        </main>
       </div>
     </div>
   );

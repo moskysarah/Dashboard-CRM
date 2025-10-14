@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import api from '../services/api';
+import { getMerchantPerformance } from '../services/api';
 
 /**
  * Structure des données de performance pour un marchand,
@@ -24,9 +24,8 @@ export const useMerchantPerformance = () => {
     const fetchPerformance = useCallback(async () => {
         setLoading(true);
         try {
-            // Cet endpoint est utilisé dans le composant original.
-            // Nous supposons qu'il renvoie un tableau de MerchantPerformanceData.
-            const response = await api.get<MerchantPerformanceData[]>("/merchants/performance");
+            // Utilisation de la fonction d'API centralisée
+            const response = await getMerchantPerformance();
             setPerformanceData(response.data);
             setError(null);
         } catch (err) {

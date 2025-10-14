@@ -25,6 +25,7 @@ const IT: React.FC = () => {
         const response = await fetchTicketsIT({});
         setTickets(response.data);
       } catch (err) {
+        console.error("Erreur lors du chargement des tickets:", err);
         setError("Erreur lors du chargement des tickets.");
       } finally {
         setLoading(false);

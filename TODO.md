@@ -1,7 +1,13 @@
-- [x] Update src/main.tsx to import "./services/i18n"
-- [x] Update src/pages/operations/RapportsList.tsx to import api from "../../services/api"
-- [x] Update src/pages/operations/TransactionsList.tsx to import api from "../../services/api"
-- [x] Run dev server to verify errors are resolved
-- [x] mettre un spinner et desactiver le bouton se connecter qaund la requete est envoyee
-- [x] si le status code la reponse de la validation de l'opt est different de 200 affichier un bouton qui renvoi vers le login
-- [x] apres 2 tentatives succecive infructuese ajouter un timer qui fais attendre 30 s avant de pemerttre de se connecter et incrementer de facon expo le temps pour reduire le nombre de tentative sur un cours delai
+# TODO: Import API Service into MerchantDashboard
+
+## Steps to Complete
+- [ ] Edit src/pages/MerchantDashboard.tsx to import api from "../services/api"
+- [ ] Remove import of useMerchantPerformance hook
+- [ ] Add useState for performanceData, loading, error
+- [ ] Add useEffect to fetch data using api.getMerchantPerformance()
+- [ ] Handle loading, error, and data states similarly to the hook
+- [ ] Test the component to ensure data loads correctly
+
+## Notes
+- This replaces the hook with direct API calls for fetching merchant performance data.
+- Ensure the component behaves the same as before.

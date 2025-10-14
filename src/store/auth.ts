@@ -27,7 +27,7 @@ const getInitialIsAuthenticated = (): boolean => {
 
 export const useAuth = create<AuthState>()(
   persist(
-    (set, get) => ({
+    (set, _get) => ({
       user: null,
       accessToken: null,
       refreshToken: null,

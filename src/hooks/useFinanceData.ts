@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import api from '../services/api';
+import { getFinanceOverview } from '../services/api';
 
 /**
  * Données agrégées pour le graphique financier.
@@ -29,9 +29,8 @@ export const useFinanceData = () => {
     const fetchFinanceData = useCallback(async () => {
         setLoading(true);
         try {
-            // On suppose que l'API a un endpoint qui renvoie toutes les données nécessaires.
-            // Dans l'API YAML, cela pourrait correspondre à `/api/v1/analytics/overview/`
-            const res = await api.get<FinanceOverview>('/analytics/overview/');
+            // Utilisation de la fonction d'API centralisée
+            const res = await getFinanceOverview();
 
             setData(res.data);
             setError(null);

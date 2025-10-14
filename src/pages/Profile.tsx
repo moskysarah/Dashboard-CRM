@@ -1,9 +1,10 @@
 // src/pages/Profile.tsx
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useTranslation } from "react-i18next";
-import { getProfile } from "../services/api";
+import { getProfile, changePassword } from "../services/api";
 import { useAuth } from "../store/auth";
+import { Input } from "../components/ui/Input";
+import { Button } from "../components/ui/Button";
 
 interface ProfileData {
   name: string;
@@ -13,7 +14,6 @@ interface ProfileData {
 }
 
 const Profile: React.FC = () => {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const user = useAuth((state) => state.user);
   const logout = useAuth((state) => state.logout);
@@ -25,10 +25,18 @@ const Profile: React.FC = () => {
   });
   const [loading, setLoading] = useState(true);
 
+  // Change password state
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [changePasswordError, setChangePasswordError] = useState("");
+  const [changePasswordLoading, setChangePasswordLoading] = useState(false);
+
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await getProfile();
+        const res = await getProfile(user?.id || 0);
         const data = res.data;
         // Utilise les données de l'API ou celles du store en fallback
         setProfile({
@@ -56,23 +64,91 @@ const Profile: React.FC = () => {
     navigate("/login");
   };
 
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setChangePasswordError("");
+    if (newPassword !== confirmPassword) {
+      setChangePasswordError("Les nouveaux mots de passe ne correspondent pas.");
+      return;
+    }
+    setChangePasswordLoading(true);
+    try {
+      await changePassword(oldPassword, newPassword);
+      alert("Mot de passe changé avec succès !");
+      setShowChangePassword(false);
+      setOldPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (error: any) {
+      console.error("Erreur lors du changement de mot de passe :", error);
+      setChangePasswordError(error.response?.data?.detail || "Erreur lors du changement de mot de passe.");
+    } finally {
+      setChangePasswordLoading(false);
+    }
+  };
+
   if (loading) return <p className="p-4">Chargement du profil...</p>;
 
   return (
-    <div className="flex items-center gap-4 p-4 bg-white rounded-lg shadow">
-      <img
-        src={profile.avatarUrl}
-        alt={profile.name}
-        className="w-12 h-12 rounded-full object-cover"
-      />
-      <div>
-        <p className="font-semibold">{profile.name}</p>
-        <p className="text-sm text-gray-500">{profile.email}</p>
-        <p className="text-sm text-gray-400">{profile.role}</p>
+    <div className="p-4 space-y-4">
+      <div className="flex flex-col md:flex-row items-center gap-4 p-4 bg-white rounded-lg shadow">
+        <img
+          src={profile.avatarUrl}
+          alt={profile.name}
+          className="w-12 h-12 rounded-full object-cover"
+        />
+        <div className="text-center md:text-left">
+          <p className="font-semibold">{profile.name}</p>
+          <p className="text-sm text-gray-500">{profile.email}</p>
+          <p className="text-sm text-gray-400">{profile.role}</p>
+        </div>
+        <button onClick={handleLogout} className="mt-2 md:mt-0 md:ml-auto px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">
+          logout
+        </button>
       </div>
-      <button onClick={handleLogout} className="ml-auto px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">
-        {t("logout")}
-      </button>
+
+      <div className="bg-white rounded-lg shadow p-4">
+        <button
+          onClick={() => setShowChangePassword(!showChangePassword)}
+          className="w-full text-left font-semibold text-blue-600 hover:text-blue-800"
+        >
+          Changer le mot de passe
+        </button>
+        {showChangePassword && (
+          <form onSubmit={handleChangePassword} className="mt-4 space-y-4">
+            <Input
+              isPassword
+              value={oldPassword}
+              onChange={(e) => setOldPassword(e.target.value)}
+              placeholder="L’ancien mot de passe actuel"
+              required
+            />
+            <Input
+              isPassword
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              placeholder="Le nouveau mot de passe"
+              required
+            />
+            <Input
+              isPassword
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Pour confirmer le nouveau mot de passe"
+              required
+            />
+            {changePasswordError && <p className="text-red-500 text-sm">{changePasswordError}</p>}
+            <Button
+              type="submit"
+              variant="primary"
+              disabled={changePasswordLoading}
+              className="flex justify-center items-center"
+            >
+              {changePasswordLoading ? "Chargement..." : "Changer le mot de passe"}
+            </Button>
+          </form>
+        )}
+      </div>
     </div>
   );
 };

@@ -15,7 +15,7 @@ export interface OverviewStats {
   merchants: {
     total_merchants: number;
     active_merchants_in_period: number;
-    top_merchants_by_volume: any[];
+  top_merchants_by_volume: Record<string, unknown>[];
   };
   financials: {
     estimated_revenue: number;

@@ -45,7 +45,7 @@ const MerchantTransactions: React.FC = () => {
         {["Tous", "Réussi", "En attente", "Échoué"].map((status) => (
           <button
             key={status}
-            onClick={() => setFilter(status as any)}
+            onClick={() => setFilter(status as "Tous" | "Réussi" | "En attente" | "Échoué")}
             className={`px-3 py-1 rounded ${
               filter === status ? "bg-blue-500 text-white" : "bg-gray-200"
             }`}

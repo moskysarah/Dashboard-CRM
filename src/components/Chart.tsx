@@ -13,13 +13,10 @@ import {
 } from "recharts";
 import { fetchFinanceData, fetchSalesData } from "../services/chart";
 import type { FinanceData, SalesData } from "../services/chart";
-import { useTranslation } from "react-i18next";
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 
 const Chart: React.FC = () => {
-  const { t } = useTranslation();
-
   const [financeChartData, setFinanceChartData] = useState<FinanceData[]>([]);
   const [salesChartData, setSalesChartData] = useState<SalesData[]>([]);
 
@@ -36,21 +33,21 @@ const Chart: React.FC = () => {
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {/* Finance Chart */}
       <div className="bg-white p-4 rounded-lg shadow">
-        <h2 className="text-lg font-semibold mb-2">{t("finance")}</h2>
+        <h2 className="text-lg font-semibold mb-2">finance</h2>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={financeChartData}>
             <XAxis dataKey="month" />
             <YAxis />
             <Tooltip />
-            <Bar dataKey="revenue" fill="#0088FE" name={t("revenue")} />
-            <Bar dataKey="expenses" fill="#FF8042" name={t("expenses")} />
+            <Bar dataKey="revenue" fill="#0088FE" name="revenue" />
+            <Bar dataKey="expenses" fill="#FF8042" name="expenses" />
           </BarChart>
         </ResponsiveContainer>
       </div>
 
       {/* Sales Chart */}
       <div className="bg-white p-4 rounded-lg shadow">
-        <h2 className="text-lg font-semibold mb-2">{t("sales")}</h2>
+        <h2 className="text-lg font-semibold mb-2">sales</h2>
         <ResponsiveContainer width="100%" height={300}>
           <PieChart>
             <Pie

@@ -1,15 +1,19 @@
+
+/*
 import { createBrowserRouter } from "react-router-dom";
-import SplashLogin from "../pages/SplashLogin"; 
+import SplashLogin from "../pages/SplashLogin";
 import Dashboard from "../pages/Dashboard";
 import Merchants from "../pages/MerchantDashboard";
 import Distributors from "../pages/DistributorDashboard";
 import TransactionsList from "../pages/operations/TransactionsList";
 import ReportsList from "../pages/operations/RapportsList";
-import Sales from "../pages/Sales"; 
-import Finance from "../pages/Finance"; 
+import Sales from "../pages/Sales";
+import Finance from "../pages/Finance";
 import IT from "../pages/IT";
-import UsersPage from "../pages/UsersPage"; // Importer la nouvelle page
-import ProtectedRoute from "../components/ProtectedRoute";
+import UsersPage from "../pages/UsersPage";
+import UserManagement from "../pages/operations/UserManagement";
+import DashboardLayout from "../layouts/dashboardLayout";
+import ProtectedRoute from "../components/protectedRoute";
 
 export const router = createBrowserRouter([
   { path: "/login", element: <SplashLogin /> },
@@ -31,3 +35,42 @@ export const router = createBrowserRouter([
 
   { path: "*", element: <SplashLogin /> },
 ]);
+
+*/
+
+
+
+// src/router/index.tsx
+import { createBrowserRouter } from "react-router-dom";
+import SplashLogin from "../pages/SplashLogin";
+import Dashboard from "../pages/Dashboard";
+import Merchants from "../pages/MerchantDashboard";
+import Distributors from "../pages/DistributorDashboard";
+import TransactionsList from "../pages/operations/TransactionsList";
+import ReportsList from "../pages/operations/RapportsList";
+import Sales from "../pages/Sales";
+import Finance from "../pages/Finance";
+import IT from "../pages/IT";
+import UsersPage from "../pages/UsersPage";
+import UserManagement from "../pages/operations/UserManagement";
+import DashboardLayout from "../layouts/dashboardLayout";
+
+export const router = createBrowserRouter([
+  { path: "/login", element: <SplashLogin /> },
+
+  // ✅ Toutes les pages sont maintenant accessibles sans restriction
+  { path: "/users", element: <UsersPage /> },
+  { path: "/dashboard", element: <Dashboard /> },
+  { path: "/usermanagement", element: <DashboardLayout><UserManagement /></DashboardLayout> },
+  { path: "/it", element: <IT /> },
+  { path: "/transactionslist", element: <TransactionsList /> },
+  { path: "/reportslist", element: <ReportsList /> },
+  { path: "/finance", element: <Finance /> },
+  { path: "/sales", element: <Sales /> },
+  { path: "/merchants", element: <Merchants /> },
+  { path: "/distributors", element: <Distributors /> },
+
+  // ✅ Redirection par défaut
+  { path: "*", element: <SplashLogin /> },
+]);
+
