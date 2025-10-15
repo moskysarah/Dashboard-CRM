@@ -9,7 +9,7 @@ export interface FinanceData {
 export interface SalesData {
   product: string;
   value: number;
-  [key: string]: any;
+  [key: string]: string | number;
 }
 
 export const fetchFinanceData = async (): Promise<FinanceData[]> => {
@@ -23,7 +23,7 @@ export const fetchFinanceData = async (): Promise<FinanceData[]> => {
       { month: "May", revenue: 1890, expenses: 4800 },
       { month: "Jun", revenue: 2390, expenses: 3800 },
     ];
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Erreur lors du chargement des données financières :", error);
     return [];
   }
@@ -38,7 +38,7 @@ export const fetchSalesData = async (): Promise<SalesData[]> => {
       { product: "Produit C", value: 200 },
       { product: "Produit D", value: 100 },
     ];
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Erreur lors du chargement des ventes :", error);
     return [];
   }

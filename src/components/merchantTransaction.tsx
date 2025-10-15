@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import api from "../services/api";
-import { UserContext } from "../contexts/userContext";
+import { useUser } from "../contexts/userContext.ts";
 
 type Transaction = {
   id: string;
@@ -11,7 +11,7 @@ type Transaction = {
 };
 
 const MerchantTransactions: React.FC = () => {
-  const { user } = useContext(UserContext);
+  const user = useUser();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [filter, setFilter] = useState<"Tous" | "Réussi" | "En attente" | "Échoué">("Tous");
   const [loading, setLoading] = useState(true);
@@ -20,7 +20,7 @@ const MerchantTransactions: React.FC = () => {
     const fetchTransactions = async () => {
       try {
         const response = await api.get("/merchants/transactions", {
-          params: { role: user?.role },
+        params: { role: user?.user?.role },
         });
         setTransactions(response.data);
       } catch (err) {

@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { RouterProvider } from "react-router-dom";
 import { router } from "./router";
 import { useAuth } from "./store/auth";
-import { TranslateProvider } from "./contexts/translateContext";
+import { TranslateProvider } from "./contexts/TranslateProvider";
+import { UserProvider } from "./contexts/UserProvider";
 
 const App = () => {
   // Cet état garantit que nous attendons la fin de l'hydratation du store Zustand.
@@ -29,7 +30,9 @@ const App = () => {
 
   return (
     <TranslateProvider>
-      <RouterProvider router={router} />
+      <UserProvider>
+        <RouterProvider router={router} />
+      </UserProvider>
     </TranslateProvider>
   );
 };

@@ -49,7 +49,7 @@ const SplashLogin: React.FC = () => {
             className="z-10 flex flex-col justify-center items-center"
           >
             <motion.img
-              src="src/assets/postesmart-logo-2.png" // logo post smart
+              src="/postesmart-logo-2.png" // logo post smart
               alt="Logo"
               className="w-24 h-24 mb-4"
 

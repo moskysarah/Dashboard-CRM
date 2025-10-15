@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
 import { getDistributors, createDistributor, deleteDistributor } from "../services/api";
-import { UserContext } from "../contexts/userContext";
+import { useUser } from "../contexts/userContext.ts";
 import T from "./T";
 
 type Distributor = {
@@ -15,7 +15,7 @@ type Distributor = {
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8"];
 
 const DistributorNetwork: React.FC = () => {
-  const { user } = useContext(UserContext);
+  const user = useUser();
   const [distributors, setDistributors] = useState<Distributor[]>([]);
   const [filter, setFilter] = useState<"Tous" | "Top" | "Faible">("Tous");
   const [loading, setLoading] = useState(true);

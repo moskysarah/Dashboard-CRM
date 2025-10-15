@@ -45,15 +45,15 @@ const Profile: React.FC = () => {
           role: data.role || user?.role || "user",
           avatarUrl: data.avatarUrl || "/images/default-avatar.png",
         });
-      } catch (error) {
-        console.error("Erreur lors du chargement du profil :", error);
-        // En cas d'erreur, on utilise les données du store
-        if (user) {
-          setProfile({ name: `${user.first_name} ${user.last_name}`, email: user.email || '', role: user.role || 'user' });
-        }
-      } finally {
-        setLoading(false);
+    } catch (error: unknown) {
+      console.error("Erreur lors du chargement du profil :", error);
+      // En cas d'erreur, on utilise les données du store
+      if (user) {
+        setProfile({ name: `${user.first_name} ${user.last_name}`, email: user.email || '', role: user.role || 'user' });
       }
+    } finally {
+      setLoading(false);
+    }
     };
 
     fetchProfile();
@@ -79,9 +79,14 @@ const Profile: React.FC = () => {
       setOldPassword("");
       setNewPassword("");
       setConfirmPassword("");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Erreur lors du changement de mot de passe :", error);
-      setChangePasswordError(error.response?.data?.detail || "Erreur lors du changement de mot de passe.");
+      if (error instanceof Error && 'response' in error && error.response) {
+        const response = error.response as { data?: { detail?: string } };
+        setChangePasswordError(response?.data?.detail || "Erreur lors du changement de mot de passe.");
+      } else {
+        setChangePasswordError("Erreur inconnue lors du changement de mot de passe.");
+      }
     } finally {
       setChangePasswordLoading(false);
     }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import api from "../services/api";
@@ -33,7 +33,7 @@ const Login = () => {
   const [otpAttempts, setOtpAttempts] = useState(0);
   const [isLocked, setIsLocked] = useState(false);
   const [lockoutTime, setLockoutTime] = useState(0);
-  const [timerId, setTimerId] = useState<number | null>(null);
+  const timerIdRef = useRef<number | null>(null);
 
   const [loginError, setLoginError] = useState("");
 
@@ -67,8 +67,8 @@ const Login = () => {
     setOtpAttempts(0);
     setIsLocked(false);
     setLockoutTime(0);
-    if (timerId) clearInterval(timerId);
-    setTimerId(null);
+    if (timerIdRef.current) clearInterval(timerIdRef.current);
+    timerIdRef.current = null;
     setIsForgotPassword(false);
   }, []);
 
@@ -86,9 +86,9 @@ const Login = () => {
   // Cleanup du timer
   useEffect(() => {
     return () => {
-      if (timerId) clearInterval(timerId);
+      if (timerIdRef.current) clearInterval(timerIdRef.current);
     };
-  }, [timerId]);
+  }, []);
 
   // Validation email/téléphone
   const isValidPhone = (input: string) => /^\d{10}$/.test(input);
@@ -117,7 +117,7 @@ const Login = () => {
       setMode("otp");
     } catch (err: unknown) {
       if (err instanceof Error && 'response' in err && err.response) {
-        const response = err.response as any;
+        const response = err.response as { data?: { lockout?: string; detail?: string } };
         if (response?.data?.lockout) {
           setLoginError(response.data.lockout);
         } else {
@@ -162,7 +162,7 @@ const Login = () => {
     } catch (err: unknown) {
       console.error(err);
       if (err instanceof Error && 'response' in err && err.response) {
-        const response = err.response as any;
+        const response = err.response as { data?: { detail?: string } };
         alert(response?.data?.detail || "Erreur lors de l'inscription");
       } else {
         alert("Erreur inconnue lors de l'inscription");
@@ -238,7 +238,7 @@ const Login = () => {
           setOtpAttempts(0);
           setIsLocked(false);
           setLockoutTime(0);
-          if (timerId) clearInterval(timerId);
+          if (timerIdRef.current) clearInterval(timerIdRef.current);
 
           login(response.data as User, {
             access: response.access,
@@ -264,7 +264,7 @@ const Login = () => {
                 return prev - 1;
               });
             }, 1000);
-            setTimerId(id);
+            timerIdRef.current = id;
           }
         }
       }
@@ -291,7 +291,7 @@ const Login = () => {
               return prev - 1;
             });
           }, 1000);
-          setTimerId(id);
+          timerIdRef.current = id;
         }
       }
     } finally {
@@ -324,9 +324,14 @@ const Login = () => {
       setMode("login");
       // Clear stored data
       localStorage.removeItem(LOCAL_STORAGE_KEYS.OTP_CODE);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Erreur lors de la réinitialisation du mot de passe :", error);
-      setResetPasswordError(error.response?.data?.detail || "Erreur lors de la réinitialisation du mot de passe.");
+      if (error instanceof Error && 'response' in error && error.response) {
+        const response = error.response as { data?: { detail?: string } };
+        setResetPasswordError(response?.data?.detail || "Erreur lors de la réinitialisation du mot de passe.");
+      } else {
+        setResetPasswordError("Erreur inconnue lors de la réinitialisation du mot de passe.");
+      }
     } finally {
       setIsLoading(false);
     }

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getMerchantPerformance } from '../services/api';
+import { getMerchants } from '../services/api';
 
 /**
  * Structure des données de performance pour un marchand,
@@ -25,7 +25,7 @@ export const useMerchantPerformance = () => {
         setLoading(true);
         try {
             // Utilisation de la fonction d'API centralisée
-            const response = await getMerchantPerformance();
+            const response = await getMerchants();
             setPerformanceData(response.data);
             setError(null);
         } catch (err) {

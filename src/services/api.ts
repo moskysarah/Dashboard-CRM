@@ -75,9 +75,9 @@ API.interceptors.request.use((config) => {
 
 // Intercepteur de réponse pour gérer l'expiration du token
 let isRefreshing = false;
-let failedQueue: { resolve: (value: unknown) => void; reject: (reason?: any) => void; }[] = [];
+let failedQueue: { resolve: (value: unknown) => void; reject: (reason?: unknown) => void; }[] = [];
 
-const processQueue = (error: any, token: string | null = null) => {
+const processQueue = (error: unknown, token: string | null = null) => {
   failedQueue.forEach(prom => {
     if (error) {
       prom.reject(error);
@@ -196,13 +196,23 @@ export const getAdminOverview = () => API.get("/admin-panel/overview/");
 export const getAdminTransactions = () => API.get("/merchants/transactions/"); // L'API définit les transactions marchandes, pas un endpoint admin dédié.
 // La création de transaction via /admin-panel/ n'est pas définie dans l'API.
 
+interface UserData {
+  first_name?: string;
+  last_name?: string;
+  username?: string;
+  password?: string;
+  role?: string;
+  email?: string;
+  phone?: string;
+}
+
 export const getAdminUsers = (params?: { page?: number; page_size?: number }) =>
   API.get("/accounts/users/", { params }); // L'admin a accès à tous les utilisateurs
 export const getAdminUserById = (id: string) =>
   API.get(`/accounts/users/${id}/`);
-export const updateAdminUser = (id: string, data: any) =>
+export const updateAdminUser = (id: string, data: UserData) =>
   API.put(`/accounts/users/${id}/`, data);
-export const patchAdminUser = (id: string, data: any) =>
+export const patchAdminUser = (id: string, data: Partial<UserData>) =>
   API.patch(`/accounts/users/${id}/`, data);
 export const deleteAdminUser = (id: string) =>
   API.delete(`/accounts/users/${id}/`);
@@ -213,11 +223,11 @@ export const getAdminMerchants = () => API.get("/merchants/profiles/");
 // ACCOUNTS / USERS
 // ========================
 export const getAccountsUsers = () => API.get("/accounts/users/");
-export const createAccountUser = (data: any) => API.post("/accounts/users/", data);
+export const createAccountUser = (data: UserData) => API.post("/accounts/users/", data);
 export const getAccountUserById = (id: string) => API.get(`/accounts/users/${id}/`);
-export const updateAccountUser = (id: string, data: any) =>
+export const updateAccountUser = (id: string, data: UserData) =>
   API.put(`/accounts/users/${id}/`, data);
-export const patchAccountUser = (id: string, data: any) =>
+export const patchAccountUser = (id: string, data: Partial<UserData>) =>
   API.patch(`/accounts/users/${id}/`, data);
 export const deleteAccountUser = (id: string) =>
   API.delete(`/accounts/users/${id}/`);
@@ -256,7 +266,7 @@ export const verifySmartOTP = verifyPhoneOTP;
 // TRANSACTIONS
 // ========================
 export const getTransactions = () => API.get("/me/transactions/");
-export const createTransaction = (data: any) =>
+export const createTransaction = (data: unknown) =>
   API.post("/me/transactions/", data);
 
 // ========================
@@ -290,17 +300,17 @@ export const sendMessage = (data: { message: string; user?: number }) =>
 // DISTRIBUTORS
 // ========================
 export const getDistributors = () => API.get("/distributors");
-export const updateDistributor = (id: string, data: any) =>
+export const updateDistributor = (id: string, data: unknown) =>
   API.put(`/distributors/${id}`, data);
 
 
-export const createDistributor = (data: any) => API.post("/distributors", data);
+export const createDistributor = (data: unknown) => API.post("/distributors", data);
 export const deleteDistributor = (id: string) => API.delete(`/distributors/${id}`);
 // ========================
 // SALES
 // ========================
 export const getSales = () => API.get("/sales");
-export const createSale = (data: any) => API.post("/sales", data);
+export const createSale = (data: unknown) => API.post("/sales", data);
 
 // ========================
 // TRANSACTIONS (SPECIFIC FUNCTIONS)

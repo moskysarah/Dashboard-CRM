@@ -12,7 +12,8 @@ const NotificationMessages: React.FC = () => {
       try {
         const data = await getNotifications();
         setNotifications(data.results);
-      } catch (err) {
+      } catch {
+        console.error('Error fetching notifications');
         setError("Impossible de charger les notifications.");
       } finally {
         setLoading(false);
