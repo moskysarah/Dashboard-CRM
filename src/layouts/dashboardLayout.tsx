@@ -2,7 +2,7 @@
 import type { ReactNode } from "react";
 import { Sidebar } from "../components/Sidebar";
 import { useState, useEffect } from "react";
-import { Bell, Mail, Globe } from "lucide-react";
+import { Bell, Mail, Globe, Menu, X } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../store/auth";
 import { getNotifications, type Notification } from "../services/notification";
@@ -19,6 +19,7 @@ const DashboardLayout: React.FC<Props> = ({ children }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [notifOpen, setNotifOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -48,34 +49,57 @@ const DashboardLayout: React.FC<Props> = ({ children }) => {
     );
   };
 
-  // 🎨 Génère une couleur dynamique basée sur le nom de l'utilisateur
-  const getProfileColor = (name: string): string => {
-    const colors = [
-      "bg-blue-500",
-      "bg-green-500",
-      "bg-purple-500",
-      "bg-pink-500",
-      "bg-indigo-500",
-      "bg-yellow-500",
-      "bg-red-500",
-      "bg-teal-500",
-    ];
-    const index = name ? name.charCodeAt(0) % colors.length : 0;
-    return colors[index];
+  // Génère une couleur basée sur le rôle de l'utilisateur
+  const getProfileColor = (role: string): string => {
+    switch (role) {
+      case 'admin':
+      case 'superadmin':
+        return 'bg-blue-500';
+      case 'merchant':
+        return 'bg-yellow-500';
+      case 'user':
+        return 'bg-green-500';
+      default:
+        return 'bg-gray-500';
+    }
   };
 
-  // 🧍 Génère la lettre de profil
+  // Génère la lettre de profil
   const getInitial = (name: string): string => {
     return name ? name.charAt(0).toUpperCase() : "?";
   };
 
   return (
     <div className="flex h-screen bg-gray-100 max-w-screen">
-      <Sidebar />
+      {/* Sidebar for desktop */}
+      <div className="hidden md:block">
+        <Sidebar />
+      </div>
+
+      {/* Mobile sidebar overlay */}
+      {sidebarOpen && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          <div
+            className="absolute inset-0 bg-black bg-opacity-50"
+            onClick={() => setSidebarOpen(false)}
+          />
+          <div className="absolute left-0 top-0 h-full w-48 bg-[#0176D3] border-r border-blue-200 shadow-lg transform transition-transform duration-300 ease-in-out">
+            <Sidebar />
+          </div>
+        </div>
+      )}
 
       <div className="flex-1 flex flex-col">
         <header className="bg-white shadow border-b border-blue-200 p-2 md:p-4 flex flex-wrap justify-between items-center h-16 md:h-20 max-w-full">
-          <h2 className="font-bold text-sm md:text-base"><T>Dashboard</T></h2>
+          <div className="flex items-center gap-2">
+            <button
+              className="md:hidden p-2 rounded-md hover:bg-gray-100"
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+            >
+              {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+            <h2 className="font-bold text-sm md:text-base"><T>Dashboard</T></h2>
+          </div>
 
           <div className="flex items-center gap-2 md:gap-4">
             {/* Profil utilisateur */}
@@ -90,10 +114,10 @@ const DashboardLayout: React.FC<Props> = ({ children }) => {
                 ) : (
                   <div
                     className={`w-8 md:w-10 h-8 md:h-10 rounded-full flex items-center justify-center text-white font-semibold border-2 border-gray-300 ${getProfileColor(
-                      user.username || "U"
+                      user.role || "user"
                     )}`}
                   >
-                    {getInitial(user.username || "U")}
+                    {getInitial(user.first_name || user.username || "U")}
                   </div>
                 )}
 

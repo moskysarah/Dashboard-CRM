@@ -6,7 +6,7 @@ import T from "./T";
 
 export function Sidebar() {
   return (
-    <div className="w-48 md:w-64 bg-[#0176D3] border-r border-blue-200 shadow-sm p-2 md:p-4">
+    <div className="w-48 md:w-64 h-screen bg-[#0176D3] border-r border-blue-200 shadow-sm p-2 md:p-4">
       <div className="flex items-center gap-2 text-yellow-200 font-bold text-base md:text-lg mt-3">
         <LogoPostSmart /> <T>Poste Smart</T>
       </div>

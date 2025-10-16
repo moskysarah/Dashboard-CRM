@@ -23,12 +23,13 @@ const SectionCard: React.FC<SectionCardProps> = ({ title, children }) => {
 };
 
 // ===== Options (copiées depuis UserManagement) =====
-const roleOptions: UserRole[] = ["admin", "user", "superadmin"];
+const roleOptions: UserRole[] = ["admin", "user", "superadmin", "merchant"];
 
 const roleColors: Record<UserRole, string> = {
-  admin: "bg-blue-400 text-white",
-  user: "bg-yellow-300 text-gray-800",
-  superadmin: "bg-purple-400 text-white",
+  admin: "bg-blue-500 text-white",
+  user: "bg-green-500 text-white",
+  superadmin: "bg-blue-500 text-white",
+  merchant: "bg-yellow-500 text-white",
 };
 
 const statusColors: Record<"Active" | "Suspended", string> = {
@@ -210,7 +211,15 @@ const UserManagement: React.FC = () => {
                   <tr key={u.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-3 py-2 text-center">
                       <div className="flex justify-center items-center">
-                        <img src={u.profile_image || '/images/default-avatar.png'} alt={u.username} className="w-8 h-8 rounded-full" />
+                        {u.profile_image ? (
+                          <img src={u.profile_image} alt={u.username} className="w-8 h-8 rounded-full object-cover" />
+                        ) : (
+                          <div
+                            className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm ${roleColors[u.role || 'user'].split(' ')[0]}`}
+                          >
+                            {capitalize(`${u.first_name || ''} ${u.last_name || ''}`.trim() || u.username).charAt(0).toUpperCase()}
+                          </div>
+                        )}
                       </div>
                     </td>
                     <td className="px-3 py-2 whitespace-nowrap font-medium">{capitalize(`${u.first_name || ''} ${u.last_name || ''}`.trim() || u.username)}</td>

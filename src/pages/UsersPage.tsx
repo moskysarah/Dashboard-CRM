@@ -6,12 +6,13 @@ import DashboardLayout from "../layouts/dashboardLayout";
 import T from "../components/T";
 
 // ===== Options (copiées depuis UserManagement) =====
-const roleOptions: UserRole[] = ["admin", "user", "superadmin"];
+const roleOptions: UserRole[] = ["admin", "user", "superadmin", "merchant"];
 
 const roleColors: Record<UserRole, string> = {
   admin: "bg-blue-400 text-white",
-  user: "bg-yellow-300 text-gray-800",
+  user: "bg-green-500 text-white",
   superadmin: "bg-purple-400 text-white",
+  merchant: "bg-yellow-500 text-white",
 };
 
 const statusColors: Record<"Active" | "Suspended", string> = {

@@ -26,7 +26,7 @@ const Sales: React.FC = () => {
   useEffect(() => {
     const fetchSales = async () => {
       try {
-        // Correction de l'endpoint. Cet endpoint doit exister sur votre API.
+        // Correction de l'endpoint. Cet endpoint doit exister sur  API poste smart.
         const res = await api.get("/analytics/sales/");
         setSalesData(res.data);
       } catch (err) {

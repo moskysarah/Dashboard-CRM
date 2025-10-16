@@ -4,7 +4,7 @@
 
 // --- Enums from API ---
 
-export type UserRole = 'admin' | 'user' | 'superadmin';
+export type UserRole = 'admin' | 'user' | 'superadmin' | 'merchant';
 
 export type TransactionStatus = 'PENDING' | 'PROCESSING' | 'SUCCESS' | 'FAILED' | 'CANCELLED' | 'ON' | 'OFF' | 'REFUNDED';
 

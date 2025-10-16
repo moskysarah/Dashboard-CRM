@@ -193,7 +193,8 @@ export const regenerateMerchantSecret = (merchantId: string) =>
 // ADMIN PANEL
 // ========================
 export const getAdminOverview = () => API.get("/admin-panel/overview/");
-export const getAdminTransactions = () => API.get("/merchants/transactions/"); // L'API définit les transactions marchandes, pas un endpoint admin dédié.
+
+//export const getAdminTransactions = () => API.get("/merchants/transactions/"); // L'API définit les transactions marchandes, pas un endpoint admin dédié.
 // La création de transaction via /admin-panel/ n'est pas définie dans l'API.
 
 interface UserData {
@@ -266,9 +267,10 @@ export const verifySmartOTP = verifyPhoneOTP;
 // TRANSACTIONS
 // ========================
 export const getTransactions = () => API.get("/me/transactions/");
+/*
 export const createTransaction = (data: unknown) =>
   API.post("/me/transactions/", data);
-
+*/
 // ========================
 // A2B CREDIT
 // ========================
@@ -317,6 +319,11 @@ export const createSale = (data: unknown) => API.post("/sales", data);
 // ========================
 export const getMerchantTransactions = () => API.get("/me/transactions/");
 export const getUserTransactions = () => API.get("/me/transactions/");
+
+// ========================
+// MERCHANT WALLETS
+// ========================
+export const getMerchantWallets = () => API.get("/merchants/wallets/");
 
 // ========================
 // MERCHANT PERFORMANCE

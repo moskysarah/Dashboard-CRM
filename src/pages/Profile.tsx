@@ -97,11 +97,23 @@ const Profile: React.FC = () => {
   return (
     <div className="p-4 space-y-4">
       <div className="flex flex-col md:flex-row items-center gap-4 p-4 bg-white rounded-lg shadow">
-        <img
-          src={profile.avatarUrl}
-          alt={profile.name}
-          className="w-12 h-12 rounded-full object-cover"
-        />
+        {profile.avatarUrl && profile.avatarUrl !== "/images/default-avatar.png" ? (
+          <img
+            src={profile.avatarUrl}
+            alt={profile.name}
+            className="w-12 h-12 rounded-full object-cover"
+          />
+        ) : (
+          <div
+            className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg ${
+              profile.role === 'admin' || profile.role === 'superadmin' ? 'bg-blue-500' :
+              profile.role === 'merchant' ? 'bg-yellow-500' :
+              profile.role === 'user' ? 'bg-green-500' : 'bg-gray-500'
+            }`}
+          >
+            {profile.name?.charAt(0)?.toUpperCase() || '?'}
+          </div>
+        )}
         <div className="text-center md:text-left">
           <p className="font-semibold">{profile.name}</p>
           <p className="text-sm text-gray-500">{profile.email}</p>

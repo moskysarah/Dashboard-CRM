@@ -5,77 +5,89 @@ import MerchantTransactions from "../components/merchantTransaction";
 import api from "../services/api";
 import * as XLSX from "xlsx";
 import T from "../components/T";
-import type { MerchantPerformanceData } from "../hooks/useMerchantPerformance";
+import { useAuth } from "../store/auth";
+
+type Transaction = {
+  id: string;
+  product: string;
+  amount: number;
+  status: "Réussi" | "En attente" | "Échoué";
+  date: string;
+};
 
 const MerchantDashboard: React.FC = () => {
-  const [performanceData, setPerformanceData] = useState<MerchantPerformanceData[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const user = useAuth((state) => state.user);
 
   useEffect(() => {
-    const fetchPerformance = async () => {
+    const fetchTransactions = async () => {
       setLoading(true);
       try {
-        const response = await api.get("/merchants/performance");
-        setPerformanceData(response.data);
+        const response = await api.get("/me/transactions", {
+          params: { role: user?.role },
+        });
+        setTransactions(response.data.results ?? response.data);
         setError(null);
       } catch (err) {
-        console.error("Erreur lors du chargement des performances des marchands:", err);
-        setError("Impossible de charger les performances.");
-        setPerformanceData([]);
+        console.error("Erreur lors du chargement des transactions:", err);
+        setError("Impossible de charger les transactions.");
+        setTransactions([]);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchPerformance();
-  }, []);
+    if (user) {
+      fetchTransactions();
+    } else {
+      setLoading(false);
+    }
+  }, [user]);
 
   const kpis = useMemo(() => {
     return {
-      totalAmount: performanceData.reduce((sum, m) => sum + m.totalAmount, 0),
-      totalSuccess: performanceData.reduce((sum, m) => sum + m.success, 0),
-      totalPending: performanceData.reduce((sum, m) => sum + m.pending, 0),
-      totalFailed: performanceData.reduce((sum, m) => sum + m.failed, 0),
+      totalAmount: transactions.reduce((sum, t) => sum + t.amount, 0),
+      totalSuccess: transactions.filter((t) => t.status === "Réussi").length,
+      totalPending: transactions.filter((t) => t.status === "En attente").length,
+      totalFailed: transactions.filter((t) => t.status === "Échoué").length,
     };
-  }, [performanceData]);
+  }, [transactions]);
 
   const exportCSV = () => {
     const csvContent =
       "data:text/csv;charset=utf-8," +
       [
-        "Nom,Sous-magasin,Transactions,Ventes réussies,En attente,Échouées,Total (€)",
-        ...performanceData.map(
-          (m) =>
-            `${m.merchantName},${m.subStore},${m.transactionsCount},${m.success},${m.pending},${m.failed},${m.totalAmount}`
+        "Produit,Montant ($),Statut,Date",
+        ...transactions.map(
+          (t) =>
+            `${t.product},${t.amount},${t.status},${t.date}`
         ),
       ].join("\n");
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "rapport_performance_merchants.csv");
+    link.setAttribute("download", "transactions_merchant.csv");
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
   const exportExcel = () => {
-    const worksheet = XLSX.utils.json_to_sheet(performanceData.map(m => ({
-      "Nom": m.merchantName,
-      "Sous-magasin": m.subStore,
-      "Transactions": m.transactionsCount,
-      "Ventes réussies": m.success,
-      "En attente": m.pending,
-      "Échouées": m.failed,
-      "Total (€)": m.totalAmount
+    const worksheet = XLSX.utils.json_to_sheet(transactions.map(t => ({
+      "Produit": t.product,
+      "Montant ($)": t.amount,
+      "Statut": t.status,
+      "Date": t.date
     })));
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Rapport Performance");
-    XLSX.writeFile(workbook, "rapport_performance_merchants.xlsx");
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Transactions");
+    XLSX.writeFile(workbook, "transactions_merchant.xlsx");
   };
 
   if (loading) {
-    return <DashboardLayout><p className="p-6"><T>Chargement des performances...</T></p></DashboardLayout>;
+    return <DashboardLayout><p className="p-6"><T>Chargement des transactions...</T></p></DashboardLayout>;
   }
 
   if (error) return <DashboardLayout><p className="p-6 text-red-500">{error}</p></DashboardLayout>;
@@ -83,7 +95,7 @@ const MerchantDashboard: React.FC = () => {
   return (
     <DashboardLayout>
       <h1 className="text-2xl font-bold mt-6 ml-6"><T>Marchand</T></h1>
-      <p className="text-gray-600 mt-4 ml-6"><T>Performance et transactions des marchands.</T></p>
+      <p className="text-gray-600 mt-4 ml-6"><T>Vos transactions et performances.</T></p>
 
       {/* KPIs marchands */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6 ml-6">
@@ -109,34 +121,28 @@ const MerchantDashboard: React.FC = () => {
         />
       </div>
 
-      {/* Suivi de performance */}
+      {/* Transactions */}
       <div className="bg-white p-4 rounded-lg shadow mt-6 ml-6">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold"><T>Suivi des performances</T></h2>
+          <h2 className="text-lg font-semibold"><T>Mes Transactions</T></h2>
         </div>
         <div className="max-h-96 overflow-y-auto overflow-x-auto rounded-lg">
           <table className="w-full text-left border-collapse">
             <thead className="border-b sticky top-0 text-center">
               <tr>
-                <th className="py-2 px-4"><T>Nom</T></th>
-                <th className="py-2 px-4"><T>Sous-magasin</T></th>
-                <th className="py-2 px-4"><T>Transactions</T></th>
-                <th className="py-2 px-4"><T>Succès</T></th>
-                <th className="py-2 px-4"><T>En attente</T></th>
-                <th className="py-2 px-4"><T>Échouées</T></th>
-                <th className="py-2 px-4"><T>Total (€)</T></th>
+                <th className="py-2 px-4"><T>Produit</T></th>
+                <th className="py-2 px-4"><T>Montant ($)</T></th>
+                <th className="py-2 px-4"><T>Statut</T></th>
+                <th className="py-2 px-4"><T>Date</T></th>
               </tr>
             </thead>
             <tbody>
-              {performanceData.map((m) => (
-                <tr key={m.merchantId} className="border-b hover:bg-gray-50 text-center">
-                  <td className="py-2 px-4">{m.merchantName}</td>
-                  <td className="py-2 px-4">{m.subStore}</td>
-                  <td className="py-2 px-4">{m.transactionsCount}</td>
-                  <td className="py-2 px-4 text-green-600 font-semibold">{m.success}</td>
-                  <td className="py-2 px-4 text-yellow-600 font-semibold">{m.pending}</td>
-                  <td className="py-2 px-4 text-red-600 font-semibold">{m.failed}</td>
-                  <td className="py-2 px-4 font-bold">{m.totalAmount}</td>
+              {transactions.map((t) => (
+                <tr key={t.id} className="border-b hover:bg-gray-50 text-center">
+                  <td className="py-2 px-4">{t.product}</td>
+                  <td className="py-2 px-4">{t.amount}</td>
+                  <td className="py-2 px-4">{t.status}</td>
+                  <td className="py-2 px-4">{t.date}</td>
                 </tr>
               ))}
             </tbody>
