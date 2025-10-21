@@ -8,11 +8,14 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+
+  //  CORRECTION ICI : rend les chemins relatifs dans ton build (indispensable pour Render)
+  base: './',
+
   server: {
     proxy: {
       "/auth": {
-        target: "http://192.162.69.75:8078", // mon backend
-        changeOrigin: true,
+        target: "http://192.162.69.75:8078", // ton backend  
         secure: false,
       },
     },
