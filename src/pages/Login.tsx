@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import Confetti from "react-confetti";
 import api from "../services/api";
 import twoPersonImage from "../assets/two_person_whith_phone-removebg-preview.png";
 import manPointImage from "../assets/man_who_point_hand-removebg-preview.png";
@@ -10,6 +11,7 @@ import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
 import { LOCAL_STORAGE_KEYS } from "../config/constants";
 import type { User } from "../types/domain";
+import T from "../components/T";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -17,13 +19,14 @@ const Login = () => {
 
   const [loginPhoneOrEmail, setLoginPhoneOrEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
-  const [loginRole, setLoginRole] = useState<"Admin" | "Marchand" | "Distributeur" | "Utilisateur">("Marchand");
+  const [loginRole, setLoginRole] = useState<"Admin" | "Marchand"  | "Utilisateur">("Marchand");
 
-  const [registerNom, setRegisterNom] = useState("");
-  const [registerPrenom, setRegisterPrenom] = useState("");
-  const [registerPhoneOrEmail, setRegisterPhoneOrEmail] = useState("");
+  const [registerUsername, setRegisterUsername] = useState("");
+  const [registerPhone, setRegisterPhone] = useState("");
+  const [registerEmail, setRegisterEmail] = useState("");
   const [registerPassword, setRegisterPassword] = useState("");
-  const [registerRole, setRegisterRole] = useState<"Admin" | "Marchand" | "Distributeur" | "Utilisateur">("Marchand");
+  const [registerRole, setRegisterRole] = useState<"Admin" | "Marchand" | "Utilisateur">("Marchand");
+  const [registerUsernameError, setRegisterUsernameError] = useState("");
 
   const [otp, setOtp] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -46,14 +49,21 @@ const Login = () => {
 
   const [mode, setMode] = useState<"login" | "register" | "otp" | "forgot" | "resetPassword">("login");
 
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [showRegistrationSuccess, setShowRegistrationSuccess] = useState(false);
+  const [registeredRole, setRegisteredRole] = useState<"Admin" | "Marchand" | "Utilisateur">("Marchand");
+  const [modalWidth, setModalWidth] = useState(0);
+  const [modalHeight, setModalHeight] = useState(0);
+  const modalRef = useRef<HTMLDivElement>(null);
+
   // Réinitialisation des champs à chaque montage du composant
   useEffect(() => {
     setLoginPhoneOrEmail("");
     setLoginPassword("");
     setLoginRole("Marchand");
-    setRegisterNom("");
-    setRegisterPrenom("");
-    setRegisterPhoneOrEmail("");
+    setRegisterUsername("");
+    setRegisterPhone("");
+    setRegisterEmail("");
     setRegisterPassword("");
     setRegisterRole("Marchand");
     setOtp("");
@@ -64,12 +74,14 @@ const Login = () => {
     setLoginError("");
     setOtpError(false);
     setResetPasswordError("");
+    setRegisterUsernameError("");
     setOtpAttempts(0);
     setIsLocked(false);
     setLockoutTime(0);
     if (timerIdRef.current) clearInterval(timerIdRef.current);
     timerIdRef.current = null;
     setIsForgotPassword(false);
+    setShowConfetti(false);
   }, []);
 
   // Réinitialisation des champs
@@ -79,7 +91,11 @@ const Login = () => {
       setLoginPassword("");
       setLoginRole("Marchand");
     } else if (mode === "register") {
-      // Reset register fields if needed
+      setRegisterUsername("");
+      setRegisterPhone("");
+      setRegisterEmail("");
+      setRegisterPassword("");
+      setRegisterRole("Marchand");
     }
   }, [mode]);
 
@@ -90,12 +106,19 @@ const Login = () => {
     };
   }, []);
 
-  // Validation email/téléphone
-  const isValidPhone = (input: string) => /^\d{10}$/.test(input);
-  const isValidEmail = (input: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input);
-  const validatePhoneOrEmail = (input: string) => isValidPhone(input) || isValidEmail(input);
+  // Update modal dimensions when modal is shown
+  useEffect(() => {
+    if (showRegistrationSuccess && modalRef.current) {
+      const rect = modalRef.current.getBoundingClientRect();
+      setModalWidth(rect.width);
+      setModalHeight(rect.height);
+    }
+  }, [showRegistrationSuccess]);
 
-  // 🔹 LOGIN
+  // Validation téléphone (seulement pour OTP)
+  const isValidPhone = (input: string) => /^\+?\d{7,15}$/.test(input.replace(/\s+/g, '')); 
+
+  //  LOGIN
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError("");
@@ -135,11 +158,22 @@ const Login = () => {
   //  REGISTER
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    setRegisterUsernameError("");
     setIsLoading(true);
+
+    const trimmedUsername = registerUsername.trim();
+    if (!trimmedUsername) {
+      setRegisterUsernameError("Le nom d'utilisateur est requis.");
+      setIsLoading(false);
+      return;
+    }
+    if (!/^[\p{L}0-9.\/+_-]+$/u.test(trimmedUsername)) {
+      setRegisterUsernameError("Le nom d'utilisateur ne peut contenir que des lettres, chiffres et les caractères './+/-/_'.");
+      setIsLoading(false);
+      return;
+    }
     if (
-      !registerNom ||
-      !registerPrenom ||
-      !validatePhoneOrEmail(registerPhoneOrEmail) ||
+      !isValidPhone(registerPhone) ||
       !registerPassword ||
       !registerRole
     ) {
@@ -149,21 +183,26 @@ const Login = () => {
     }
 
     try {
-      await api.post("/accounts/users", {
-        first_name: registerNom,
-        last_name: registerPrenom,
-        username: registerPhoneOrEmail,
+      await api.post("/accounts/users/", {
+        username: trimmedUsername,
+        phone: registerPhone,
+        email: registerEmail || undefined,
         password: registerPassword,
         role: registerRole,
       });
 
-      alert("Compte créé avec succès !");
-      setMode("login");
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 5000); // Hide confetti after 5 seconds
+      setRegisteredRole(registerRole);
+      setShowRegistrationSuccess(true);
     } catch (err: unknown) {
-      console.error(err);
+      console.error("Erreur complète lors de l'inscription :", err);
       if (err instanceof Error && 'response' in err && err.response) {
-        const response = err.response as { data?: { detail?: string } };
-        alert(response?.data?.detail || "Erreur lors de l'inscription");
+        const response = err.response as { data?: { detail?: string; [key: string]: unknown } };
+        console.error("Données de la réponse d'erreur :", response.data);
+        const errorMessage = response?.data?.detail ||
+          (response.data && typeof response.data === 'object' ? JSON.stringify(response.data) : "Erreur lors de l'inscription");
+        alert(errorMessage);
       } else {
         alert("Erreur inconnue lors de l'inscription");
       }
@@ -176,29 +215,31 @@ const Login = () => {
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    if (!validatePhoneOrEmail(forgotPhoneOrEmail)) {
-      alert("Veuillez saisir un téléphone ou email valide.");
+    const trimmedInput = forgotPhoneOrEmail.trim();
+    if (!isValidPhone(trimmedInput)) {
+      alert("Veuillez saisir un numéro de téléphone valide.");
       setIsLoading(false);
       return;
     }
 
-    try {
-      await api.post("accounts/otp/request/", {
-        phone: forgotPhoneOrEmail,
-      });
+  try {
+    await api.post("/accounts/password-reset/", { phone: trimmedInput });
 
-      localStorage.setItem(LOCAL_STORAGE_KEYS.USER_PHONE, forgotPhoneOrEmail);
+    localStorage.setItem(LOCAL_STORAGE_KEYS.USER_PHONE, trimmedInput);
 
-      const maskedPhone = isValidPhone(forgotPhoneOrEmail)
-        ? forgotPhoneOrEmail.replace(/(\d{3})(\d{3})(\d{4})/, "$1***$2***$3")
-        : forgotPhoneOrEmail.replace(/(.{3})(.*)(@.*)/, "$1***$3");
+      const maskedPhone = trimmedInput.replace(/(\d{3})(\d{3})(\d{4})/, "$1***$2***$3");
 
       localStorage.setItem(LOCAL_STORAGE_KEYS.MASKED_PHONE, maskedPhone);
       setIsForgotPassword(true);
       setMode("otp");
     } catch (err: unknown) {
       console.error(err);
-      alert("Erreur lors de l'envoi de l'OTP. Veuillez réessayer.");
+      if (err instanceof Error && 'response' in err && err.response) {
+        const response = err.response as { data?: { detail?: string } };
+        alert(response?.data?.detail || "Erreur lors de l'envoi de l'OTP. Veuillez réessayer.");
+      } else {
+        alert("Erreur inconnue lors de l'envoi de l'OTP.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -220,14 +261,9 @@ const Login = () => {
 
     try {
       if (isForgotPassword) {
-        // mot de passe oublier, code valide  OTP pour reinitialiser le mot de passe
-        const res = await api.post("/accounts/password-reset/confirm/", { phone, otp: code });
-        if (res.status === 200) {
-          localStorage.setItem(LOCAL_STORAGE_KEYS.OTP_CODE, code); // restore OTP comme token de reinitialisation
-          setMode("resetPassword");
-        } else {
-          setOtpError(true);
-        }
+        // mot de passe oublier, code valide OTP pour reinitialiser le mot de passe
+        localStorage.setItem(LOCAL_STORAGE_KEYS.OTP_CODE, code); // store OTP for reset
+        setMode("resetPassword");
       } else {
         // Normal login
         const res = await api.post("/accounts/otp/login/", { phone, otp: code });
@@ -304,7 +340,7 @@ const Login = () => {
     e.preventDefault();
     setResetPasswordError("");
     if (newPassword !== confirmNewPassword) {
-      setResetPasswordError("Le nouveau mot de passe ne correspod pas.");
+      setResetPasswordError("Le nouveau mot de passe ne correspond pas.");
       return;
     }
     if (newPassword.length < 8) {
@@ -362,37 +398,71 @@ const Login = () => {
     </svg>
   );
 
+  const handleContinue = () => {
+    const dashboardRoutes = {
+      "Admin": "/dashboard",
+      "Marchand": "/merchants",
+      "Utilisateur": "/distributors"
+    };
+    const route = dashboardRoutes[registeredRole] || "/dashboard";
+    navigate(route);
+    setShowRegistrationSuccess(false);
+  };
+
   return (
-    <div className="min-h-screen flex font-sans overflow-hidden">
-      {/* Partie gauche : formulaire */}
-      <div className="w-1/2 flex flex-col justify-center items-center p-10 bg-white shadow-lg relative">
+    <div className="min-h-screen flex flex-col md:flex-row font-sans overflow-hidden">
+      {showConfetti && <Confetti width={window.innerWidth} height={window.innerHeight} />}
+
+      {/* Modal de succès d'inscription */}
+{showRegistrationSuccess && (
+  <div className="fixed inset-0 flex items-center justify-center z-50 bg-blue-500/20 backdrop-blur-md">
+    <div ref={modalRef} className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full mx-4 relative">
+      {showConfetti && modalWidth > 0 && modalHeight > 0 && (
+        <Confetti
+          width={modalWidth}
+          height={modalHeight}
+          style={{ position: 'absolute', top: 0, left: 0, zIndex: 10 }}
+        />
+      )}
+      <h2 className="text-2xl font-bold text-center mb-4 text-green-600">Inscription réussie !</h2>
+      <p className="text-center mb-6">Votre inscription a été reçue avec succès.</p>
+      <Button onClick={handleContinue} variant="primary" className="w-full">
+        Continuer
+      </Button>
+    </div>
+  </div>
+)}
+
+
+      {/* Partie gauche : formulaire - en bas sur mobile, gauche sur desktop */}
+      <div className="w-full md:w-1/2 flex flex-col justify-center items-center p-6 md:p-10 bg-white shadow-lg relative order-2 md:order-1">
         <AnimatePresence mode="wait">
           {mode === "login" && (
             <motion.div key="login" {...slide} className="w-full max-w-sm text-center">
-              <h2 className="text-3xl font-bold text-gray-800 mb-4">Se connecter</h2>
+              <h2 className="text-3xl font-bold text-gray-800 mb-4"><T>Se connecter</T></h2>
               <form onSubmit={handleLogin} className="space-y-4">
                 <Input
                   type="text"
                   value={loginPhoneOrEmail}
                   onChange={(e) => setLoginPhoneOrEmail(e.target.value)}
-                  placeholder="Téléphone ou Email"
+                  placeholder={<T>Téléphone ou Email</T>}
                 />
                 <Input
                   isPassword
                   value={loginPassword}
                   onChange={(e) => setLoginPassword(e.target.value)}
-                  placeholder="Mot de passe"
+                  placeholder={<T>Mot de passe</T>}
                 />
                 <div className="text-left w-full">
                   <select
                     value={loginRole}
-                    onChange={(e) => setLoginRole(e.target.value as "Admin" | "Marchand" | "Distributeur" | "Utilisateur")}
+                    onChange={(e) => setLoginRole(e.target.value as "Admin" | "Marchand" | "Utilisateur")}
                     className="w-full p-2 border border-gray-300 rounded-md"
                   >
-                    <option value="">-- Sélectionner un rôle --</option>
-                    <option value="Admin">Admin</option>
-                    <option value="Distributeur">Distributeur</option>
-                    <option value="Utilisateur">Utilisateur</option>
+                    <option value="">- Sélectionner un rôle --</option>
+                    <option value="Admin"> Admin </option>
+                      <option value="Marchand"> Marchand </option>
+                    <option value="Utilisateur"> Utilisateur </option>
                   </select>
                 </div>
 
@@ -421,40 +491,44 @@ const Login = () => {
               <form onSubmit={handleRegister} className="space-y-4">
                 <Input
                   type="text"
-                  value={registerNom}
-                  onChange={(e) => setRegisterNom(e.target.value)}
-                  placeholder="Nom"
+                  value={registerUsername}
+                  onChange={(e) => {
+                    setRegisterUsername(e.target.value);
+                    setRegisterUsernameError("");
+                  }}
+                  placeholder="Nom d'utilisateur"
+                  autoComplete="username"
                 />
+                {registerUsernameError && <p className="text-red-500 text-sm">{registerUsernameError}</p>}
                 <Input
                   type="text"
-                  value={registerPrenom}
-                  onChange={(e) => setRegisterPrenom(e.target.value)}
-                  placeholder="Prénom"
+                  value={registerPhone}
+                  onChange={(e) => setRegisterPhone(e.target.value)}
+                  placeholder="Téléphone"
                 />
                 <Input
-                  type="text"
-                  value={registerPhoneOrEmail}
-                  onChange={(e) => setRegisterPhoneOrEmail(e.target.value)}
-                  placeholder="Téléphone ou Email"
+                  type="email"
+                  value={registerEmail}
+                  onChange={(e) => setRegisterEmail(e.target.value)}
+                  placeholder="Email"
                 />
                 <Input
                   isPassword
                   value={registerPassword}
                   onChange={(e) => setRegisterPassword(e.target.value)}
                   placeholder="Mot de passe"
+                  autoComplete="current-password"
                 />
                 <div className="text-left w-full">
-                  
                   <select
                     value={registerRole}
-                    onChange={(e) => setRegisterRole(e.target.value as "Admin" | "Marchand" | "Distributeur" | "Utilisateur")}
+                    onChange={(e) => setRegisterRole(e.target.value as "Admin" | "Marchand" | "Utilisateur")}
                     className="w-full p-2 border border-gray-300 rounded-md"
                   >
                     <option value="">-- Sélectionner un rôle --</option>
                     <option value="Admin">Admin</option>
-                    <option value="Marchand">Marchand</option>
-                    <option value="Distributeur">Distributeur</option>
-                    <option value="Utilisateur">Utilisateur</option>
+                    <option value="Marchand"> Marchand </option>
+                    <option value="Utilisateur"> Utilisateur </option>
                   </select>
                 </div>
                 <Button
@@ -480,7 +554,7 @@ const Login = () => {
                   type="text"
                   value={forgotPhoneOrEmail}
                   onChange={(e) => setForgotPhoneOrEmail(e.target.value)}
-                  placeholder="Téléphone ou Email"
+                  placeholder="Téléphone"
                 />
                 <Button
                   type="submit"
@@ -526,6 +600,7 @@ const Login = () => {
                       }}
                       placeholder="Code OTP"
                       className="text-center"
+                      autoComplete="one-time-code"
                     />
                     <Button
                       type="submit"
@@ -592,8 +667,8 @@ const Login = () => {
         </AnimatePresence>
       </div>
 
-      {/* Partie droite */}
-      <div className="w-1/2 bg-[#0176D3] text-white flex flex-col justify-center items-center p-10 relative">
+      {/* Partie droite (image) - en haut sur mobile, droite sur desktop */}
+      <div className="w-full md:w-1/2 bg-[#0176D3] text-white flex flex-col justify-center items-center p-6 md:p-10 relative order-1 md:order-2">
         <AnimatePresence mode="wait">
           {mode && (
             <motion.img
@@ -606,7 +681,7 @@ const Login = () => {
                   : girlPhoneImage
               }
               alt={mode}
-              className="w-60 mb-6 rounded-full"
+              className="w-40 md:w-60 mb-4 md:mb-6 rounded-full"
               initial={{ y: -50, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: -50, opacity: 0 }}
@@ -639,6 +714,15 @@ const Login = () => {
             <h2 className="text-4xl font-bold mb-4">Vérification OTP</h2>
             <p className="mb-6 text-center max-w-sm">
               Saisissez le code OTP envoyé sur votre téléphone ou votre email.
+            </p>
+          </>
+        )}
+
+        {mode === "forgot" && (
+          <>
+            <h2 className="text-4xl font-bold mb-4">Mot de passe oublié</h2>
+            <p className="mb-6 text-center max-w-sm">
+              Veuillez réinitialiser votre compte
             </p>
           </>
         )}

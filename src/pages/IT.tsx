@@ -3,6 +3,7 @@ import DashboardLayout from "../layouts/dashboardLayout";
 import { Server, Bug, Key, Wifi, Database, Download } from "lucide-react";
 import type { Ticket } from "../types/domain";
 import fetchTicketsIT from "../services/api";
+import T from "../components/T";
 
 const typeIcon = {
   "Problème de serveur": <Server className="inline-block mr-2 w-6 h-6 text-red-500" />,
@@ -40,7 +41,7 @@ const IT: React.FC = () => {
   return (
     <DashboardLayout>
       <div className="p-6">
-        <h1 className="text-2xl font-bold mb-6">Module IT - Support & Gestion</h1>
+        <h1 className="text-2xl font-bold mb-6"><T>Module IT - Support & Gestion</T></h1>
 
         <div className="mb-6 flex gap-3">
           {["Tous", "Ouvert", "En cours", "Résolu"].map((status) => (
@@ -59,7 +60,7 @@ const IT: React.FC = () => {
         </div>
 
         {loading ? (
-          <p>Chargement des tickets...</p>
+          <p><T>Chargement des tickets...</T></p>
         ) : error ? (
           <p className="text-red-600">{error}</p>
         ) : (

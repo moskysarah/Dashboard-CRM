@@ -51,7 +51,7 @@ const SplashLogin: React.FC = () => {
             <motion.img
               src="/postesmart-logo-2.png" // logo post smart
               alt="Logo"
-              className="w-24 h-24 mb-4"
+              className="w-26 h-26 mb-4  rounded-full"
 
               transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
             />

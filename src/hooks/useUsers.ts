@@ -1,96 +1,96 @@
-import { useState, useEffect, useCallback } from 'react';
-import { getAdminUsers, patchAdminUser } from '../services/api';
-import type { User, UserRole } from '../types/domain';
-import { useAuth } from '../store/auth';
-
-// L'API renvoie une réponse paginée
-interface PaginatedUsers {
-    count: number;
-    next: string | null;
-    previous: string | null;
-    results: User[];
-}
+import { useState, useEffect } from "react";
+import { getAdminUsers, setUserRole, setUserStatus, createUser } from "../services/api";
+import { useAuth } from "../store/auth";
+import type { User, UserRole } from "../types/domain";
 
 export const useUsers = () => {
-    const [users, setUsers] = useState<User[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    // États pour la pagination
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalUsers, setTotalUsers] = useState(0);
-    const [pageSize] = useState(10); // Nombre d'utilisateurs par page
-    const user = useAuth((state) => state.user);
-    const userRole = user?.role;
+  const { user } = useAuth();
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
 
-    const fetchUsers = useCallback(async (page = 1) => {
-        // On ne fait rien tant que l'objet utilisateur n'est pas chargé.
-        if (!user) {
-            setLoading(false); // On s'assure que l'état de chargement n'est pas bloqué
-            return;
-        }
+  // 🔹 Récupérer la liste des utilisateurs (admin only)
+  const fetchUsers = async (page = 1) => {
+    if (user?.role !== 'admin') {
+      setError("Accès refusé: Vous n'avez pas les permissions nécessaires pour voir la liste des utilisateurs.");
+      setLoading(false);
+      return;
+    }
 
-        setLoading(true);
-        setCurrentPage(page);
+    setLoading(true);
+    try {
+      const res = await getAdminUsers({ page });
+      setUsers(res.data.results || []);
+      setTotalUsers(res.data.count || 0);
+      setPageSize(res.data.page_size || 10);
+      setCurrentPage(page);
+    } catch (err: any) {
+      console.error(err);
+      if (err.response?.status === 403) {
+        setError("Accès refusé: Permissions insuffisantes pour accéder à la liste des utilisateurs.");
+      } else {
+        setError("Erreur lors du chargement des utilisateurs");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        // Seul un superadmin peut lister tous les utilisateurs
-        if (user.role !== 'superadmin') {
-            setError("Vous n'avez pas les droits pour voir la liste des utilisateurs.");
-            setLoading(false);
-            return;
-        }
-        try {
-            // On passe la page et la taille de la page à l'API
-            const res = await getAdminUsers({ page, page_size: pageSize });
-            const paginatedResponse = res.data as PaginatedUsers;
-            setTotalUsers(paginatedResponse.count);
-            setUsers(paginatedResponse.results ?? []);
-            setError(null);
-        } catch (err) {
-            console.error("Erreur lors du chargement des utilisateurs:", err);
-            setError("Impossible de charger les utilisateurs.");
-            setUsers([]);
-        } finally {
-            setLoading(false);
-        }
-    }, [user, pageSize]);
+  const refreshUsers = (page = currentPage) => fetchUsers(page);
 
-    useEffect(() => {
-        fetchUsers(1); // Charger la première page au montage
-    }, [fetchUsers]);
+  // 🔹 Mettre à jour le rôle d’un utilisateur (route: POST /admin-panel/users/{id}/set-role/)
+  const updateUserRole = async (userId: number, newRole: string) => {
+    try {
+      await setUserRole(userId, newRole);
+      await refreshUsers(currentPage);
+    } catch (error) {
+      console.error("Erreur de changement de rôle :", error);
+      setError("Impossible de changer le rôle de l'utilisateur.");
+    }
+  };
 
-    const updateUser = useCallback(async (userId: number, data: Partial<User>): Promise<boolean> => {
-        if (userRole !== 'superadmin') return false;
-        try {
-            await patchAdminUser(userId.toString(), data);
-            // Rafraîchir la liste pour voir les changements
-            await fetchUsers();
-            return true;
-        } catch (err) {
-            console.error(`Erreur lors de la mise à jour de l'utilisateur ${userId}:`, err);
-            return false;
-        }
-    }, [fetchUsers, userRole]);
+  // 🔹 Mettre à jour le statut d’un utilisateur (route: POST /admin-panel/users/{id}/set-status/)
+  const updateUserStatus = async (userId: number, isActive: boolean) => {
+    try {
+      await setUserStatus(userId, isActive ? "active" : "inactive");
+      await refreshUsers(currentPage);
+    } catch (error) {
+      console.error("Erreur de changement de statut :", error);
+      setError("Impossible de changer le statut de l'utilisateur.");
+    }
+  };
 
-    const updateUserStatus = useCallback(async (userId: number, isActive: boolean) => {
-        // L'API attend un PATCH sur l'utilisateur avec le champ is_active
-        return await updateUser(userId, { is_active: isActive });
-    }, [updateUser]);
+  // 🔹 Créer un nouvel utilisateur
+  const createNewUser = async (userData: { first_name: string; last_name: string; email: string; password: string; role: UserRole }) => {
+    try {
+      await createUser(userData);
+      await refreshUsers(currentPage);
+    } catch (error) {
+      console.error("Erreur de création d'utilisateur :", error);
+      setError("Impossible de créer l'utilisateur.");
+    }
+  };
 
-    const updateUserRole = useCallback(async (userId: number, role: UserRole) => {
-        // L'API attend un PATCH sur l'utilisateur avec le champ role
-        return await updateUser(userId, { role });
-    }, [updateUser]);
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
+  const totalPages = Math.ceil(totalUsers / pageSize);
 
-    return {
-        users,
-        loading,
-        error,
-        currentPage,
-        totalUsers,
-        pageSize,
-        refreshUsers: fetchUsers,
-        updateUserStatus,
-        updateUserRole,
-    };
+  return {
+    users,
+    loading,
+    error,
+    currentPage,
+    totalUsers,
+    totalPages,
+    pageSize,
+    refreshUsers,
+    updateUserRole,
+    updateUserStatus,
+    createNewUser,
+  };
 };

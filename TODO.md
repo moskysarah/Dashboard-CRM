@@ -1,10 +1,8 @@
-# TODO: Add Burger Menu for Mobile Sidebar
+# TODO: Fix Render Deployment Issues
 
-## Steps to Complete:
-- [x] Add state for sidebar toggle in `dashboardLayout.tsx`
-- [x] Import Menu icon from lucide-react
-- [x] Add burger menu button in header (visible only on mobile)
-- [x] Modify sidebar positioning: fixed on mobile with slide animation, relative on desktop
-- [x] Add overlay background when sidebar is open on mobile
-- [x] Handle closing sidebar on mobile (click outside or on link)
-- [x] Test responsiveness on mobile view
+## Pending Tasks
+- [x] Add missing API functions to src/services/api.ts (getDistributors, updateDistributor, createDistributor, deleteDistributor, getSales, createSale)
+- [x] Replace hardcoded baseURL in src/services/api.ts with environment variable
+- [x] Create .env file with VITE_API_URL for development
+- [x] Run build to check for errors
+- [ ] Test API calls in development

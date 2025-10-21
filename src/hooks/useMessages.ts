@@ -1,54 +1,53 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getMessages, sendMessage as postMessage } from '../services/api';
-import { useAuth } from '../store/auth';
+import { getNotifications, markNotificationRead } from '../services/api';
+import { AxiosError } from 'axios';
 import type { Message } from '../types/domain';
 
-export const useMessages = () => {
-    const [messages, setMessages] = useState<Message[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const user = useAuth((state) => state.user);
+export const useNotifications = () => {
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-    const fetchMessages = useCallback(async () => {
-        try {
-            // Utilisation de la fonction d'API centralisée
-            const res = await getMessages();
-            setMessages(res.data.results ?? []);
-            setError(null);
-        } catch (err) {
-            console.error("Erreur lors du chargement des messages:", err);
-            setError("Impossible de charger les messages.");
-            setMessages([]);
-        } finally {
-            setLoading(false);
-        }
-    }, []);
+  // Fetch notifications
+  const fetchMessages = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await getNotifications();
+      setMessages(res.data.results ?? []);
+      setError(null);
+    } catch (err) {
+      console.error("Erreur lors du chargement des notifications :", err);
+      if (err instanceof AxiosError && err.response?.status === 401) {
+        setError("Token expiré. Veuillez vous reconnecter.");
+      } else if (err instanceof AxiosError && err.response?.status === 403) {
+        setError("Vous n'avez pas la permission de voir ces notifications.");
+      } else {
+        setError("Impossible de charger les notifications.");
+      }
+      setMessages([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-    useEffect(() => {
-        fetchMessages();
-    }, [fetchMessages]);
+  useEffect(() => {
+    fetchMessages();
+  }, [fetchMessages]);
 
-    const sendMessage = useCallback(async (content: string): Promise<boolean> => {
-        if (!user) {
-            console.error("Utilisateur non authentifié, ne peut pas envoyer de message.");
-            return false;
-        }
-        try {
-            // L'API spec n'est pas claire sur l'envoi, on se base sur une implémentation logique
-            // Utilisation de la fonction d'API centralisée
-            await postMessage({
-                message: content,
-                user: user.id,
-            });
-            // Après l'envoi, on rafraîchit la liste pour voir le nouveau message
-            await fetchMessages();
-            return true;
-        } catch (err) {
-            console.error("Erreur lors de l'envoi du message:", err);
-            setError("L'envoi du message a échoué.");
-            return false;
-        }
-    }, [user, fetchMessages]);
+  // Marquer un message comme lu
+  const markAsRead = useCallback(async (id: number) => {
+    try {
+    await markNotificationRead(id.toString()); // <-- conversion ici
+    setMessages((prev) =>
+      prev.map((msg) =>
+        msg.id === id ? { ...msg, is_read: true } : msg
+      )
+    );
+  } catch (err) {
+    console.error("Erreur lors du marquage du message comme lu :", err);
+    setError("Impossible de marquer le message comme lu.");
+  }
+}, []);
 
-    return { messages, loading, error, sendMessage, refreshMessages: fetchMessages };
+  return { messages, loading, error, fetchMessages, markAsRead };
 };

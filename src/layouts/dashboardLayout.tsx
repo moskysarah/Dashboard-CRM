@@ -27,21 +27,26 @@ const DashboardLayout: React.FC<Props> = ({ children }) => {
     navigate("/login");
   };
 
-  // Charger les notifications depuis ton API
+  // Charger les notifications depuis ton API (seulement pour admin/superadmin)
   useEffect(() => {
     const loadNotifications = async () => {
+      if (!user || !['admin', 'superadmin'].includes(user.role || '')) {
+        return;
+      }
       try {
-        const data = await getNotifications();
+        const data = await getNotifications({ user: user?.id });
         setNotifications(data.results);
       } catch (error) {
         console.error("Erreur lors du chargement des notifications:", error);
       }
     };
 
-    loadNotifications();
-    const interval = setInterval(loadNotifications, 30000);
-    return () => clearInterval(interval);
-  }, []);
+    if (user?.id) {
+      loadNotifications();
+      const interval = setInterval(loadNotifications, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [user?.id, user?.role]);
 
   const markNotifRead = (id: number) => {
     setNotifications((prev) =>
@@ -202,7 +207,7 @@ const DashboardLayout: React.FC<Props> = ({ children }) => {
               onClick={handleLogout}
               className="bg-red-500 text-white px-2 md:px-3 py-1 rounded hover:bg-red-600 text-sm"
             >
-              <T>logout</T>
+              <T>Logout</T>
             </button>
           </div>
         </header>

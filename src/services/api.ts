@@ -2,28 +2,22 @@ import axios from "axios";
 import { LOCAL_STORAGE_KEYS } from "../config/constants";
 import { useAuth } from "../store/auth";
 
+// ========================
 // CONFIGURATION GLOBALE
 // ========================
 const API = axios.create({
-  baseURL: "http://192.162.69.75:8078/api/v1", // toutes les routes
+  baseURL: import.meta.env.VITE_API_URL || "http://192.162.69.75:8078/api/v1",
 });
 
-//https://001096dn-8000.uks1.devtunnels.ms/api/v1
-//
-
-/**
- * Récupère le token d'accès de manière fiable.
- * Tente d'abord de le lire depuis le store Zustand.
- * Si le store n'est pas encore hydraté, il lit directement le localStorage.
- */
+// ========================
+// GESTION DU TOKEN
+// ========================
 let cachedAuthState: { state?: { accessToken?: string } } | null = null;
 let cachedAuthStateRaw: string | null = null;
 
 function getAccessToken() {
   const tokenFromStore = useAuth.getState().accessToken;
-  if (tokenFromStore) {
-    return tokenFromStore;
-  }
+  if (tokenFromStore) return tokenFromStore;
 
   const authStateFromStorage = localStorage.getItem(LOCAL_STORAGE_KEYS.AUTH_STATE);
   if (authStateFromStorage) {
@@ -41,49 +35,57 @@ function getAccessToken() {
   return null;
 }
 
-// pour ajouter le token uniquement quand nécessaire
-API.interceptors.request.use((config) => {
-  const accessToken = getAccessToken();
+// ========================
+// INTERCEPTEUR REQUEST
+// ========================
+API.interceptors.request.use(
+  (config) => {
+    const accessToken = getAccessToken();
 
-  // Vérification des endpoints publics avec méthode
-  const publicEndpoints = [
-    { url: "/accounts/otp/request/", method: "POST" },
-    { url: "/accounts/token/phone/", method: "POST" },
-    { url: "/accounts/users/", method: "POST" },
-    { url: "/accounts/password-reset/", method: "POST" },
-    { url: "/accounts/otp/login/", method: "POST" },
-  ];
+    const normalizedUrl = config.url
+      ? config.url.startsWith("/") ? config.url : "/" + config.url
+      : "";
 
-  const isPublicEndpoint = publicEndpoints.some(
-    (endpoint) =>
-      config.url === endpoint.url && config.method?.toUpperCase() === endpoint.method
-  );
+    // 🔓 Routes publiques (pas besoin de token)
+    const publicEndpoints = [
+      { url: "/accounts/otp/request/", method: "POST" },
+      { url: "/accounts/token/phone/", method: "POST" },
+      { url: "/accounts/users/", method: "POST" },
+      { url: "/accounts/password-reset/", method: "POST" },
+      { url: "/accounts/otp/login/", method: "POST" },
+      { url: "/notification/messages/", method: "GET" }, //  ajouté pour recevoir les OTP
+    ];
 
-  if (isPublicEndpoint) {
+    const isPublicEndpoint = publicEndpoints.some(
+      (endpoint) =>
+        normalizedUrl === endpoint.url &&
+        config.method?.toUpperCase() === endpoint.method
+    );
+
+    if (isPublicEndpoint) {
+      config.headers.Authorization = undefined;
+      return config;
+    }
+
+    if (accessToken) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
+    }
+
     return config;
-  }
+  },
+  (error) => Promise.reject(error)
+);
 
-  // Ajout du token si disponible
-  if (accessToken) {
-    config.headers.Authorization = `Bearer ${accessToken}`;
-  }
-
-  return config;
-}, (error) => {
-  return Promise.reject(error);
-});
-
-// Intercepteur de réponse pour gérer l'expiration du token
+// ========================
+// INTERCEPTEUR RESPONSE
+// ========================
 let isRefreshing = false;
-let failedQueue: { resolve: (value: unknown) => void; reject: (reason?: unknown) => void; }[] = [];
+let failedQueue: { resolve: (value: unknown) => void; reject: (reason?: unknown) => void }[] = [];
 
 const processQueue = (error: unknown, token: string | null = null) => {
-  failedQueue.forEach(prom => {
-    if (error) {
-      prom.reject(error);
-    } else {
-      prom.resolve(token);
-    }
+  failedQueue.forEach((prom) => {
+    if (error) prom.reject(error);
+    else prom.resolve(token);
   });
   failedQueue = [];
 };
@@ -93,16 +95,23 @@ API.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
+    // Handle 403 Forbidden errors
+    if (error.response?.status === 403) {
+      console.error("Accès refusé (403): Permissions insuffisantes pour cette ressource.");
+      // You can add custom logic here, like showing a notification or redirecting
+      return Promise.reject(error);
+    }
+
     if ((error.response?.status === 401 || error.response?.status === 419) && !originalRequest._retry) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         })
-          .then(token => {
-            originalRequest.headers['Authorization'] = 'Bearer ' + token;
+          .then((token) => {
+            originalRequest.headers["Authorization"] = "Bearer " + token;
             return API(originalRequest);
           })
-          .catch(err => Promise.reject(err));
+          .catch((err) => Promise.reject(err));
       }
 
       originalRequest._retry = true;
@@ -117,8 +126,8 @@ API.interceptors.response.use(
           const user = useAuth.getState().user;
           if (user) login(user, { access, refresh: currentRefreshToken });
 
-          API.defaults.headers.common['Authorization'] = 'Bearer ' + access;
-          originalRequest.headers['Authorization'] = 'Bearer ' + access;
+          API.defaults.headers.common["Authorization"] = "Bearer " + access;
+          originalRequest.headers["Authorization"] = "Bearer " + access;
           processQueue(null, access);
           return API(originalRequest);
         } catch (_error) {
@@ -141,199 +150,119 @@ API.interceptors.response.use(
 export const refreshToken = (refresh: string) =>
   API.post("/token/refresh/", { refresh });
 
-export const requestOTP = (phone: string, password?: string) =>
-  API.post("/accounts/otp/request/", password ? { phone, password } : { phone });
-
-// AUTHENTIFICATION (PHONE + OTP)
 // ========================
-// L'API ne spécifie qu'un champ 'phone' pour la demande d'OTP.
-// export const requestOTP = (phone: string, password?: string) =>
-//   API.post("/accounts/otp/request/", { phone });
+// DISTRIBUTEURS
+// ========================
+export const getDistributors = () => API.get("/distributors/");
+export const createDistributor = (data: { name: string; commission: number; sales: number; stock: number }) =>
+  API.post("/distributors/", data);
+export const updateDistributor = (id: string, data: Partial<{ commission: number; stock: number }>) =>
+  API.patch(`/distributors/${id}/`, data);
+export const deleteDistributor = (id: string) => API.delete(`/distributors/${id}/`);
+
+// ========================
+// SALES
+// ========================
+export const getSales = () => API.get("/sales/");
+export const createSale = (data: { distributorId: string; amount: number; date: string }) =>
+  API.post("/sales/", data);
+
+// ========================
+// AUTHENTIFICATION (OTP, LOGIN, PASSWORD)
+// ========================
+export const requestOTP = (phone: string, password?: string) =>
+  axios.post(`${API.defaults.baseURL}/accounts/otp/request/`, password ? { phone, password } : { phone });
 
 export const otpLogin = (phone: string, otp: string) =>
-  API.post("/accounts/otp/login/", { phone, otp });
+  axios.post(`${API.defaults.baseURL}/accounts/otp/login/`, { phone, otp });
 
 export const phoneLogin = (phone: string, password: string) =>
-  API.post("/accounts/token/phone/", { phone, password });
+  axios.post(`${API.defaults.baseURL}/accounts/token/phone/`, { phone, password });
 
-// MOT DE PASSE
-// ========================
 export const resetPassword = (email: string) =>
-  API.post("/accounts/password-reset/", { email });
+  axios.post(`${API.defaults.baseURL}/accounts/password-reset/`, { email });
 
 export const confirmResetPassword = (token: string, password: string) =>
-  API.post("/accounts/password-reset/confirm/", { token, password });
+  axios.post(`${API.defaults.baseURL}/accounts/password-reset/confirm/`, { token, password });
 
-// cette route n'existe pas 
-export const changePassword = (oldPassword: string, newPassword: string) =>
-  API.post("/accounts/change-password/", { old_password: oldPassword, new_password: newPassword });
+export const changePassword = (data: { old_password: string; new_password: string }) =>
+  API.post("/accounts/change-password/", data);
 
 // ========================
 // PROFIL UTILISATEUR
 // ========================
-// L'API ne définit pas d'endpoint /me/profile/. On utilise l'endpoint pour récupérer un utilisateur par son ID.
 export const getProfile = (userId: number) => API.get(`/accounts/users/${userId}/`);
 
 // ========================
-// PUBLIC
+// CRÉATION ET GESTION DES UTILISATEURS
 // ========================
-export const getPublicSchema = () => API.get("/schema/");
-
-// ========================
-// MERCHANT
-// ========================
-export const getMerchants = () => API.get("/merchants/profiles/");
-export const getMerchantById = (id: string) => API.get(`/merchants/profiles/${id}/`);
-export const topupMerchant = (merchantId: string, amount: number) =>
-  API.post("/public/merchant-topup/", { merchantId, amount }); // Note: Le body n'est pas défini dans l'API, mais la route existe.
-export const regenerateMerchantSecret = (merchantId: string) =>
-  API.post(`/admin-panel/merchants/${merchantId}/regenerate-secret/`);
-
-// ========================
-// ADMIN PANEL
-// ========================
-export const getAdminOverview = () => API.get("/admin-panel/overview/");
-
-//export const getAdminTransactions = () => API.get("/merchants/transactions/"); // L'API définit les transactions marchandes, pas un endpoint admin dédié.
-// La création de transaction via /admin-panel/ n'est pas définie dans l'API.
-
-interface UserData {
-  first_name?: string;
-  last_name?: string;
-  username?: string;
-  password?: string;
-  role?: string;
-  email?: string;
-  phone?: string;
-}
+export const createUser = (userData: {
+  first_name: string;
+  last_name: string;
+  email: string;
+  password: string;
+  role: string;
+}) => API.post("/accounts/users/", userData);
 
 export const getAdminUsers = (params?: { page?: number; page_size?: number }) =>
-  API.get("/accounts/users/", { params }); // L'admin a accès à tous les utilisateurs
-export const getAdminUserById = (id: string) =>
-  API.get(`/accounts/users/${id}/`);
-export const updateAdminUser = (id: string, data: UserData) =>
-  API.put(`/accounts/users/${id}/`, data);
-export const patchAdminUser = (id: string, data: Partial<UserData>) =>
-  API.patch(`/accounts/users/${id}/`, data);
+  API.get("/accounts/users/", { params });
+
+export const updateAdminUser = (id: string, data: Partial<{
+  first_name: string;
+  last_name: string;
+  username: string;
+  password: string;
+  role: string;
+  email: string;
+  phone: string;
+}>) => API.patch(`/accounts/users/${id}/`, data);
+
 export const deleteAdminUser = (id: string) =>
   API.delete(`/accounts/users/${id}/`);
 
-export const getAdminMerchants = () => API.get("/merchants/profiles/");
+// ========================
 
 // ========================
-// ACCOUNTS / USERS
+// MERCHANTS
 // ========================
-export const getAccountsUsers = () => API.get("/accounts/users/");
-export const createAccountUser = (data: UserData) => API.post("/accounts/users/", data);
-export const getAccountUserById = (id: string) => API.get(`/accounts/users/${id}/`);
-export const updateAccountUser = (id: string, data: UserData) =>
-  API.put(`/accounts/users/${id}/`, data);
-export const patchAccountUser = (id: string, data: Partial<UserData>) =>
-  API.patch(`/accounts/users/${id}/`, data);
-export const deleteAccountUser = (id: string) =>
-  API.delete(`/accounts/users/${id}/`);
-
-// ========================
-// ACCOUNTS / USERS SETTINGS
-// ========================
-export const getAccountsUsersSettings = () => API.get("/accounts/user-settings/");
-export const getAccountUserSettingById = (id: string) =>
-  API.get(`/accounts/user-settings/${id}/`);
-
-// ========================
-// ACCOUNTS / VERIFICATION
-// ========================
-export const initiateMailVerification = (email: string) =>
-  API.post("/accounts/initiate-email-verification/", { email });
-
-export const initiatePhoneVerification = (phone: string) =>
-  API.post("/accounts/initiate-phone-verification/", { phone });
-
-export const verifyPhoneOTP = (phone: string, otp: string) =>
-  API.post("/accounts/verify-phone-otp/", { phone, otp });
-
-export const verifyMailOTP = (email: string, otp: string) =>
-  API.post("/accounts/verify-email-otp/", { email, otp });
-
-// ========================
-// SMART (OTP/SECURITY)
-// ========================
-// Les endpoints /smart/* n'existent pas dans l'API.
-// Utilisez les endpoints /accounts/initiate-phone-verification/ et /accounts/verify-phone-otp/
-export const sendSmartOTP = initiatePhoneVerification;
-export const verifySmartOTP = verifyPhoneOTP;
-
-// ========================
-// TRANSACTIONS
-// ========================
-export const getTransactions = () => API.get("/me/transactions/");
-/*
-export const createTransaction = (data: unknown) =>
-  API.post("/me/transactions/", data);
-*/
-// ========================
-// A2B CREDIT
-// ========================
-export const removeCredit = (from_subscriber_number: string, credit: string) =>
-  API.post("/a2b/credit/remove/", { from_subscriber_number, credit });
-export const transferCredit = (to_subscriber_number: string, credit: string) =>
-  API.post("/a2b/credit/transfer/", { to_subscriber_number, credit });
+export const getMerchants = () => API.get("/merchants/");
 
 // ========================
 // NOTIFICATIONS
 // ========================
 export const getNotifications = () => API.get("/notification/messages/");
 export const markNotificationRead = (id: string) =>
-  API.patch(`/notification/messages/${id}/`, { is_read: true }); // L'API ne définit pas de PATCH, mais c'est une supposition logique.
+  API.patch(`/notification/messages/${id}/`, { is_read: true });
 
 // ========================
-// MESSAGES
+// TRANSACTIONS & FINANCES
 // ========================
-export const getMessages = () => API.get("/notification/messages/");
-export const sendMessage = (data: { message: string; user?: number }) =>
-  API.post("/notification/messages/", data); // L'API ne définit pas de POST ici. C'est une supposition.
-
-// ========================
-// IT TICKETS
-// ========================
-// L'endpoint /it/tickets/ n'est pas défini dans la spécification OpenAPI.
-
-// ========================
-// DISTRIBUTORS
-// ========================
-export const getDistributors = () => API.get("/distributors");
-export const updateDistributor = (id: string, data: unknown) =>
-  API.put(`/distributors/${id}`, data);
+export const getTransactions = () => API.get("/me/transactions/");
+export const getUserWallet = () => API.get("/me/wallet/");
+export const getMerchantWallets = () => API.get("/me/wallet/");
 
 
-export const createDistributor = (data: unknown) => API.post("/distributors", data);
-export const deleteDistributor = (id: string) => API.delete(`/distributors/${id}`);
-// ========================
-// SALES
-// ========================
-export const getSales = () => API.get("/sales");
-export const createSale = (data: unknown) => API.post("/sales", data);
+//   ADMIN PANEL - UTILISATEURS ====
 
+// Changer le rôle d'un utilisateur
+export const setUserRole = (userId: string | number, role: string) =>
+  API.post(`/admin-panel/users/${userId}/set-role/`, { role });
+
+// Changer le statut d'un utilisateur (actif/inactif, etc.)
+export const setUserStatus = (userId: string | number, status: string) =>
+  API.post(`/admin-panel/users/${userId}/set-status/`, { status });
+
+
+
+// ANALYTICS
 // ========================
-// TRANSACTIONS (SPECIFIC FUNCTIONS)
-// ========================
+export const getAnalyticsOverview = () => API.get("/analytics/overview/");
+export const getAnalyticsTimeseries = () => API.get("/analytics/timeseries/");
+export const getAnalyticsByStatus = () => API.get("/analytics/by-status/");
+export const getAnalyticsActiveUsers = () => API.get("/analytics/active-users/");
+
+// Additional exports for hooks
+export const getAdminOverview = getAnalyticsOverview;
 export const getMerchantTransactions = () => API.get("/me/transactions/");
-export const getUserTransactions = () => API.get("/me/transactions/");
-
-// ========================
-// MERCHANT WALLETS
-// ========================
-export const getMerchantWallets = () => API.get("/merchants/wallets/");
-
-// ========================
-// MERCHANT PERFORMANCE
-// ========================
-/*
-export const getMerchantPerformance = () => API.get("/merchants/performance");
-*/
-// ========================
-// FINANCE OVERVIEW
-// ========================
-export const getFinanceOverview = () => API.get("/analytics/overview/");
 
 export default API;

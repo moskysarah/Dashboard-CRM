@@ -3,17 +3,9 @@ import DashboardLayout from "../layouts/dashboardLayout";
 import DistributorKPI from "../components/distributorKPI";
 import T from "../components/T";
 import { ShoppingCart, DollarSign, Package, TrendingUp } from "lucide-react";
-import { getDistributors, getProfile, getMerchantWallets } from "../services/api";
+import { getProfile, getMerchantWallets } from "../services/api";
 import { useUser } from "../contexts/userContext";
 import { useTransactions } from "../hooks/useTransactions";
-
-type Distributor = {
-  id: string;
-  name: string;
-  commission: number;
-  sales: number;
-  stock: number;
-};
 
 type Profile = {
   id: number;
@@ -35,26 +27,13 @@ type Wallet = {
 const DistributorDashboard: React.FC = () => {
   const user = useUser();
   const { transactions, loading: transactionsLoading, error: transactionsError } = useTransactions();
-  const [distributors, setDistributors] = useState<Distributor[]>([]);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [wallets, setWallets] = useState<Wallet[]>([]);
-  const [loading, setLoading] = useState(true);
   const [profileLoading, setProfileLoading] = useState(true);
   const [walletsLoading, setWalletsLoading] = useState(true);
   const [filter, setFilter] = useState<"Tous" | "Réussi" | "En attente" | "Échoué">("Tous");
 
   useEffect(() => {
-    const fetchDistributors = async () => {
-      try {
-        const response = await getDistributors();
-        setDistributors(response.data);
-      } catch (err) {
-        console.error("Erreur fetching distributors:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     const fetchProfileAndWallets = async () => {
       try {
         if (user?.user?.id) {
@@ -71,7 +50,6 @@ const DistributorDashboard: React.FC = () => {
       }
     };
 
-    fetchDistributors();
     fetchProfileAndWallets();
   }, [user]);
 
@@ -81,10 +59,10 @@ const DistributorDashboard: React.FC = () => {
     return "text-blue-500";
   };
 
-  const totalSales = distributors.reduce((sum, d) => sum + d.sales, 0);
-  const averageCommission = distributors.length > 0 ? distributors.reduce((sum, d) => sum + d.commission, 0) / distributors.length : 0;
-  const totalStock = distributors.reduce((sum, d) => sum + d.stock, 0);
-  const totalCommissionsEarned = distributors.reduce((sum, d) => sum + (d.sales * d.commission / 100), 0);
+  const totalSales = 0;
+  const averageCommission = 0;
+  const totalStock = 0;
+  const totalCommissionsEarned = 0;
 
   const filteredTransactions = filter === "Tous" ? transactions : transactions.filter((t) => {
     const statusMap: Record<string, string> = {
@@ -95,7 +73,7 @@ const DistributorDashboard: React.FC = () => {
     return t.status === statusMap[filter];
   });
 
-  if (loading || profileLoading || walletsLoading || transactionsLoading) return <div className="flex justify-center items-center h-32"><T>Chargement du tableau de bord...</T></div>;
+  if (profileLoading || walletsLoading || transactionsLoading) return <div className="flex justify-center items-center h-32"><T>Chargement du tableau de bord...</T></div>;
 
   return (
     <DashboardLayout>
@@ -122,7 +100,7 @@ const DistributorDashboard: React.FC = () => {
           <DistributorKPI
             title={<T>Stock Disponible</T>}
             value={totalStock}
-            color="bg-white text-gray-700 shadow-lg"
+            color="bg-white text-gray-700 shadow-lg "
             icon={<Package size={16} className={getIconColor(totalStock)} />}
           />
           <DistributorKPI
@@ -134,7 +112,7 @@ const DistributorDashboard: React.FC = () => {
         </div>
 
         {/* Profile and Wallet Info */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           {profile && (
             <div className="bg-white p-4 rounded-lg shadow">
               <h2 className="text-lg font-semibold mb-4"><T>Informations du Profil</T></h2>
@@ -146,7 +124,7 @@ const DistributorDashboard: React.FC = () => {
                     profile.role === 'user' ? 'bg-green-500' : 'bg-gray-500'
                   }`}
                 >
-                  {profile.first_name?.charAt(0)}{profile.last_name?.charAt(0)}
+                  {profile.first_name?.charAt(0)?.toUpperCase()}{profile.last_name?.charAt(0)?.toUpperCase()}
                 </div>
                 <div>
                   <p><strong><T>Nom:</T></strong> {profile.first_name} {profile.last_name}</p>

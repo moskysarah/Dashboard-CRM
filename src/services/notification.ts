@@ -19,7 +19,7 @@ export interface NotificationResponse {
   results: Notification[];
 }
 
-export async function getNotifications(): Promise<NotificationResponse> {
-  const response = await api.get<NotificationResponse>("/notification/messages");
+export async function getNotifications(params?: { user?: number; is_for?: string }): Promise<NotificationResponse> {
+  const response = await api.get<NotificationResponse>("/notification/messages/", { params });
   return response.data;
 }

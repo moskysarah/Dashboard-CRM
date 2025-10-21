@@ -1,212 +1,178 @@
-import React, { useState, useMemo, useEffect } from "react";
-import { useUsers } from "../hooks/useUsers";
-import { useTranslate } from "../contexts/translateContext";
-import type { User, UserRole } from "../types/domain";
+import React, { useEffect, useState } from "react";
 import DashboardLayout from "../layouts/dashboardLayout";
+import { getTransactions, getUserWallet } from "../services/api";
 import T from "../components/T";
 
-// ===== Options (copiées depuis UserManagement) =====
-const roleOptions: UserRole[] = ["admin", "user", "superadmin", "merchant"];
-
-const roleColors: Record<UserRole, string> = {
-  admin: "bg-blue-400 text-white",
-  user: "bg-green-500 text-white",
-  superadmin: "bg-purple-400 text-white",
-  merchant: "bg-yellow-500 text-white",
-};
-
-const statusColors: Record<"Active" | "Suspended", string> = {
-  Active: "bg-green-400 text-white",
-  Suspended: "bg-red-400 text-white",
-};
-
-// ===== Section Card Composant (copié depuis UserManagement) =====
-interface SectionCardProps {
-  title: React.ReactNode;
-  children?: React.ReactNode;
+// ====================== Types ======================
+interface Transaction {
+  id: number;
+  amount: number;
+  status: string;
+  date: string;
+  description?: string;
 }
 
-const SectionCard: React.FC<SectionCardProps> = ({ title, children }) => {
-  return (
-    <div className="bg-white rounded-xl shadow-lg p-6 mb-6 relative w-full">
-      <h2 className="text-lg font-bold mb-4">{title}</h2>
-      {children}
-    </div>
-  );
+interface Wallet {
+  id: number;
+  balance: number;
+  currency: string;
+  last_updated: string;
+}
+
+// ====================== Couleurs ======================
+const statusColors: Record<string, string> = {
+  success: "bg-green-500 text-white",
+  pending: "bg-yellow-400 text-white",
+  failed: "bg-red-500 text-white",
 };
 
-const capitalize = (text: string) => text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+// ====================== Page principale ======================
+const UserPage: React.FC = () => {
 
-// ===== UsersPage Component =====
-const UsersPage: React.FC = () => {
-  const { users, loading, error, refreshUsers, updateUserStatus, updateUserRole, currentPage, totalUsers, pageSize } = useUsers();
-  const { translate } = useTranslate();
-  const [selectedUserIdForRoleChange, setSelectedUserIdForRoleChange] = useState<number | null>(null);
-  const [placeholderText, setPlaceholderText] = useState<string>("Rechercher une option");
+  const [wallet, setWallet] = useState<Wallet | null>(null);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
+  // Charger wallet et transactions
   useEffect(() => {
-    const performTranslation = async () => {
+    const fetchData = async () => {
+      setLoading(true);
       try {
-        const result = await translate("Rechercher une option");
-        setPlaceholderText(result);
-      } catch (error) {
-        console.error('Translation error for placeholder:', error);
-        setPlaceholderText("Rechercher une option"); // Fallback
+        // Requêtes API
+        const [walletRes, txRes] = await Promise.all([
+          getUserWallet(),
+          getTransactions(),
+        ]);
+        setWallet(walletRes.data);
+        setTransactions(txRes.data);
+      } catch (err: any) {
+        console.error("Erreur lors du chargement :", err);
+        if (err.response?.status === 403) {
+          setError("Accès refusé: Permissions insuffisantes pour accéder aux données.");
+        } else {
+          setError("Impossible de charger vos informations.");
+        }
+      } finally {
+        setLoading(false);
       }
     };
-
-    performTranslation();
-  }, [translate]);
-
-  const handleToggleStatus = (user: User) => {
-    updateUserStatus(user.id, !user.is_active);
-  };
-
-  const handleChangeRole = (userId: number, role: UserRole) => {
-    updateUserRole(userId, role);
-    setSelectedUserIdForRoleChange(null);
-  };
-
-  const totalPages = Math.ceil(totalUsers / pageSize);
-
-  // Logique pour générer les numéros de page à afficher
-  const paginationItems = useMemo(() => {
-    const items: (number | string)[] = [];
-    const siblings = 1;
-    const totalPageNumbers = siblings * 2 + 5;
-
-    if (totalPages <= totalPageNumbers) {
-      for (let i = 1; i <= totalPages; i++) {
-        items.push(i);
-      }
-    } else {
-      const leftSiblingIndex = Math.max(currentPage - siblings, 1);
-      const rightSiblingIndex = Math.min(currentPage + siblings, totalPages);
-      const shouldShowLeftDots = leftSiblingIndex > 2;
-      const shouldShowRightDots = rightSiblingIndex < totalPages - 1;
-
-      items.push(1);
-      if (shouldShowLeftDots) items.push("...");
-      for (let i = leftSiblingIndex; i <= rightSiblingIndex; i++) {
-        if (i > 1 && i < totalPages) items.push(i);
-      }
-      if (shouldShowRightDots) items.push("...");
-      items.push(totalPages);
-    }
-    return items;
-  }, [currentPage, totalPages]);
+    fetchData();
+  }, []);
 
   return (
     <DashboardLayout>
-      <div className="p-6 bg-gray-100 min-h-screen">
-        <SectionCard title={<T>Gestion des Utilisateurs</T>}>
-          <div className="overflow-x-auto">
-            <div className="relative">
-              {loading && (
-                <div className="absolute inset-0 bg-white bg-opacity-50 flex justify-center items-center z-30">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-                </div>
-              )}
-              {error && !loading && (
-                <div className="text-center py-4 text-red-500">{error}</div>
-              )}
-              <table className="w-full divide-y divide-gray-200 text-center text-xs">
-                <thead className="sticky top-0 z-20 bg-gray-50">
-                  <tr>
-                    {[<T>Profil</T>, <T>Nom</T>, <T>Email</T>, <T>Date Inscription</T>, <T>Rôle</T>, <T>Statut</T>, <T>Actions</T>].map((h, index) => (
-                      <th key={index} className="px-3 py-2 font-medium text-gray-500 whitespace-nowrap">{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {users.map(u => (
-                    <tr key={u.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-3 py-2 text-center">
-                        <div className="flex justify-center items-center">
-                          <img src={u.profile_image || '/images/default-avatar.png'} alt={u.username} className="w-8 h-8 rounded-full" />
-                        </div>
-                      </td>
-                      <td className="px-3 py-2 whitespace-nowrap font-medium">{capitalize(`${u.first_name || ''} ${u.last_name || ''}`.trim() || u.username)}</td>
-                      <td className="px-3 py-2 whitespace-nowrap text-gray-500">{u.email || 'N/A'}</td>
-                      <td className="px-3 py-2 whitespace-nowrap text-gray-500">{u.date_joined ? new Date(u.date_joined).toLocaleDateString() : 'N/A'}</td>
-                      <td className="px-3 py-2 text-center relative">
-                        <span
-                          className={`text-xs px-2 py-0.5 rounded-full cursor-pointer ${roleColors[u.role || 'user']}`}
-                          onClick={() => setSelectedUserIdForRoleChange(selectedUserIdForRoleChange === u.id ? null : u.id)}
-                        >
-                          <T>{u.role || 'user'}</T>
-                        </span>
-                        {selectedUserIdForRoleChange === u.id && (
-                          <div className="absolute top-10 left-1/2 transform -translate-x-1/2 w-56 bg-white border shadow-lg rounded-lg z-30">
-                            <input type="text" placeholder={placeholderText} className="w-full px-3 py-2 text-xs border-b outline-none" />
-                            <div className="max-h-48 overflow-y-auto p-2 space-y-2">
-                              {roleOptions.map((r) => (
-                                <div key={r} onClick={() => handleChangeRole(u.id, r)} className={`cursor-pointer text-xs px-2 py-0.5 rounded-full ${roleColors[r]} text-center hover:opacity-80`}>
-                                  <T>{r}</T>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </td>
-                      <td className="px-3 py-2 whitespace-nowrap">
-                        <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${statusColors[u.is_active ? "Active" : "Suspended"]}`}>
-                          {u.is_active ? <T>Actif</T> : <T>Suspendu</T>}
-                        </span>
-                      </td>
-                      <td className="px-3 py-2 whitespace-nowrap">
-                        <button
-                          onClick={() => handleToggleStatus(u)}
-                          className={`text-xs px-2 py-0.5 rounded-full font-semibold transition-colors ${u.is_active ? "bg-red-400 hover:bg-red-500 text-white" : "bg-green-400 hover:bg-green-500 text-white"}`}
-                        >
-                          {u.is_active ? <T>Suspendre</T> : <T>Activer</T>}
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <div className="flex justify-between items-center mt-4">
-              <span className="text-xs text-gray-600">
-                <T>Page</T> {currentPage} <T>sur</T> {totalPages} ({totalUsers} <T>utilisateurs</T>)
-              </span>
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={() => refreshUsers(currentPage - 1)}
-                  disabled={currentPage <= 1}
-                  className="px-2 py-1 text-xs font-semibold text-gray-700 bg-white border border-gray-300 rounded-md disabled:opacity-50 hover:bg-gray-50"
-                >
-                  <T>Précédent</T>
-                </button>
-                {paginationItems.map((item, index) =>
-                  typeof item === "string" ? (
-                    <span key={`dots-${index}`} className="px-2 py-1 text-xs text-gray-500">...</span>
-                  ) : (
-                    <button
-                      key={item}
-                      onClick={() => refreshUsers(item)}
-                      disabled={item === currentPage}
-                      className={`px-2 py-1 text-xs font-semibold rounded-md ${item === currentPage ? "bg-blue-500 text-white" : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"}`}
-                    >
-                      {item}
-                    </button>
-                  )
-                )}
-                <button
-                  onClick={() => refreshUsers(currentPage + 1)}
-                  disabled={currentPage >= totalPages}
-                  className="px-2 py-1 text-xs font-semibold text-gray-700 bg-white border border-gray-300 rounded-md disabled:opacity-50 hover:bg-gray-50"
-                >
-                  <T>Suivant</T>
-                </button>
+      <div className="p-4 sm:p-6 bg-gray-100 min-h-screen">
+        <div className="max-w-5xl mx-auto space-y-6">
+          {/* ================= Wallet Section ================= */}
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <h2 className="text-lg  font-bold mb-4 text-gray-800">
+              <T>Mon Portefeuille</T>
+            </h2>
+
+            {loading && (
+              <div className="flex justify-center py-6">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
               </div>
-            </div>
+            )}
+
+            {error && !loading && (
+              <div className="text-center py-4 text-red-500 font-medium">{error}</div>
+            )}
+
+            {!loading && wallet && (
+              <div className="flex flex-col sm:flex-row justify-between items-center bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-5 rounded-lg shadow-md transition-transform hover:scale-[1.01]">
+                <div>
+                  <p className="text-sm opacity-80"><T>Solde actuel</T></p>
+                  <p className="text-3xl font-bold">{wallet.balance.toLocaleString()} {wallet.currency}</p>
+                </div>
+                <div className="mt-3 sm:mt-0">
+                  <p className="text-sm opacity-80"><T>Dernière mise à jour</T></p>
+                  <p className="font-semibold">
+                    {new Date(wallet.last_updated).toLocaleString()}
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
-        </SectionCard>
+
+          {/* ================= Transactions Section ================= */}
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <h2 className="text-lg  font-bold mb-4 text-gray-800">
+              <T>Mes Transactions</T>
+            </h2>
+
+            {loading && (
+              <div className="flex justify-center py-6">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+              </div>
+            )}
+
+            {error && !loading && (
+              <div className="text-center py-4 text-red-500 font-medium">{error}</div>
+            )}
+
+            {!loading && !error && transactions.length > 0 && (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200 text-sm sm:text-base">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-3 py-2 text-left text-gray-600 font-semibold">
+                        <T>ID</T>
+                      </th>
+                      <th className="px-3 py-2 text-left text-gray-600 font-semibold">
+                        <T>Date</T>
+                      </th>
+                      <th className="px-3 py-2 text-left text-gray-600 font-semibold">
+                        <T>Description</T>
+                      </th>
+                      <th className="px-3 py-2 text-left text-gray-600 font-semibold">
+                        <T>Montant</T>
+                      </th>
+                      <th className="px-3 py-2 text-left text-gray-600 font-semibold">
+                        <T>Statut</T>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {transactions.map((tx) => (
+                      <tr key={tx.id} className="hover:bg-gray-50 transition-colors">
+                        <td className="px-3 py-2 font-medium text-gray-700">{tx.id}</td>
+                        <td className="px-3 py-2 text-gray-600">
+                          {new Date(tx.date).toLocaleDateString()}
+                        </td>
+                        <td className="px-3 py-2 text-gray-600">
+                          {tx.description || "—"}
+                        </td>
+                        <td className="px-3 py-2 font-semibold text-gray-800">
+                          {tx.amount} FC
+                        </td>
+                        <td className="px-3 py-2">
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs sm:text-sm font-semibold ${
+                              statusColors[tx.status] || "bg-gray-300 text-gray-800"
+                            }`}
+                          >
+                            <T>{tx.status}</T>
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {!loading && !error && transactions.length === 0 && (
+              <div className="text-center py-6 text-gray-500">
+                <T>Aucune transaction trouvée.</T>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </DashboardLayout>
   );
 };
 
-export default UsersPage;
+export default UserPage;

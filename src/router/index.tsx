@@ -12,6 +12,7 @@ import Finance from "../pages/Finance";
 import IT from "../pages/IT";
 import UsersPage from "../pages/UsersPage";
 import UserManagement from "../pages/operations/UserManagement";
+import KPIDashboard from "../pages/KPIDashboard";
 import DashboardLayout from "../layouts/dashboardLayout";
 import ProtectedRoute from "../components/protectedRoute";
 
@@ -43,7 +44,7 @@ export const router = createBrowserRouter([
 // src/router/index.tsx
 import { createBrowserRouter } from "react-router-dom";
 import SplashLogin from "../pages/SplashLogin";
-import Dashboard from "../pages/Dashboard";
+import Dashboard from "../pages/DashboardAdmin";
 import Merchants from "../pages/MerchantDashboard";
 import Distributors from "../pages/DistributorDashboard";
 import TransactionsList from "../pages/operations/TransactionsList";
@@ -58,7 +59,7 @@ import DashboardLayout from "../layouts/dashboardLayout";
 export const router = createBrowserRouter([
   { path: "/login", element: <SplashLogin /> },
 
-  // ✅ Toutes les pages sont maintenant accessibles sans restriction
+  // Toutes les pages sont maintenant accessibles sans restriction
   { path: "/users", element: <UsersPage /> },
   { path: "/dashboard", element: <Dashboard /> },
   { path: "/usermanagement", element: <DashboardLayout><UserManagement /></DashboardLayout> },
@@ -70,7 +71,8 @@ export const router = createBrowserRouter([
   { path: "/merchants", element: <Merchants /> },
   { path: "/distributors", element: <Distributors /> },
 
-  // ✅ Redirection par défaut
+
+  // Redirection par défaut
   { path: "*", element: <SplashLogin /> },
 ]);
 

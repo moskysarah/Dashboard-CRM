@@ -1,22 +1,28 @@
 import React, { useState } from 'react';
 
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'placeholder'> {
   // On pourra ajouter des props custom plus tard (ex: état d'erreur)
   label?: string;
   isPassword?: boolean;
+  placeholder?: React.ReactNode;
 }
 
-export const Input: React.FC<InputProps> = ({ className, isPassword, type, ...props }) => {
+export const Input: React.FC<InputProps> = ({ className, isPassword, type, placeholder, ...props }) => {
   const [showPassword, setShowPassword] = useState(false);
 
-  const baseClasses = "w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 outline-none";
+  const baseClasses = "w-full border border-gray-500 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 outline-none";
   const combinedClasses = `${baseClasses} ${className || ''}`;
 
   const inputType = isPassword ? (showPassword ? 'text' : 'password') : type;
 
   return (
     <div className="relative">
-      <input className={combinedClasses} type={inputType} {...props} />
+      <input className={combinedClasses} type={inputType} placeholder={typeof placeholder === 'string' ? placeholder : undefined} autoComplete={isPassword ? "current-password" : props.autoComplete} {...props} />
+      {placeholder && typeof placeholder !== 'string' && !props.value && (
+        <div className="absolute inset-0 flex items-center px-4 pointer-events-none text-gray-400">
+          {placeholder}
+        </div>
+      )}
       {isPassword && (
         <button
           type="button"

@@ -5,6 +5,7 @@ import { getProfile, changePassword } from "../services/api";
 import { useAuth } from "../store/auth";
 import { Input } from "../components/ui/Input";
 import { Button } from "../components/ui/Button";
+import T from "../components/T";
 
 interface ProfileData {
   name: string;
@@ -73,7 +74,7 @@ const Profile: React.FC = () => {
     }
     setChangePasswordLoading(true);
     try {
-      await changePassword(oldPassword, newPassword);
+      await changePassword({ old_password: oldPassword, new_password: newPassword });
       alert("Mot de passe changé avec succès !");
       setShowChangePassword(false);
       setOldPassword("");
@@ -92,7 +93,7 @@ const Profile: React.FC = () => {
     }
   };
 
-  if (loading) return <p className="p-4">Chargement du profil...</p>;
+  if (loading) return <p className="p-4"><T>Chargement du profil...</T></p>;
 
   return (
     <div className="p-4 space-y-4">
@@ -120,7 +121,7 @@ const Profile: React.FC = () => {
           <p className="text-sm text-gray-400">{profile.role}</p>
         </div>
         <button onClick={handleLogout} className="mt-2 md:mt-0 md:ml-auto px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">
-          logout
+          <T>logout</T>
         </button>
       </div>
 
@@ -129,7 +130,7 @@ const Profile: React.FC = () => {
           onClick={() => setShowChangePassword(!showChangePassword)}
           className="w-full text-left font-semibold text-blue-600 hover:text-blue-800"
         >
-          Changer le mot de passe
+          <T>Changer le mot de passe</T>
         </button>
         {showChangePassword && (
           <form onSubmit={handleChangePassword} className="mt-4 space-y-4">

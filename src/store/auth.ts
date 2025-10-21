@@ -35,26 +35,37 @@ export const useAuth = create<AuthState>()(
 
       // Gère la connexion après une validation réussie
       login: (user: User, tokens: { access: string; refresh: string }) => {
-        set({
-          user,
-          accessToken: tokens.access,
-          refreshToken: tokens.refresh,
-          isAuthenticated: true,
-        });
-        // Nettoyage du token temporaire qui n'est plus nécessaire
-        cleanupAuthLocalStorage();
+        try {
+          set({
+            user,
+            accessToken: tokens.access,
+            refreshToken: tokens.refresh,
+            isAuthenticated: true,
+          });
+          // Nettoyage du token temporaire qui n'est plus nécessaire
+          cleanupAuthLocalStorage();
+        } catch (error) {
+          console.error("Login error:", error);
+          // Optionally, handle the error (e.g., show a notification)
+        }
       },
 
       logout: () => {
-        // On vide l'état du store
-        set({ user: null, accessToken: null, refreshToken: null, isAuthenticated: false });
-        // Et on s'assure de nettoyer complètement le localStorage
-        cleanupAuthLocalStorage();
+        try {
+          // On vide l'état du store
+          set({ user: null, accessToken: null, refreshToken: null, isAuthenticated: false });
+          // Et on s'assure de nettoyer complètement le localStorage
+          cleanupAuthLocalStorage();
+        } catch (error) {
+          console.error("Logout error:", error);
+          // Optionally, handle the error (e.g., show a notification)
+        }
       },
     }),
     { name: LOCAL_STORAGE_KEYS.AUTH_STATE }
   )
 );
+
 export const useIsAuthenticated = () => {
   const auth = useAuth();
   return auth.isAuthenticated;

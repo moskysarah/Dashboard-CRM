@@ -19,7 +19,7 @@ export function Sidebar() {
             }`
           }
         >
-          <LayoutDashboard size={18} /> <T>Espace administrateur</T>
+          <LayoutDashboard size={18} /> <T>Tableau de bord</T>
         </NavLink>
 
 

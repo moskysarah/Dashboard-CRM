@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getAdminOverview } from '../services/api';
+import { getAnalyticsOverview } from '../services/api';
 import { useAuth } from '../store/auth';
+import { AxiosError } from 'axios';
 
 export interface OverviewStats {
   filters_applied: {
@@ -53,11 +54,15 @@ export const useOverviewStats = () => {
         }
         setLoading(true);
         try {
-            const res = await getAdminOverview();
+            const res = await getAnalyticsOverview();
             setStats(res.data);
         } catch (err) {
-            setError("Impossible de charger les statistiques d'aperçu.");
-            console.error(err);
+            if (err instanceof AxiosError && err.response?.status === 401) {
+                setError("Token expiré. Veuillez vous reconnecter.");
+            } else {
+                setError("Impossible de charger les statistiques d'aperçu.");
+                console.error(err);
+            }
         } finally {
             setLoading(false);
         }

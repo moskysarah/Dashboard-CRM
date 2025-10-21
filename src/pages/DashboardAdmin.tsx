@@ -2,7 +2,7 @@
 import React from "react";
 import UserManagement from "./operations/UserManagement";
 import DashboardLayout from "../layouts/dashboardLayout";
-const Dashboard: React.FC = () => {
+const DashboardAdmin: React.FC = () => {
   return (
   
     <DashboardLayout> 
@@ -12,4 +12,4 @@ const Dashboard: React.FC = () => {
   );
 };
 
-export default Dashboard;
+export default DashboardAdmin;
