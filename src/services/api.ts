@@ -6,7 +6,7 @@ import { useAuth } from "../store/auth";
 // CONFIGURATION GLOBALE
 // ========================
 const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://192.162.69.75:8078/api/v1",
+  baseURL: "http://192.162.69.75:8078/api/v1",
 });
 
 // ========================
@@ -151,23 +151,6 @@ export const refreshToken = (refresh: string) =>
   API.post("/token/refresh/", { refresh });
 
 // ========================
-// DISTRIBUTEURS
-// ========================
-export const getDistributors = () => API.get("/distributors/");
-export const createDistributor = (data: { name: string; commission: number; sales: number; stock: number }) =>
-  API.post("/distributors/", data);
-export const updateDistributor = (id: string, data: Partial<{ commission: number; stock: number }>) =>
-  API.patch(`/distributors/${id}/`, data);
-export const deleteDistributor = (id: string) => API.delete(`/distributors/${id}/`);
-
-// ========================
-// SALES
-// ========================
-export const getSales = () => API.get("/sales/");
-export const createSale = (data: { distributorId: string; amount: number; date: string }) =>
-  API.post("/sales/", data);
-
-// ========================
 // AUTHENTIFICATION (OTP, LOGIN, PASSWORD)
 // ========================
 export const requestOTP = (phone: string, password?: string) =>
@@ -221,6 +204,19 @@ export const deleteAdminUser = (id: string) =>
   API.delete(`/accounts/users/${id}/`);
 
 // ========================
+
+// SALES
+// ========================
+export const getSales = () => API.get("/sales/");
+export const createSale = (data: any) => API.post("/sales/", data);
+
+// ========================
+// DISTRIBUTORS
+// ========================
+export const getDistributors = () => API.get("/distributors/");
+export const createDistributor = (data: any) => API.post("/distributors/", data);
+export const updateDistributor = (id: string, data: any) => API.patch(`/distributors/${id}/`, data);
+export const deleteDistributor = (id: string) => API.delete(`/distributors/${id}/`);
 
 // ========================
 // MERCHANTS

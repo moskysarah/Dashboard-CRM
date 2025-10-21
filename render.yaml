@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: Dashbaord-CRM
+    runtime: node
+    buildCommand: npm run build
+    startCommand: npx serve -s dist
+    envVars:
+      - key: NODE_VERSION
+        value: 18
