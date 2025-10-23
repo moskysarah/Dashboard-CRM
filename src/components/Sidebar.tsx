@@ -1,6 +1,6 @@
 // src/components/Sidebar.tsx
 import { NavLink } from "react-router-dom";
-import { LayoutDashboard, BarChart, Users, Settings, ShoppingCart, Store } from "lucide-react"; //Truck
+import { LayoutDashboard, BarChart, Users, Settings, ShoppingCart,Store } from "lucide-react"; //Truck
 import LogoPostSmart from "./logoPostSmart"; // import logo post smart
 import T from "./translatespace";
 
