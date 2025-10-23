@@ -1,76 +1,87 @@
-import { useState, useEffect, useCallback } from 'react';
-import { getAnalyticsOverview } from '../services/api';
-import { useAuth } from '../store/auth';
-import { AxiosError } from 'axios';
+// src/hooks/useOverviewStats.ts
+import { useState, useEffect } from "react";
+import api from "../services/api";
 
-export interface OverviewStats {
-  filters_applied: {
-    start_date: string;
-    end_date: string;
-  };
+type StatsData = {
   users: {
     total_users: number;
     new_users_in_period: number;
-    active_users_in_period: number;
-  };
-  merchants: {
-    total_merchants: number;
-    active_merchants_in_period: number;
-  top_merchants_by_volume: Record<string, unknown>[];
   };
   financials: {
-    estimated_revenue: number;
     total_volume_in: number;
-    total_volume_out: number;
-    average_transaction_value: number;
   };
   transactions: {
-    total_in_period: number;
     success_rate_percent: number;
-    successful_out_for_revenue_calc: number;
   };
-  stats_per_devise: {
-    devise__codeISO: string;
-    num_transactions: number;
-    volume_in: number | null;
-    volume_out: number | null;
-    successful_count: number;
-    failed_count: number;
-    pending_count: number;
-  }[];
-}
+};
+
+type TimeseriesData = {
+  date: string;
+  transactions: number;
+  revenue: number;
+};
+
+type StatusData = {
+  status: string;
+  count: number;
+};
+
+type ActiveUser = {
+  id: string;
+  name: string;
+  email: string;
+};
 
 export const useOverviewStats = () => {
-    const [stats, setStats] = useState<OverviewStats | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const userRole = useAuth((state) => state.user?.role);
+  const [stats, setStats] = useState<StatsData | null>(null);
+  const [timeseries, setTimeseries] = useState<TimeseriesData[]>([]);
+  const [statusData, setStatusData] = useState<StatusData[]>([]);
+  const [activeUsers, setActiveUsers] = useState<ActiveUser[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-    const fetchStats = useCallback(async () => {
-        if (userRole !== 'superadmin') {
-            setError("Vous n'avez pas les droits pour voir ces statistiques.");
-            setLoading(false);
-            return;
-        }
-        setLoading(true);
-        try {
-            const res = await getAnalyticsOverview();
-            setStats(res.data);
-        } catch (err) {
-            if (err instanceof AxiosError && err.response?.status === 401) {
-                setError("Token expiré. Veuillez vous reconnecter.");
-            } else {
-                setError("Impossible de charger les statistiques d'aperçu.");
-                console.error(err);
-            }
-        } finally {
-            setLoading(false);
-        }
-    }, [userRole]);
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        // KPI global
+        const overviewRes = await api.get("/analytics/overview/");
+        setStats({
+          users: {
+            total_users: overviewRes.data.totalUsers ?? 0,
+            new_users_in_period: overviewRes.data.newUsersInPeriod ?? 0,
+          },
+          financials: {
+            total_volume_in: overviewRes.data.totalRevenue ?? 0,
+          },
+          transactions: {
+            success_rate_percent: overviewRes.data.successRate ?? 0,
+          },
+        });
 
-    useEffect(() => {
-        fetchStats();
-    }, [fetchStats]);
+        // Graphiques temps
+        const timeseriesRes = await api.get("/analytics/timeseries/");
+        setTimeseries(timeseriesRes.data || []);
 
-    return { stats, loading, error, refreshStats: fetchStats };
+        // Statut des transactions
+        const statusRes = await api.get("/analytics/by-status/");
+        setStatusData(statusRes.data || []);
+
+        // Utilisateurs actifs
+        const activeRes = await api.get("/analytics/active-users/");
+        setActiveUsers(activeRes.data || []);
+
+        setError(null);
+      } catch (err: any) {
+        console.error("Erreur fetch user overview:", err);
+        setError("Impossible de charger les données utilisateur.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  return { stats, timeseries, statusData, activeUsers, loading, error };
 };

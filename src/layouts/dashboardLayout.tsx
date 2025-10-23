@@ -5,9 +5,9 @@ import { useState, useEffect } from "react";
 import { Bell, Mail, Globe, Menu, X } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../store/auth";
-import { getNotifications, type Notification } from "../services/notification";
+import { getNotifications, type AppNotification} from "../services/notification";
 import { useTranslate } from "../contexts/translateContext";
-import T from "../components/T";
+import T from "../components/translatespace";
 
 type Props = {
   children?: ReactNode;
@@ -16,7 +16,7 @@ type Props = {
 const DashboardLayout: React.FC<Props> = ({ children }) => {
   const { user, logout } = useAuth();
   const { language, setLanguage } = useTranslate();
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [notifOpen, setNotifOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -62,7 +62,7 @@ const DashboardLayout: React.FC<Props> = ({ children }) => {
         return 'bg-blue-500';
       case 'merchant':
         return 'bg-yellow-500';
-      case 'user':
+      case 'agent':
         return 'bg-green-500';
       default:
         return 'bg-gray-500';

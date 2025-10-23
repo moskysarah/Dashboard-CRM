@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
-import { getDistributors, createDistributor, deleteDistributor } from "../services/api";
+//import { getDistributors, createDistributor, deleteDistributor } from "../services/api";
 import { useUser } from "../contexts/userContext.ts";
-import T from "./T";
+import T from "./translatespace.tsx";
 
 type Distributor = {
   id: string;
@@ -30,8 +30,8 @@ const DistributorNetwork: React.FC = () => {
   useEffect(() => {
     const fetchDistributors = async () => {
       try {
-        const response = await getDistributors();
-        setDistributors(response.data);
+        //const response = await getDistributors();
+       // setDistributors(response.data);
       } catch (err) {
         console.error("Erreur fetching distributors:", err);
       } finally {
@@ -50,8 +50,8 @@ const DistributorNetwork: React.FC = () => {
 
   const handleAddDistributor = async () => {
     try {
-      const response = await createDistributor(newDistributor);
-      setDistributors([...distributors, response.data]);
+      //const response = await createDistributor(newDistributor);
+      //setDistributors([...distributors, response.data]);
       setNewDistributor({ name: "", commission: 0, sales: 0, stock: 0 });
       setShowAddForm(false);
     } catch (err) {
@@ -62,7 +62,7 @@ const DistributorNetwork: React.FC = () => {
   const handleDeleteDistributor = async (id: string) => {
     if (window.confirm("Êtes-vous sûr de vouloir supprimer ce distributeur ?")) {
       try {
-        await deleteDistributor(id);
+      //  await deleteDistributor(id);
         setDistributors(distributors.filter(d => d.id !== id));
       } catch (err) {
         console.error("Erreur deleting distributor:", err);

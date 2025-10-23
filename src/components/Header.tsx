@@ -1,5 +1,5 @@
 import { Bell, User, Globe } from "lucide-react";
-import T from "./T";
+import T from "./translatespace";
 import { useTranslate } from "../contexts/translateContext";
 
 export function Header() {

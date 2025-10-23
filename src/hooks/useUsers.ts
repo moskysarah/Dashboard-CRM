@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getAdminUsers, setUserRole, setUserStatus, createUser } from "../services/api";
+import { getAdminUsers, setUserRole, setUserStatus, createUser, deleteUserAccount} from "../services/api";
 import { useAuth } from "../store/auth";
 import type { User, UserRole } from "../types/domain";
 
@@ -12,10 +12,10 @@ export const useUsers = () => {
   const [totalUsers, setTotalUsers] = useState(0);
   const [pageSize, setPageSize] = useState(10);
 
-  // 🔹 Récupérer la liste des utilisateurs (admin only)
+  //   Récupérer la liste des utilisateurs
   const fetchUsers = async (page = 1) => {
-    if (user?.role !== 'admin') {
-      setError("Accès refusé: Vous n'avez pas les permissions nécessaires pour voir la liste des utilisateurs.");
+    if (user?.role !== "admin") {
+      setError("Accès refusé : vous n'avez pas les permissions nécessaires pour voir la liste des utilisateurs.");
       setLoading(false);
       return;
     }
@@ -30,9 +30,9 @@ export const useUsers = () => {
     } catch (err: any) {
       console.error(err);
       if (err.response?.status === 403) {
-        setError("Accès refusé: Permissions insuffisantes pour accéder à la liste des utilisateurs.");
+        setError("Accès refusé : permissions insuffisantes.");
       } else {
-        setError("Erreur lors du chargement des utilisateurs");
+        setError("Erreur lors du chargement des utilisateurs.");
       }
     } finally {
       setLoading(false);
@@ -41,10 +41,10 @@ export const useUsers = () => {
 
   const refreshUsers = (page = currentPage) => fetchUsers(page);
 
-  // 🔹 Mettre à jour le rôle d’un utilisateur (route: POST /admin-panel/users/{id}/set-role/)
+  // 🔹 Changer le rôle
   const updateUserRole = async (userId: number, newRole: string) => {
     try {
-      await setUserRole(userId, newRole);
+      await setUserRole(userId.toString(), newRole);
       await refreshUsers(currentPage);
     } catch (error) {
       console.error("Erreur de changement de rôle :", error);
@@ -52,10 +52,10 @@ export const useUsers = () => {
     }
   };
 
-  // 🔹 Mettre à jour le statut d’un utilisateur (route: POST /admin-panel/users/{id}/set-status/)
+  //  Changer le statut
   const updateUserStatus = async (userId: number, isActive: boolean) => {
     try {
-      await setUserStatus(userId, isActive ? "active" : "inactive");
+      await setUserStatus(userId.toString(), isActive ? "active" : "inactive");
       await refreshUsers(currentPage);
     } catch (error) {
       console.error("Erreur de changement de statut :", error);
@@ -63,14 +63,33 @@ export const useUsers = () => {
     }
   };
 
-  // 🔹 Créer un nouvel utilisateur
-  const createNewUser = async (userData: { first_name: string; last_name: string; email: string; password: string; role: UserRole }) => {
+  // 🔹 Créer un utilisateur
+  const createNewUser = async (userData: {
+    first_name: string;
+    last_name: string;
+    email: string;
+    password: string;
+    role: UserRole;
+  }) => {
     try {
       await createUser(userData);
       await refreshUsers(currentPage);
     } catch (error) {
       console.error("Erreur de création d'utilisateur :", error);
       setError("Impossible de créer l'utilisateur.");
+    }
+  };
+
+  // 🔹 Supprimer un utilisateur
+  const deleteUser = async (userId: number) => {
+    if (!window.confirm("Voulez-vous vraiment supprimer cet utilisateur ?")) return;
+
+    try {
+      await deleteUserAccount(userId.toString());
+      setUsers((prev) => prev.filter((u) => u.id !== userId)); // Mise à jour locale immédiate
+    } catch (error) {
+      console.error("Erreur de suppression d'utilisateur :", error);
+      setError("Impossible de supprimer l'utilisateur.");
     }
   };
 
@@ -92,5 +111,6 @@ export const useUsers = () => {
     updateUserRole,
     updateUserStatus,
     createNewUser,
+    deleteUser, 
   };
 };

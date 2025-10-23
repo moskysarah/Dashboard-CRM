@@ -11,7 +11,8 @@ import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
 import { LOCAL_STORAGE_KEYS } from "../config/constants";
 import type { User } from "../types/domain";
-import T from "../components/T";
+import T from "../components/translatespace";
+import { useNotifications } from "../hooks/useOtpNotifications"; 
 
 const Login = () => {
   const navigate = useNavigate();
@@ -19,16 +20,18 @@ const Login = () => {
 
   const [loginPhoneOrEmail, setLoginPhoneOrEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
-  const [loginRole, setLoginRole] = useState<"Admin" | "Marchand"  | "Utilisateur">("Marchand");
+  const [loginRole, setLoginRole] = useState<"Admin" | "Marchand"  | "Agent PMC">("Marchand");
 
   const [registerUsername, setRegisterUsername] = useState("");
   const [registerPhone, setRegisterPhone] = useState("");
   const [registerEmail, setRegisterEmail] = useState("");
   const [registerPassword, setRegisterPassword] = useState("");
-  const [registerRole, setRegisterRole] = useState<"Admin" | "Marchand" | "Utilisateur">("Marchand");
+  const [registerRole, setRegisterRole] = useState<"Admin" | "Marchand" | "Agent PMC">("Marchand");
   const [registerUsernameError, setRegisterUsernameError] = useState("");
 
   const [otp, setOtp] = useState("");
+
+// ----------------------------
   const [isLoading, setIsLoading] = useState(false);
   const [otpError, setOtpError] = useState(false);
 
@@ -51,10 +54,23 @@ const Login = () => {
 
   const [showConfetti, setShowConfetti] = useState(false);
   const [showRegistrationSuccess, setShowRegistrationSuccess] = useState(false);
-  const [registeredRole, setRegisteredRole] = useState<"Admin" | "Marchand" | "Utilisateur">("Marchand");
+  const [registeredRole, setRegisteredRole] = useState<"Admin" | "Marchand" | "Agent PMC">("Marchand");
   const [modalWidth, setModalWidth] = useState(0);
   const [modalHeight, setModalHeight] = useState(0);
   const modalRef = useRef<HTMLDivElement>(null);
+
+// HOOK OTP AUTOMATIQUE
+// ----------------------------
+
+const fetchedOtp = useNotifications();
+
+useEffect(() => {
+  if (fetchedOtp.notifications.length > 0) {
+    const latestMessage = fetchedOtp.notifications[0].message;
+    setOtp(latestMessage);
+    localStorage.setItem(LOCAL_STORAGE_KEYS.OTP_CODE, latestMessage);
+  }
+}, [fetchedOtp]);
 
   // Réinitialisation des champs à chaque montage du composant
   useEffect(() => {
@@ -402,7 +418,7 @@ const Login = () => {
     const dashboardRoutes = {
       "Admin": "/dashboard",
       "Marchand": "/merchants",
-      "Utilisateur": "/distributors"
+      "Agent PMC": "/distributors"
     };
     const route = dashboardRoutes[registeredRole] || "/dashboard";
     navigate(route);
@@ -456,13 +472,13 @@ const Login = () => {
                 <div className="text-left w-full">
                   <select
                     value={loginRole}
-                    onChange={(e) => setLoginRole(e.target.value as "Admin" | "Marchand" | "Utilisateur")}
+                    onChange={(e) => setLoginRole(e.target.value as "Admin" | "Marchand" | "Agent PMC")}
                     className="w-full p-2 border border-gray-300 rounded-md"
                   >
                     <option value="">- Sélectionner un rôle --</option>
                     <option value="Admin"> Admin </option>
                       <option value="Marchand"> Marchand </option>
-                    <option value="Utilisateur"> Utilisateur </option>
+                    <option value="Agent PMC"> Agent PMC </option>
                   </select>
                 </div>
 
@@ -522,13 +538,13 @@ const Login = () => {
                 <div className="text-left w-full">
                   <select
                     value={registerRole}
-                    onChange={(e) => setRegisterRole(e.target.value as "Admin" | "Marchand" | "Utilisateur")}
+                    onChange={(e) => setRegisterRole(e.target.value as "Admin" | "Marchand" | "Agent PMC")}
                     className="w-full p-2 border border-gray-300 rounded-md"
                   >
                     <option value="">-- Sélectionner un rôle --</option>
                     <option value="Admin">Admin</option>
                     <option value="Marchand"> Marchand </option>
-                    <option value="Utilisateur"> Utilisateur </option>
+                    <option value="Agent PMC"> Agent PMC </option>
                   </select>
                 </div>
                 <Button

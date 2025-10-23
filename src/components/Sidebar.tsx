@@ -2,7 +2,7 @@
 import { NavLink } from "react-router-dom";
 import { LayoutDashboard, BarChart, Users, Settings, ShoppingCart, Truck, Store } from "lucide-react";
 import LogoPostSmart from "./logoPostSmart"; // import logo post smart
-import T from "./T";
+import T from "./translatespace";
 
 export function Sidebar() {
   return (

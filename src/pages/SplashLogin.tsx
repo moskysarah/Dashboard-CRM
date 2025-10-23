@@ -51,12 +51,12 @@ const SplashLogin: React.FC = () => {
             <motion.img
               src="/postesmart-logo-2.png" // logo post smart
               alt="Logo"
-              className="w-26 h-26 mb-4  rounded-full"
+              className="w-16 h-16 md:w-24 md:h-24 lg:w-32 lg:h-32 mb-4 rounded-full"
 
               transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
             />
             <motion.h1
-              className="text-4xl font-bold text-white mb-4"
+              className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-4 text-center"
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.5, duration: 3 }}

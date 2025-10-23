@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { getDistributors, updateDistributor } from "../services/api";
-import T from "./T";
+import T from "./translatespace";
 
 type Distributor = {
   id: string;

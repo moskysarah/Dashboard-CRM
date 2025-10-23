@@ -35,9 +35,8 @@ function getAccessToken() {
   return null;
 }
 
-// ========================
 // INTERCEPTEUR REQUEST
-// ========================
+
 API.interceptors.request.use(
   (config) => {
     const accessToken = getAccessToken();
@@ -46,7 +45,7 @@ API.interceptors.request.use(
       ? config.url.startsWith("/") ? config.url : "/" + config.url
       : "";
 
-    // 🔓 Routes publiques (pas besoin de token)
+    //  Routes publiques (pas besoin de token)
     const publicEndpoints = [
       { url: "/accounts/otp/request/", method: "POST" },
       { url: "/accounts/token/phone/", method: "POST" },
@@ -168,15 +167,22 @@ export const resetPassword = (email: string) =>
 export const confirmResetPassword = (token: string, password: string) =>
   axios.post(`${API.defaults.baseURL}/accounts/password-reset/confirm/`, { token, password });
 
-export const changePassword = (data: { old_password: string; new_password: string }) =>
-  API.post("/accounts/change-password/", data);
+// ========================
+// GESTION DU PROFIL UTILISATEUR (AGENT)
 
-// ========================
-// PROFIL UTILISATEUR
-// ========================
-export const getProfile = (userId: number) => API.get(`/accounts/users/${userId}/`);
+// Profil de l’agent connecté
+export const getAgentProfile = () => API.get("/accounts/user");
+// Portefeuille de l’agent connecté
+export const getAgentWallet = () => API.get("/me/wallets");
+// Transactions de l’agent connecté
+export const getAgentTransactions = () => API.get("/me/transactions");
 
-// ========================
+// DELETE USER  ACCOUNT  (Agent)
+
+export const deleteUserAccount = (id: string) =>
+  API.delete(`/accounts/users/${id}/`);
+
+
 // CRÉATION ET GESTION DES UTILISATEURS
 // ========================
 export const createUser = (userData: {
@@ -200,42 +206,35 @@ export const updateAdminUser = (id: string, data: Partial<{
   phone: string;
 }>) => API.patch(`/accounts/users/${id}/`, data);
 
-export const deleteAdminUser = (id: string) =>
-  API.delete(`/accounts/users/${id}/`);
 
-// ========================
 
-// SALES
-// ========================
-export const getSales = () => API.get("/sales/");
-export const createSale = (data: any) => API.post("/sales/", data);
-
-// ========================
-// DISTRIBUTORS
-// ========================
-export const getDistributors = () => API.get("/distributors/");
-export const createDistributor = (data: any) => API.post("/distributors/", data);
-export const updateDistributor = (id: string, data: any) => API.patch(`/distributors/${id}/`, data);
-export const deleteDistributor = (id: string) => API.delete(`/distributors/${id}/`);
-
-// ========================
-// MERCHANTS
-// ========================
-export const getMerchants = () => API.get("/merchants/");
-
-// ========================
 // NOTIFICATIONS
 // ========================
 export const getNotifications = () => API.get("/notification/messages/");
 export const markNotificationRead = (id: string) =>
   API.patch(`/notification/messages/${id}/`, { is_read: true });
 
-// ========================
-// TRANSACTIONS & FINANCES
-// ========================
-export const getTransactions = () => API.get("/me/transactions/");
-export const getUserWallet = () => API.get("/me/wallet/");
-export const getMerchantWallets = () => API.get("/me/wallet/");
+
+// -------- MARCHANT ROUTE ---------------------------------------------
+
+// GET WALLET OF AGENT AND MERCHANT
+export const getAgentWallets = () => API.get("/me/wallets/");
+export const getMerchantWallets = () => API.get("/merchants/wallets/{id}/");
+
+// DELETE A MARCHANT PROFILE 
+export const deleteProfileMerchants = () => API.delete("/merchants/profiles/{id}/")
+
+// GET PROFILE MERCHANT
+
+export const getProfileMerchants = (id: number) => API.get(`/merchants/profiles/${id}/`)
+
+// POST PROFILE MERCHANT 
+
+export const getProfileMerchant = () => API.get("/merchants/profiles/{id}/")
+
+//user seeting 
+
+export const getUserSettings = () => API.get("/accounts/user-settings/")
 
 
 //   ADMIN PANEL - UTILISATEURS ====
@@ -260,5 +259,7 @@ export const getAnalyticsActiveUsers = () => API.get("/analytics/active-users/")
 // Additional exports for hooks
 export const getAdminOverview = getAnalyticsOverview;
 export const getMerchantTransactions = () => API.get("/me/transactions/");
+
+export const getMerchants = () => API.get("/merchants/");
 
 export default API;

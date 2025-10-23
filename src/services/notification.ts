@@ -1,7 +1,7 @@
 // src/services/notificationService.ts
 import api from "../services/api"; // ton instance Axios (déjà utilisée ailleurs)
 
-export interface Notification {
+export interface AppNotification {
   id: number;
   message: string;
   created_at: string;
@@ -16,7 +16,7 @@ export interface NotificationResponse {
   count: number;
   next: string | null;
   previous: string | null;
-  results: Notification[];
+  results: AppNotification[];
 }
 
 export async function getNotifications(params?: { user?: number; is_for?: string }): Promise<NotificationResponse> {

@@ -1,10 +1,11 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { LOCAL_STORAGE_KEYS } from '../config/constants'; // Le chemin est déjà bon, mais c'est pour l'exemple
-import type { User } from '../types/domain';
+import type { User, Agent } from '../types/domain';
 import { cleanupAuthLocalStorage } from '../utils/localStorageCleanup';
 
 export interface AuthState {
+  agent: Agent | null;
   user: User | null;
   accessToken: string | null;
   refreshToken: string | null;
@@ -28,6 +29,7 @@ const getInitialIsAuthenticated = (): boolean => {
 export const useAuth = create<AuthState>()(
   persist(
     (set) => ({
+      agent: null,
       user: null,
       accessToken: null,
       refreshToken: null,
@@ -53,7 +55,7 @@ export const useAuth = create<AuthState>()(
       logout: () => {
         try {
           // On vide l'état du store
-          set({ user: null, accessToken: null, refreshToken: null, isAuthenticated: false });
+          set({ agent: null, user: null, accessToken: null, refreshToken: null, isAuthenticated: false });
           // Et on s'assure de nettoyer complètement le localStorage
           cleanupAuthLocalStorage();
         } catch (error) {

@@ -1,39 +1,36 @@
-import { useEffect, useState } from "react";
-import { getAnalyticsOverview } from "../services/api";
-import { AxiosError } from "axios";
+import { useState, useEffect } from "react";
+import { getAnalyticsTimeseries, getAnalyticsByStatus, getAnalyticsActiveUsers } from "../services/api";
 
-import { useAuth } from '../store/auth';
-
-export const useAnalyticsData = () => {
-  const [data, setData] = useState(null);
+export const useAnalytics = () => {
+  const [timeseries, setTimeseries] = useState<any[]>([]);
+  const [statusData, setStatusData] = useState<any[]>([]);
+  const [activeUsers, setActiveUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { user } = useAuth();
 
   useEffect(() => {
-    const fetchData = async () => {
-      if (!user || !['admin', 'superadmin'].includes(user.role || '')) {
-        setError('You do not have permission to view analytics data.');
-        setLoading(false);
-        return;
-      }
+    const fetchAnalytics = async () => {
+      setLoading(true);
       try {
-        const res = await getAnalyticsOverview();
-        setData(res.data);
-      } catch (err) {
-        if (err instanceof AxiosError && err.response?.status === 401) {
-          setError("Token expiré. Veuillez vous reconnecter.");
-        } else if (err instanceof AxiosError && err.response?.status === 403) {
-          setError('You do not have permission to view analytics data.');
-        } else {
-          setError("Impossible de charger les données analytics");
-        }
+        const [tsRes, statusRes, usersRes] = await Promise.all([
+          getAnalyticsTimeseries(),
+          getAnalyticsByStatus(),
+          getAnalyticsActiveUsers(),
+        ]);
+
+        setTimeseries(tsRes.data || []);
+        setStatusData(statusRes.data || []);
+        setActiveUsers(usersRes.data || []);
+      } catch (err: any) {
+        console.error(err);
+        setError("Erreur lors du chargement des analytics.");
       } finally {
         setLoading(false);
       }
     };
-    fetchData();
-  }, [user]);
 
-  return { data, loading, error };
+    fetchAnalytics();
+  }, []);
+
+  return { timeseries, statusData, activeUsers, loading, error };
 };

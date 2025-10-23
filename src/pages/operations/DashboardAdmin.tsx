@@ -1,29 +1,27 @@
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import { useOverviewStats } from "../../hooks/useOverviewStats";
 import { useUsers } from "../../hooks/useUsers";
 import type { User, UserRole } from "../../types/domain";
 import TransactionsList from "./TransactionsList";
 import ReportsList from "./RapportsList";
-import T from "../../components/T";
+import T from "../../components/translatespace";
 
-// Composant carte générique
 interface SectionCardProps {
   title: string | React.ReactNode;
   children?: React.ReactNode;
   className?: string;
 }
 const SectionCard: React.FC<SectionCardProps> = ({ title, children, className }) => (
-  <div className={`bg-white rounded-xl shadow-md p-4 mb-6 w-full ${className || ''}`}>
+  <div className={`bg-white rounded-xl shadow-md p-4 mb-6 w-full ${className || ""}`}>
     <h2 className="text-lg font-bold mb-4">{title}</h2>
     {children}
   </div>
 );
 
-// Options et couleurs
-const roleOptions: UserRole[] = ["admin", "user", "superadmin"];
+const roleOptions: UserRole[] = ["admin", "agent", "superadmin"];
 const roleColors: Record<UserRole, string> = {
   admin: "bg-blue-500 text-white",
-  user: "bg-green-500 text-white",
+  agent: "bg-green-500 text-white",
   superadmin: "bg-purple-500 text-white",
 };
 const statusColors: Record<"Active" | "Suspended", string> = {
@@ -31,7 +29,6 @@ const statusColors: Record<"Active" | "Suspended", string> = {
   Suspended: "bg-red-400 text-white",
 };
 
-// Capitalize helper
 const capitalize = (text: string) =>
   text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
 
@@ -41,18 +38,19 @@ const UserManagement: React.FC = () => {
     users,
     loading: usersLoading,
     error: usersError,
-    refreshUsers,
     updateUserRole,
     updateUserStatus,
     createNewUser,
+    deleteUser,
     currentPage,
     totalPages,
     totalUsers,
   } = useUsers();
 
-
   const [selectedUserIdForRoleChange, setSelectedUserIdForRoleChange] = useState<number | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false); // modal suppression
+  const [userIdToDelete, setUserIdToDelete] = useState<number | null>(null);
   const [newUserData, setNewUserData] = useState({
     first_name: "",
     last_name: "",
@@ -61,9 +59,7 @@ const UserManagement: React.FC = () => {
     role: undefined as UserRole | undefined,
   });
 
-  // Handlers
-  const handleToggleStatus = (user: User) =>
-    updateUserStatus(user.id, !user.is_active);
+  const handleToggleStatus = (user: User) => updateUserStatus(user.id, !user.is_active);
 
   const handleChangeRole = (userId: number, role: UserRole) => {
     updateUserRole(userId, role);
@@ -71,63 +67,67 @@ const UserManagement: React.FC = () => {
   };
 
   const handleCreateUser = async () => {
-    if (!newUserData.role) return; // Ensure role is selected
-    await createNewUser(newUserData as { first_name: string; last_name: string; email: string; password: string; role: UserRole });
+    if (!newUserData.role) return;
+    await createNewUser(newUserData as {
+      first_name: string;
+      last_name: string;
+      email: string;
+      password: string;
+      role: UserRole;
+    });
     setShowCreateModal(false);
     setNewUserData({ first_name: "", last_name: "", email: "", password: "", role: undefined });
   };
 
-  // Pagination items
-  const paginationItems = useMemo(() => {
-    const items: (number | string)[] = [];
-    const siblings = 1;
-    const totalPageNumbers = siblings * 2 + 5;
-    if (totalPages <= totalPageNumbers) {
-      for (let i = 1; i <= totalPages; i++) items.push(i);
-    } else {
-      const leftSiblingIndex = Math.max(currentPage - siblings, 1);
-      const rightSiblingIndex = Math.min(currentPage + siblings, totalPages);
-      if (leftSiblingIndex > 2) items.push(1, "...");
-      for (let i = leftSiblingIndex; i <= rightSiblingIndex; i++) items.push(i);
-      if (rightSiblingIndex < totalPages - 1) items.push("...", totalPages);
+  const handleDeleteUser = async () => {
+    if (userIdToDelete !== null) {
+      await deleteUser(userIdToDelete);
+      setUserIdToDelete(null);
+      setShowDeleteModal(false);
     }
-    return items;
-  }, [currentPage, totalPages]);
+  };
 
   return (
     <div className="relative min-h-screen">
-
-      {/* Dashboard principal flouté si modal ouverte */}
-      <div className={`${showCreateModal ? "blur-sm pointer-events-none" : ""} p-4`}>
-
+      <div className={`${showCreateModal || showDeleteModal ? "blur-sm pointer-events-none" : ""} p-4`}>
         {/* Statistiques */}
         {statsLoading ? (
-          <div className="text-center p-6"><T>Chargement des statistiques...</T></div>
-        ) : overviewStats && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-white rounded-xl shadow-xl p-4 text-center">
-              <h3 className="text-gray-500 text-sm"><T>Total Utilisateurs</T></h3>
-              <p className="text-xl font-bold">{overviewStats.users.total_users}</p>
-            </div>
-            <div className="bg-white rounded-xl shadow-xl p-4 text-center">
-              <h3 className="text-gray-500 text-sm"><T>Nouveaux Utilisateurs (30j)</T></h3>
-              <p className="text-xl font-bold text-green-600">{overviewStats.users.new_users_in_period}</p>
-            </div>
-            <div className="bg-white rounded-xl shadow-xl p-4 text-center">
-              <h3 className="text-gray-500 text-sm"><T>Volume Total (Entrant)</T></h3>
-              <p className="text-xl font-bold text-blue-600">{overviewStats.financials.total_volume_in} $</p>
-            </div>
-            <div className="bg-white rounded-xl shadow-xl p-4 text-center">
-              <h3 className="text-gray-500 text-sm"><T>Taux de Succès (Tx)</T></h3>
-              <p className="text-xl font-bold text-purple-600">{overviewStats.transactions.success_rate_percent} %</p>
-            </div>
+          <div className="text-center p-6">
+            <T>Chargement des statistiques...</T>
           </div>
+        ) : (
+          overviewStats && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+              <div className="bg-white rounded-xl shadow-xl p-4 text-center">
+                <h3 className="text-gray-500 text-sm">
+                  <T>Total Utilisateurs</T>
+                </h3>
+                <p className="text-xl font-bold">{overviewStats.users.total_users}</p>
+              </div>
+              <div className="bg-white rounded-xl shadow-xl p-4 text-center">
+                <h3 className="text-gray-500 text-sm">
+                  <T>Nouveaux Utilisateurs (30j)</T>
+                </h3>
+                <p className="text-xl font-bold text-green-600">{overviewStats.users.new_users_in_period}</p>
+              </div>
+              <div className="bg-white rounded-xl shadow-xl p-4 text-center">
+                <h3 className="text-gray-500 text-sm">
+                  <T>Volume Total (Entrant)</T>
+                </h3>
+                <p className="text-xl font-bold text-blue-600">{overviewStats.financials.total_volume_in} $</p>
+              </div>
+              <div className="bg-white rounded-xl shadow-xl p-4 text-center">
+                <h3 className="text-gray-500 text-sm">
+                  <T>Taux de Succès (Tx)</T>
+                </h3>
+                <p className="text-xl font-bold text-purple-600">{overviewStats.transactions.success_rate_percent} %</p>
+              </div>
+            </div>
+          )
         )}
 
         {/* Gestion Utilisateurs */}
         <SectionCard title={<T>Gestion des Utilisateurs</T>}>
-
-          {/* Table Utilisateurs */}
           <div className="overflow-x-auto relative">
             {usersLoading && (
               <div className="absolute inset-0 bg-white bg-opacity-50 flex justify-center items-center z-30">
@@ -142,12 +142,14 @@ const UserManagement: React.FC = () => {
               <thead className="sticky top-0 z-20 bg-gray-50">
                 <tr>
                   {["Profil", "Nom", "Email", "Date Inscription", "Rôle", "Statut", "Actions"].map((h, i) => (
-                    <th key={i} className="px-3 py-2 font-medium text-gray-500 whitespace-nowrap">{h}</th>
+                    <th key={i} className="px-3 py-2 font-medium text-gray-500 whitespace-nowrap">
+                      {h}
+                    </th>
                   ))}
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {users.map(u => (
+                {users.map((u) => (
                   <tr key={u.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-3 py-2 text-center">
                       {capitalize(`${u.first_name} ${u.last_name}` || u.username).charAt(0)}
@@ -161,16 +163,18 @@ const UserManagement: React.FC = () => {
                     </td>
                     <td className="px-3 py-2 text-center relative">
                       <span
-                        className={`text-xs px-2 py-0.5 rounded-full cursor-pointer ${roleColors[u.role || "user"]}`}
+                        className={`text-xs px-2 py-0.5 rounded-full cursor-pointer ${roleColors[u.role || "admin"]}`}
                         onClick={() =>
-                          setSelectedUserIdForRoleChange(selectedUserIdForRoleChange === u.id ? null : u.id)
+                          setSelectedUserIdForRoleChange(
+                            selectedUserIdForRoleChange === u.id ? null : u.id
+                          )
                         }
                       >
-                        {u.role || "user"}
+                        {u.role || "admin"}
                       </span>
                       {selectedUserIdForRoleChange === u.id && (
                         <div className="absolute top-10 left-1/2 transform -translate-x-1/2 w-40 bg-white border shadow-lg rounded-lg z-30">
-                          {roleOptions.map(r => (
+                          {roleOptions.map((r) => (
                             <div
                               key={r}
                               onClick={() => handleChangeRole(u.id, r)}
@@ -183,7 +187,9 @@ const UserManagement: React.FC = () => {
                       )}
                     </td>
                     <td className="px-3 py-2 whitespace-nowrap">
-                      <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${statusColors[u.is_active ? "Active" : "Suspended"]}`}>
+                      <span
+                        className={`text-xs px-2 py-0.5 rounded-full font-semibold ${statusColors[u.is_active ? "Active" : "Suspended"]}`}
+                      >
                         {u.is_active ? "Actif" : "Suspendu"}
                       </span>
                     </td>
@@ -191,7 +197,9 @@ const UserManagement: React.FC = () => {
                       <button
                         onClick={() => handleToggleStatus(u)}
                         className={`text-xs px-2 py-0.5 rounded-full font-semibold transition-colors ${
-                          u.is_active ? "bg-red-400 hover:bg-red-500 text-white" : "bg-green-400 hover:bg-green-500 text-white"
+                          u.is_active
+                            ? "bg-red-400 hover:bg-red-500 text-white"
+                            : "bg-green-400 hover:bg-green-500 text-white"
                         }`}
                       >
                         {u.is_active ? "Suspendre" : "Activer"}
@@ -201,58 +209,50 @@ const UserManagement: React.FC = () => {
                 ))}
               </tbody>
             </table>
-            
-            {/* Pagination */}
-            <div className="flex justify-center items-center gap-1 mt-2">
-                <div className="mb-4 flex justify-between items-center justify-items-center w-full px-4 py-2 mt-4"> 
-                  <button
-                    onClick={() => setShowCreateModal(true)}
-                    className="px-3 py-1 rounded bg-green-500 text-white hover:bg-green-600 text-sm"
-                  >
-                    <T>Créer un nouvel utilisateur</T>
-                  </button>
-                  <span className="text-xs text-gray-600">
-                    Page {currentPage} sur {totalPages} ({totalUsers} utilisateurs)
-                  </span>
-                </div>
-              <button onClick={() => refreshUsers(currentPage - 1)} disabled={currentPage <= 1} className="px-2 py-1 text-xs font-semibold border rounded disabled:opacity-50">
-                Précédent
-              </button>
-              {paginationItems.map((item, idx) =>
-                typeof item === "string" ? (
-                  <span key={idx} className="px-2 py-1 text-xs text-gray-500">{item}</span>
-                ) : (
-                  <button key={item} onClick={() => refreshUsers(item)} className={`px-2 py-1 text-xs font-semibold rounded ${item === currentPage ? "bg-blue-500 text-white" : "bg-white border text-gray-700"}`}>{item}</button>
-                )
-              )}
-              <button onClick={() => refreshUsers(currentPage + 1)} disabled={currentPage >= totalPages} className="px-2 py-1 text-xs font-semibold border rounded disabled:opacity-50">
-                Suivant
-              </button>
 
-              
+            {/* Pagination + Boutons */}
+            <div className="flex justify-between items-center w-full px-4 py-2 mt-4">
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setShowCreateModal(true)}
+                  className="px-2 py-1 rounded bg-green-500 text-white hover:bg-green-600 text-xs"
+                >
+                  <T>Créer un utilisateur</T>
+                </button>
+                <button
+                  onClick={() => setShowDeleteModal(true)}
+                  className="px-2 py-1 rounded bg-red-500 text-white hover:bg-red-600 text-xs"
+                >
+                  <T>Supprimer un utilisateur</T>
+                </button>
+              </div>
+              <span className="text-xs text-gray-600">
+                Page {currentPage} sur {totalPages} ({totalUsers} utilisateurs)
+              </span>
             </div>
           </div>
         </SectionCard>
 
-        {/* Transactions List */}
         <SectionCard title={<T>Liste des Transactions</T>}>
           <TransactionsList />
         </SectionCard>
 
-        {/* Reports List */}
         <SectionCard title={<T>Rapports</T>}>
           <ReportsList />
         </SectionCard>
       </div>
 
-      {/* Modal Création Utilisateur */}
+      {/*  Modal création utilisateur */}
       {showCreateModal && (
         <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-auto">
           <div className="bg-white rounded-xl p-6 w-96 relative shadow-lg">
-            <h3 className="text-lg font-bold mb-4"><T>Créer un nouvel utilisateur</T></h3>
+            <h3 className="text-lg font-bold mb-4">
+              <T>Créer un nouvel utilisateur</T>
+            </h3>
             <input
               type="text"
               placeholder="Prénom"
+              required
               value={newUserData.first_name}
               onChange={(e) => setNewUserData({ ...newUserData, first_name: e.target.value })}
               className="w-full px-3 py-2 mb-2 border rounded"
@@ -260,6 +260,7 @@ const UserManagement: React.FC = () => {
             <input
               type="text"
               placeholder="Nom"
+              required
               value={newUserData.last_name}
               onChange={(e) => setNewUserData({ ...newUserData, last_name: e.target.value })}
               className="w-full px-3 py-2 mb-2 border rounded"
@@ -274,27 +275,82 @@ const UserManagement: React.FC = () => {
             <input
               type="password"
               placeholder="Mot de passe"
+              required
               value={newUserData.password}
               onChange={(e) => setNewUserData({ ...newUserData, password: e.target.value })}
               className="w-full px-3 py-2 mb-2 border rounded"
             />
             <select
               value={newUserData.role || ""}
-              onChange={(e) => setNewUserData({ ...newUserData, role: e.target.value ? e.target.value as UserRole : undefined })}
+              onChange={(e) =>
+                setNewUserData({
+                  ...newUserData,
+                  role: e.target.value ? (e.target.value as UserRole) : undefined,
+                })
+              }
               className="w-full px-3 py-2 mb-4 border rounded"
             >
-              <option value="" disabled>--Choisis le rôle--</option>
-              {roleOptions.map(r => <option key={r} value={r}>{r}</option>)}
+              <option value="" disabled>
+                --Choisis le rôle--
+              </option>
+              {roleOptions.map((r) => (
+                <option key={r} value={r}>
+                  {r}
+                </option>
+              ))}
             </select>
             <div className="flex justify-end gap-2">
-              <button onClick={() => setShowCreateModal(false)} className="px-3 py-1 rounded bg-gray-300 hover:bg-gray-400 text-sm">Annuler</button>
-              <button onClick={handleCreateUser} className="px-3 py-1 rounded bg-green-500 hover:bg-green-600 text-white text-sm">Créer</button>
+              <button
+                onClick={() => setShowCreateModal(false)}
+                className="px-3 py-1 rounded bg-gray-300 hover:bg-gray-400 text-sm"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={handleCreateUser}
+                className="px-3 py-1 rounded bg-green-500 hover:bg-green-600 text-white text-sm"
+              >
+                Créer
+              </button>
             </div>
           </div>
         </div>
       )}
 
-
+      {/*  Modal suppression utilisateur */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-auto">
+          <div className="bg-white rounded-xl p-6 w-80 relative shadow-lg">
+            <h3 className="text-lg font-bold mb-3 text-center text-red-600">
+              <T>Supprimer un utilisateur</T>
+            </h3>
+            <p className="text-sm text-gray-600 text-center mb-4">
+              Saisis l’ID de l’utilisateur à supprimer.
+            </p>
+            <input
+              type="number"
+              placeholder="ID utilisateur"
+              value={userIdToDelete || ""}
+              onChange={(e) => setUserIdToDelete(Number(e.target.value))}
+              className="w-full px-3 py-2 mb-3 border rounded text-center"
+            />
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="px-3 py-1 rounded bg-gray-300 hover:bg-gray-400 text-sm"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={handleDeleteUser}
+                className="px-3 py-1 rounded bg-red-500 hover:bg-red-600 text-white text-sm"
+              >
+                Supprimer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

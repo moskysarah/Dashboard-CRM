@@ -4,7 +4,30 @@
 
 // --- Enums from API ---
 
-export type UserRole = 'admin' | 'user' | 'superadmin';
+export type UserRole = 'admin' | 'agent' | 'superadmin';
+
+export type AgentRole = 'admin' | 'agent' | 'superadmin';
+
+/**
+ * Represents an Agent object from the API.
+ * Based on `components.schemas.User` but specific to agents.
+ */
+export type Agent = {
+  id: number;
+  username: string;
+  email?: string;
+  first_name?: string;
+  last_name?: string;
+  phone: string;
+  role: AgentRole;
+  is_active?: boolean;
+  is_staff?: boolean;
+  is_superuser?: boolean;
+  profile_image?: string | null; // format: uri
+  date_joined?: string; // format: date-time
+  last_login?: string | null; // format: date-time
+  merchant?: string | null; // format: uuid
+}
 
 export type TransactionStatus = 'PENDING' | 'PROCESSING' | 'SUCCESS' | 'FAILED' | 'CANCELLED' | 'ON' | 'OFF' | 'REFUNDED';
 

@@ -1,59 +1,17 @@
 
-/*
-import { createBrowserRouter } from "react-router-dom";
-import SplashLogin from "../pages/SplashLogin";
-import Dashboard from "../pages/Dashboard";
-import Merchants from "../pages/MerchantDashboard";
-import Distributors from "../pages/DistributorDashboard";
-import TransactionsList from "../pages/operations/TransactionsList";
-import ReportsList from "../pages/operations/RapportsList";
-import Sales from "../pages/Sales";
-import Finance from "../pages/Finance";
-import IT from "../pages/IT";
-import UsersPage from "../pages/UsersPage";
-import UserManagement from "../pages/operations/UserManagement";
-import KPIDashboard from "../pages/KPIDashboard";
-import DashboardLayout from "../layouts/dashboardLayout";
-import ProtectedRoute from "../components/protectedRoute";
-
-export const router = createBrowserRouter([
-  { path: "/login", element: <SplashLogin /> },
-
-  // Les superadmins ont accès à tout. Les admins ont accès à ces pages.
-  // La page des utilisateurs n'est accessible qu'aux superadmins.
-  { path: "/users", element: <ProtectedRoute allowedRoles={['superadmin']}><UsersPage /></ProtectedRoute> },
-
-  { path: "/dashboard", element: <ProtectedRoute allowedRoles={['admin', 'user']}><Dashboard /></ProtectedRoute>},
-  { path: "/it", element: <ProtectedRoute allowedRoles={['admin']}><IT /></ProtectedRoute> },
-  { path: "/transactionslist", element: <ProtectedRoute allowedRoles={['admin', 'user']}><TransactionsList /></ProtectedRoute> },
-  { path: "/reportslist", element: <ProtectedRoute allowedRoles={['admin', 'user']}><ReportsList /></ProtectedRoute> },
-  { path: "/finance", element: <ProtectedRoute allowedRoles={['admin']}><Finance /></ProtectedRoute> },
-  
-  // Les utilisateurs de type 'user' (marchands, distributeurs) ont accès à ces pages.
-  { path: "/sales", element: <ProtectedRoute allowedRoles={['user']}><Sales /></ProtectedRoute> },
-  { path: "/merchants", element: <ProtectedRoute allowedRoles={['user']}><Merchants /></ProtectedRoute> },
-  { path: "/distributors", element: <ProtectedRoute allowedRoles={['user']}><Distributors /></ProtectedRoute> },
-
-  { path: "*", element: <SplashLogin /> },
-]);
-
-*/
-
-
-
 // src/router/index.tsx
 import { createBrowserRouter } from "react-router-dom";
 import SplashLogin from "../pages/SplashLogin";
-import Dashboard from "../pages/DashboardAdmin";
-import Merchants from "../pages/MerchantDashboard";
-import Distributors from "../pages/DistributorDashboard";
+import Dashboard from "../pages/PageMain";
+import Merchants from "../pages/DashboardMerchant";
+//import Distributors from "../pages/DistributorDashboard";
 import TransactionsList from "../pages/operations/TransactionsList";
 import ReportsList from "../pages/operations/RapportsList";
-import Sales from "../pages/Sales";
-import Finance from "../pages/Finance";
-import IT from "../pages/IT";
-import UsersPage from "../pages/UsersPage";
-import UserManagement from "../pages/operations/UserManagement";
+import Sales from "../pages/DashboardSales";
+import Finance from "../pages/DashboardFinance";
+import DashboardSettings from "../pages/DashboardSettings";
+import UsersPage from "../pages/AgentDashboard";
+import UserManagement from "../pages/operations/DashboardAdmin";
 import DashboardLayout from "../layouts/dashboardLayout";
 
 export const router = createBrowserRouter([
@@ -63,16 +21,15 @@ export const router = createBrowserRouter([
   { path: "/users", element: <UsersPage /> },
   { path: "/dashboard", element: <Dashboard /> },
   { path: "/usermanagement", element: <DashboardLayout><UserManagement /></DashboardLayout> },
-  { path: "/it", element: <IT /> },
+  { path: "/it", element: <DashboardSettings/> },
   { path: "/transactionslist", element: <TransactionsList /> },
   { path: "/reportslist", element: <ReportsList /> },
   { path: "/finance", element: <Finance /> },
   { path: "/sales", element: <Sales /> },
   { path: "/merchants", element: <Merchants /> },
-  { path: "/distributors", element: <Distributors /> },
+  //{ path: "/distributors", element: <Distributors /> },
 
 
   // Redirection par défaut
   { path: "*", element: <SplashLogin /> },
 ]);
-

@@ -1,15 +1,16 @@
 // src/pages/Dashboard.tsx
 import React from "react";
-import UserManagement from "./operations/UserManagement";
+import DashboardAdmin from "./operations/DashboardAdmin";
 import DashboardLayout from "../layouts/dashboardLayout";
-const DashboardAdmin: React.FC = () => {
+
+const PageMain: React.FC = () => {
   return (
   
     <DashboardLayout> 
-      <UserManagement />
+      <DashboardAdmin />
 
     </DashboardLayout>
   );
 };
 
-export default DashboardAdmin;
+export default PageMain;
