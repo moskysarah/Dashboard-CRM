@@ -23,7 +23,7 @@ export type Agent = {
   is_active?: boolean;
   is_staff?: boolean;
   is_superuser?: boolean;
-  profile_image?: string | null; // format: uri
+  profile_image?: string | null;
   date_joined?: string; // format: date-time
   last_login?: string | null; // format: date-time
   merchant?: string | null; // format: uuid
