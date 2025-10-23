@@ -4,8 +4,8 @@ import SplashLogin from "../pages/SplashLogin";
 import Dashboard from "../pages/PageMain";
 import Merchants from "../pages/DashboardMerchant";
 //import Distributors from "../pages/DistributorDashboard";
-import TransactionsList from "../pages/operations/TransactionsList";
-import ReportsList from "../pages/operations/RapportsList";
+//import TransactionsList from "../pages/operations/TransactionsList";
+//import ReportsList from "../pages/operations/RapportsList";
 import Sales from "../pages/DashboardSales";
 import Finance from "../pages/DashboardFinance";
 import IT from "../pages/DashboardSettings";
@@ -58,28 +58,6 @@ export const router = createBrowserRouter([
       </RoleProtectedRoute>
     ),
   },
-   {
-    path: "/transactionList",
-    element: (
-      <RoleProtectedRoute allowedRoles={["Admin","SuperAdmin",]}>
-        <TransactionsList />
-      </RoleProtectedRoute>
-    ),
-  },
-   {
-    path: "/reportsList",
-    element: (
-      <RoleProtectedRoute allowedRoles={["Admin" , "SuperAdmin",]}>
-        <ReportsList/>
-      </RoleProtectedRoute>
-    ),
-  },
-  
-  
-
- 
-
-  
 
   {
     path: "/it",
@@ -92,7 +70,7 @@ export const router = createBrowserRouter([
   {
     path: "/usermanagement",
     element: (
-      <RoleProtectedRoute allowedRoles={["Admin"]}>
+      <RoleProtectedRoute allowedRoles={["Admin" , "SuperAdmin"]}>
         <DashboardLayout>
           <UserManagement />
         </DashboardLayout>
@@ -100,4 +78,27 @@ export const router = createBrowserRouter([
     ),
   },
 ]);
-     
+
+
+
+     /*
+ {
+    path: "/transactionList",
+    element: (
+      <RoleProtectedRoute allowedRoles={["Admin","SuperAdmin",]}>
+        <TransactionsList />
+      </RoleProtectedRoute>
+    ),
+  },
+  
+   {
+    path: "/reportsList",
+    element: (
+      <RoleProtectedRoute allowedRoles={["Admin" , "SuperAdmin",]}>
+        <ReportsList/>
+      </RoleProtectedRoute>
+    ),
+  },
+
+  */
+

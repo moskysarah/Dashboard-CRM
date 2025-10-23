@@ -1,6 +1,6 @@
 // src/components/Sidebar.tsx
 import { NavLink } from "react-router-dom";
-import { LayoutDashboard, BarChart, Users, Settings, ShoppingCart, Truck, Store } from "lucide-react";
+import { LayoutDashboard, BarChart, Users, Settings, ShoppingCart, Store } from "lucide-react"; //Truck
 import LogoPostSmart from "./logoPostSmart"; // import logo post smart
 import T from "./translatespace";
 
@@ -68,7 +68,7 @@ export function Sidebar() {
           <ShoppingCart size={18} /> <T>Vente</T>
         </NavLink>
 
-        <NavLink
+        {/* <NavLink
           to="/distributors"
           className={({ isActive }) =>
             `flex items-center gap-2 p-2 rounded-lg text-sm md:text-base ${
@@ -76,10 +76,9 @@ export function Sidebar() {
             }`
           }
         >
-          <Truck size={18} /> <T>distributeur</T>
-        </NavLink>
+          <Truck size={18} /> <T>distributeur</T> */}
 
-        <NavLink
+       <NavLink
           to="/it"
           className={({ isActive }) =>
             `flex items-center gap-2 p-2 rounded-lg text-sm md:text-base ${
