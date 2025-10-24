@@ -13,8 +13,17 @@ export const useTransactions = () => {
         const res = await api.get("/me/transactions/");
         setTransactions(res.data as Transaction[]);
       } catch (err: any) {
-        console.error(err);
-        setError("Erreur lors du chargement des transactions.");
+        console.error("Error fetching transactions:", err);
+        // Provide more specific error message based on error type
+        if (err.code === 'ERR_NETWORK') {
+          setError("Erreur réseau. Vérifiez votre connexion internet.");
+        } else if (err.response?.status === 401) {
+          setError("Non autorisé. Veuillez vous reconnecter.");
+        } else if (err.response?.status === 403) {
+          setError("Accès refusé. Permissions insuffisantes.");
+        } else {
+          setError("Erreur lors du chargement des transactions.");
+        }
       } finally {
         setLoading(false);
       }

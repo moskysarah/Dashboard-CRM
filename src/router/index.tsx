@@ -1,16 +1,15 @@
-// src/router/index.tsx
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import SplashLogin from "../pages/SplashLogin";
-import Dashboard from "../pages/PageMain";
+import DashboardAdmin from "../pages/operations/DashboardAdmin";
 import Merchants from "../pages/DashboardMerchant";
 import Sales from "../pages/DashboardSales";
 import Finance from "../pages/DashboardFinance";
 import IT from "../pages/DashboardSettings";
 import UsersPage from "../pages/AgentDashboard";
-// import UserManagement from "../pages/operations/DashboardAdmin";
 import DashboardLayout from "../layouts/dashboardLayout";
 import RoleProtectedRoute from "../components/roleProtectedRoute";
-import ErrorPage from "../pages/ErrorPage"; 
+import ErrorPage from "../pages/ErrorPage";
+import RedirectByRole from "../components/redirectByRole"; // ← Import du redirect
 import { useAuth } from "../store/auth";
 import type { JSX } from "react";
 
@@ -19,7 +18,6 @@ const RequireAuth = ({ children }: { children: JSX.Element }) => {
   const { user } = useAuth.getState();
 
   if (!user) {
-    // Si pas connecté, on redirige vers SplashLogin
     return <Navigate to="/login" replace />;
   }
 
@@ -27,6 +25,15 @@ const RequireAuth = ({ children }: { children: JSX.Element }) => {
 };
 
 export const router = createBrowserRouter([
+  {
+    path: "/",
+    element: (
+      <RequireAuth>
+        <RedirectByRole />
+      </RequireAuth>
+    ),
+    errorElement: <ErrorPage />,
+  },
   {
     path: "/login",
     element: <SplashLogin />,
@@ -36,9 +43,9 @@ export const router = createBrowserRouter([
     path: "/dashboard",
     element: (
       <RequireAuth>
-        <RoleProtectedRoute allowedRoles={["Admin", "SuperAdmin", "Marchand", "Agent PMC"]}>
+        <RoleProtectedRoute allowedRoles={["Admin", "SuperAdmin" ,]}>
           <DashboardLayout>
-            <Dashboard />
+            <DashboardAdmin />
           </DashboardLayout>
         </RoleProtectedRoute>
       </RequireAuth>
@@ -49,7 +56,7 @@ export const router = createBrowserRouter([
     path: "/users",
     element: (
       <RequireAuth>
-        <RoleProtectedRoute allowedRoles={["Agent PMC"]}>
+        <RoleProtectedRoute allowedRoles={[ "Agent PMC"]}>
           <DashboardLayout>
             <UsersPage />
           </DashboardLayout>
@@ -110,21 +117,6 @@ export const router = createBrowserRouter([
     ),
     errorElement: <ErrorPage />,
   },
-  /*
-  {
-    path: "/usermanagement",
-    element: (
-      <RequireAuth>
-        <RoleProtectedRoute allowedRoles={["Admin", "SuperAdmin"]}>
-          <DashboardLayout>
-            <UserManagement />
-          </DashboardLayout>
-        </RoleProtectedRoute>
-      </RequireAuth>
-    ),
-    errorElement: <ErrorPage />,
-  },
-  */
   {
     path: "*",
     element: <ErrorPage />,

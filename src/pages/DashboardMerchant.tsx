@@ -6,7 +6,7 @@ import MerchantKPI from "../components/merchantKPI";
 import MerchantTransactions from "../components/merchantTransactions";
 import MerchantWallet from "../components/merchantWallet";
 import MerchantProfile from "../components/merchantProfile";
-import { getProfileMerchants, getMerchantWallets, getMerchantTransactions } from "../services/api";
+import { getProfileMerchant, getAgentWallets, getMerchantTransactions } from "../services/api";
 import * as XLSX from "xlsx";
 import T from "../components/translatespace";
 import { useAuth } from "../store/auth";
@@ -51,10 +51,10 @@ const DashboardMerchant: React.FC = () => {
         const transactionsRes = await getMerchantTransactions();
         setTransactions(transactionsRes.data.results ?? transactionsRes.data);
 
-        const profileRes = await getProfileMerchants(user.id);
+        const profileRes = await getProfileMerchant(user.id);
         setProfile(profileRes.data);
 
-        const walletsRes = await getMerchantWallets();
+        const walletsRes = await getAgentWallets();
         setWallets(walletsRes.data.results || walletsRes.data);
 
         setError(null);

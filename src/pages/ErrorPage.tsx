@@ -4,11 +4,19 @@ const ErrorPage = () => {
   const error: any = useRouteError();
   console.error(error);
 
+  // Determine if it's a 404 or other error
+  const is404 = error?.status === 404 || !error;
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 text-center">
-      <h1 className="text-4xl font-bold text-red-600 mb-4">404 - Page non trouvée</h1>
+      <h1 className="text-3xl font-bold text-red-600 mb-4">
+        {is404 ? "404 - Page non trouvée" : "Erreur"}
+      </h1>
       <p className="text-gray-700 mb-6">
-        Désolé, la page que vous cherchez n’existe pas ou a été déplacée.
+        {is404
+          ? "Désolé, la page que vous cherchez n’existe pas ou a été déplacée."
+          : error?.message || "Une erreur inattendue s'est produite."
+        }
       </p>
       <a
         href="/login"

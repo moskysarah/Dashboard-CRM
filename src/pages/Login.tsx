@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react"; 
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import Confetti from "react-confetti";
@@ -10,9 +10,7 @@ import { useAuth } from "../store/auth";
 import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
 import { LOCAL_STORAGE_KEYS } from "../config/constants";
-import type { User } from "../types/domain";
 import T from "../components/translatespace";
-import { useNotifications } from "../hooks/useOtpNotifications"; 
 
 const Login = () => {
   const navigate = useNavigate();
@@ -30,19 +28,14 @@ const Login = () => {
   const [registerUsernameError, setRegisterUsernameError] = useState("");
 
   const [otp, setOtp] = useState("");
-
-// ----------------------------
   const [isLoading, setIsLoading] = useState(false);
   const [otpError, setOtpError] = useState(false);
-
-
   const [otpAttempts, setOtpAttempts] = useState(0);
   const [isLocked, setIsLocked] = useState(false);
   const [lockoutTime, setLockoutTime] = useState(0);
   const timerIdRef = useRef<number | null>(null);
 
   const [loginError, setLoginError] = useState("");
-
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [forgotPhoneOrEmail, setForgotPhoneOrEmail] = useState("");
 
@@ -51,7 +44,6 @@ const Login = () => {
   const [resetPasswordError, setResetPasswordError] = useState("");
 
   const [mode, setMode] = useState<"login" | "register" | "otp" | "forgot" | "resetPassword">("login");
-
   const [showConfetti, setShowConfetti] = useState(false);
   const [showRegistrationSuccess, setShowRegistrationSuccess] = useState(false);
   const [registeredRole, setRegisteredRole] = useState<"Admin" | "Marchand" | "Agent PMC">("Marchand");
@@ -59,20 +51,7 @@ const Login = () => {
   const [modalHeight, setModalHeight] = useState(0);
   const modalRef = useRef<HTMLDivElement>(null);
 
-// HOOK OTP AUTOMATIQUE
-// ----------------------------
-
-const fetchedOtp = useNotifications();
-
-useEffect(() => {
-  if (fetchedOtp.notifications.length > 0) {
-    const latestMessage = fetchedOtp.notifications[0].message;
-    setOtp(latestMessage);
-    localStorage.setItem(LOCAL_STORAGE_KEYS.OTP_CODE, latestMessage);
-  }
-}, [fetchedOtp]);
-
-  // Réinitialisation des champs à chaque montage du composant
+  // Réinitialisation des champs à chaque montage
   useEffect(() => {
     setLoginPhoneOrEmail("");
     setLoginPassword("");
@@ -100,7 +79,7 @@ useEffect(() => {
     setShowConfetti(false);
   }, []);
 
-  // Réinitialisation des champs
+  // Réinitialisation des champs selon mode
   useEffect(() => {
     if (mode === "login") {
       setLoginPhoneOrEmail("");
@@ -122,7 +101,7 @@ useEffect(() => {
     };
   }, []);
 
-  // Update modal dimensions when modal is shown
+  // Update modal dimensions
   useEffect(() => {
     if (showRegistrationSuccess && modalRef.current) {
       const rect = modalRef.current.getBoundingClientRect();
@@ -131,26 +110,34 @@ useEffect(() => {
     }
   }, [showRegistrationSuccess]);
 
-  // Validation téléphone (seulement pour OTP)
   const isValidPhone = (input: string) => /^\+?\d{7,15}$/.test(input.replace(/\s+/g, '')); 
 
-  //  LOGIN
+  // ------------------------ LOGIN ------------------------
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError("");
     setIsLoading(true);
 
+    const cleanPhone = loginPhoneOrEmail.trim();
+    const cleanPassword = loginPassword.trim();
+
+    if (!cleanPhone || !cleanPassword) {
+      setLoginError("Veuillez remplir tous les champs.");
+      setIsLoading(false);
+      return;
+    }
+
     try {
       await api.post("accounts/otp/request/", {
-        phone: loginPhoneOrEmail,
-        password: loginPassword,
+        phone: cleanPhone,
+        password: cleanPassword,
       });
 
-      localStorage.setItem(LOCAL_STORAGE_KEYS.USER_PHONE, loginPhoneOrEmail);
+      localStorage.setItem(LOCAL_STORAGE_KEYS.USER_PHONE, cleanPhone);
 
-      const maskedPhone = isValidPhone(loginPhoneOrEmail)
-        ? loginPhoneOrEmail.replace(/(\d{3})(\d{3})(\d{4})/, "$1***$2***$3")
-        : loginPhoneOrEmail.replace(/(.{3})(.*)(@.*)/, "$1***$3");
+      const maskedPhone = isValidPhone(cleanPhone)
+        ? cleanPhone.replace(/(\d{3})(\d{3})(\d{4})/, "$1***$2***$3")
+        : cleanPhone.replace(/(.{3})(.*)(@.*)/, "$1***$3");
 
       localStorage.setItem(LOCAL_STORAGE_KEYS.MASKED_PHONE, maskedPhone);
       setMode("otp");
@@ -171,28 +158,28 @@ useEffect(() => {
     }
   };
 
-  //  REGISTER
+  // ------------------------ REGISTER ------------------------
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setRegisterUsernameError("");
     setIsLoading(true);
 
     const trimmedUsername = registerUsername.trim();
+    const cleanPhone = registerPhone.trim();
+    const cleanEmail = registerEmail.trim();
+    const cleanPassword = registerPassword.trim();
+
     if (!trimmedUsername) {
       setRegisterUsernameError("Le nom d'utilisateur est requis.");
       setIsLoading(false);
       return;
     }
     if (!/^[\p{L}0-9.\/+_-]+$/u.test(trimmedUsername)) {
-      setRegisterUsernameError("Le nom d'utilisateur ne peut contenir que des lettres, chiffres et les caractères './+/-/_'.");
+      setRegisterUsernameError("Le nom d'utilisateur ne peut contenir que des lettres, chiffres et './+/-/_'.");
       setIsLoading(false);
       return;
     }
-    if (
-      !isValidPhone(registerPhone) ||
-      !registerPassword ||
-      !registerRole
-    ) {
+    if (!isValidPhone(cleanPhone) || !cleanPassword || !registerRole) {
       alert("Veuillez remplir correctement tous les champs.");
       setIsLoading(false);
       return;
@@ -201,21 +188,20 @@ useEffect(() => {
     try {
       await api.post("/accounts/users/", {
         username: trimmedUsername,
-        phone: registerPhone,
-        email: registerEmail || undefined,
-        password: registerPassword,
+        phone: cleanPhone,
+        email: cleanEmail || undefined,
+        password: cleanPassword,
         role: registerRole,
       });
 
       setShowConfetti(true);
-      setTimeout(() => setShowConfetti(false), 5000); // Hide confetti after 5 seconds
+      setTimeout(() => setShowConfetti(false), 5000);
       setRegisteredRole(registerRole);
       setShowRegistrationSuccess(true);
     } catch (err: unknown) {
       console.error("Erreur complète lors de l'inscription :", err);
       if (err instanceof Error && 'response' in err && err.response) {
         const response = err.response as { data?: { detail?: string; [key: string]: unknown } };
-        console.error("Données de la réponse d'erreur :", response.data);
         const errorMessage = response?.data?.detail ||
           (response.data && typeof response.data === 'object' ? JSON.stringify(response.data) : "Erreur lors de l'inscription");
         alert(errorMessage);
@@ -227,44 +213,11 @@ useEffect(() => {
     }
   };
 
-  //  FORGOT PASSWORD
-  const handleForgotPassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    const trimmedInput = forgotPhoneOrEmail.trim();
-    if (!isValidPhone(trimmedInput)) {
-      alert("Veuillez saisir un numéro de téléphone valide.");
-      setIsLoading(false);
-      return;
-    }
-
-  try {
-    await api.post("/accounts/password-reset/", { phone: trimmedInput });
-
-    localStorage.setItem(LOCAL_STORAGE_KEYS.USER_PHONE, trimmedInput);
-
-      const maskedPhone = trimmedInput.replace(/(\d{3})(\d{3})(\d{4})/, "$1***$2***$3");
-
-      localStorage.setItem(LOCAL_STORAGE_KEYS.MASKED_PHONE, maskedPhone);
-      setIsForgotPassword(true);
-      setMode("otp");
-    } catch (err: unknown) {
-      console.error(err);
-      if (err instanceof Error && 'response' in err && err.response) {
-        const response = err.response as { data?: { detail?: string } };
-        alert(response?.data?.detail || "Erreur lors de l'envoi de l'OTP. Veuillez réessayer.");
-      } else {
-        alert("Erreur inconnue lors de l'envoi de l'OTP.");
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  //  OTP VALIDATION
+  // ------------------------ OTP ------------------------
   const handleOtpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+
     const phone = localStorage.getItem(LOCAL_STORAGE_KEYS.USER_PHONE);
     const code = otp || localStorage.getItem(LOCAL_STORAGE_KEYS.OTP_CODE);
 
@@ -275,35 +228,61 @@ useEffect(() => {
       return;
     }
 
+    const cleanPhone = phone.trim();
+    const cleanOtp = code.trim();
+
     try {
       if (isForgotPassword) {
-        // mot de passe oublier, code valide OTP pour reinitialiser le mot de passe
-        localStorage.setItem(LOCAL_STORAGE_KEYS.OTP_CODE, code); // store OTP for reset
+        localStorage.setItem(LOCAL_STORAGE_KEYS.OTP_CODE, cleanOtp);
         setMode("resetPassword");
       } else {
-        // Normal login
-        const res = await api.post("/accounts/otp/login/", { phone, otp: code });
+        const res = await api.post("/accounts/otp/login/", {
+          phone: cleanPhone,
+          otp: cleanOtp,
+        });
+
         const response = res.data;
 
         if (res.status === 200 && response.access && response.refresh && response.data) {
-          console.log("[SUCCESS] Connexion réussie ");
+          console.log("[SUCCESS] Connexion réussie");
           setOtpAttempts(0);
           setIsLocked(false);
           setLockoutTime(0);
           if (timerIdRef.current) clearInterval(timerIdRef.current);
 
-          login(response.data as User, {
+
+             // ------------------- MAPPING DES RÔLES -------------------
+          const roleMap: Record<string, "Admin" | "Marchand" | "User"> = {
+            "admin": "Admin",
+            "merchant": "Marchand",
+            "user": "User",
+         };
+
+         const userRole = roleMap[response.data.role] || "Marchand";
+
+        // je le sauvegarde dans mon  store auth avec le rôle correct
+            login({ ...response.data, role: userRole }, {
+             access: response.access,
+             refresh: response.refresh,
+          });
+
+          login(response.data, {
             access: response.access,
             refresh: response.refresh,
           });
 
-          navigate("/dashboard");
+          const role = response.data.role;
+          if (role === "Admin") navigate("/dashboard");
+          else if (role === "Marchand") navigate("/merchants");
+          else if (role === "User") navigate("/users");
+
+          else navigate("/");
         } else {
           setOtpError(true);
           const newAttempts = otpAttempts + 1;
           setOtpAttempts(newAttempts);
           if (newAttempts >= 2) {
-            const lockoutDuration = 30 * Math.pow(2, newAttempts - 2); // 30s, 60s, 120s, etc.
+            const lockoutDuration = 30 * Math.pow(2, newAttempts - 2);
             setIsLocked(true);
             setLockoutTime(lockoutDuration);
             const id = setInterval(() => {
@@ -312,6 +291,7 @@ useEffect(() => {
                   setIsLocked(false);
                   setOtpAttempts(0);
                   clearInterval(id);
+                  return 0;
                 }
                 return prev - 1;
               });
@@ -322,36 +302,13 @@ useEffect(() => {
       }
     } catch (err: unknown) {
       console.error(err);
-      if (isForgotPassword) {
-        setOtpError(true);
-      } else {
-        setOtpError(true);
-        const newAttempts = otpAttempts + 1;
-        setOtpAttempts(newAttempts);
-        if (newAttempts >= 2) {
-          const lockoutDuration = 30 * Math.pow(2, newAttempts - 2); // 30s, 60s, 120s, etc.
-          setIsLocked(true);
-          setLockoutTime(lockoutDuration);
-          const id = setInterval(() => {
-            setLockoutTime((prev) => {
-              if (prev <= 1) {
-                setIsLocked(false);
-                setOtpAttempts(0);
-                clearInterval(id);
-                return 0;
-              }
-              return prev - 1;
-            });
-          }, 1000);
-          timerIdRef.current = id;
-        }
-      }
+      setOtpError(true);
     } finally {
       setIsLoading(false);
     }
   };
 
-  //  RESET PASSWORD
+  // ------------------------ RESET PASSWORD ------------------------
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setResetPasswordError("");
@@ -374,7 +331,6 @@ useEffect(() => {
       });
       alert("Mot de passe réinitialisé avec succès !");
       setMode("login");
-      // Clear stored data
       localStorage.removeItem(LOCAL_STORAGE_KEYS.OTP_CODE);
     } catch (error: unknown) {
       console.error("Erreur lors de la réinitialisation du mot de passe :", error);
@@ -389,13 +345,7 @@ useEffect(() => {
     }
   };
 
-  const slide = {
-    initial: { opacity: 0, x: -50 },
-    animate: { opacity: 1, x: 0 },
-    exit: { opacity: 0, x: 50 },
-    transition: { duration: 0.5 },
-  };
-
+  // ------------------------ Spinner ------------------------
   const Spinner = () => (
     <svg
       className="animate-spin h-5 w-5 text-white"
@@ -414,15 +364,54 @@ useEffect(() => {
     </svg>
   );
 
+  // ------------------------ Continue after registration ------------------------
   const handleContinue = () => {
     const dashboardRoutes = {
       "Admin": "/dashboard",
       "Marchand": "/merchants",
-      "Agent PMC": "/distributors"
+      "User": "/users",
+      "Agent PMC": "/users" // Added Agent PMC role
     };
-    const route = dashboardRoutes[registeredRole] || "/dashboard";
+    const route = dashboardRoutes[registeredRole] || "/";
     navigate(route);
     setShowRegistrationSuccess(false);
+  };
+
+  // ------------------------ FORGOT PASSWORD ------------------------
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    const cleanPhone = forgotPhoneOrEmail.trim();
+
+    if (!cleanPhone) {
+      alert("Veuillez saisir votre téléphone.");
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      await api.post("accounts/otp/request/", {
+        phone: cleanPhone,
+      });
+
+      localStorage.setItem(LOCAL_STORAGE_KEYS.USER_PHONE, cleanPhone);
+      setIsForgotPassword(true);
+      setMode("otp");
+    } catch (err: unknown) {
+      console.error(err);
+      alert("Erreur lors de l'envoi de l'OTP.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // ------------------------ Animation ------------------------
+  const slide = {
+    initial: { x: 300, opacity: 0 },
+    animate: { x: 0, opacity: 1 },
+    exit: { x: -300, opacity: 0 },
+    transition: { duration: 0.5 },
   };
 
   return (
@@ -478,7 +467,7 @@ useEffect(() => {
                     <option value="">- Sélectionner un rôle --</option>
                     <option value="Admin"> Admin </option>
                       <option value="Marchand"> Marchand </option>
-                    <option value="Agent PMC"> Agent PMC </option>
+                    <option value="User"> Agent PMC </option>
                   </select>
                 </div>
 
@@ -616,7 +605,7 @@ useEffect(() => {
                       }}
                       placeholder="Code OTP"
                       className="text-center"
-                      autoComplete="one-time-code"
+                      autoFocus
                     />
                     <Button
                       type="submit"

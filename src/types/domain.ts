@@ -4,9 +4,9 @@
 
 // --- Enums from API ---
 
-export type UserRole = 'admin' | 'agent' | 'superadmin';
+export type UserRole = 'admin' | 'agent' | 'superadmin'| 'marchand';
 
-export type AgentRole = 'admin' | 'agent' | 'superadmin';
+export type AgentRole = 'admin' | 'agent' | 'superadmin'|'marchand';
 
 /**
  * Represents an Agent object from the API.

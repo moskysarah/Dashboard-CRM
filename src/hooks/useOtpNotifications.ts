@@ -21,11 +21,11 @@ export const useNotifications = ({ is_for }: UseNotificationsOptions = {}) => {
     const fetchNotifications = async () => {
       try {
         setLoading(true);
-        let url = `/notifications/?phone=${phone}`;
+        const params: { phone: string; is_for?: string } = { phone };
         if (is_for) {
-          url += `&is_for=${is_for}`;
+          params.is_for = is_for;
         }
-        const res = await api.get(url);
+        const res = await api.get("/notification/messages/", { params });
         setNotifications(res.data.results || []);
       } catch (err) {
         console.error("Erreur récupération notifications :", err);

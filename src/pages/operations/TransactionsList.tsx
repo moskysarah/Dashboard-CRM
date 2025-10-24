@@ -21,7 +21,17 @@ const TransactionsList: React.FC = () => {
   }
 
   if (error) {
-    return <p className="text-center py-4 text-red-500">{error}</p>;
+    return (
+      <div className="text-center py-4">
+        <p className="text-red-500 mb-2">{error}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          Réessayer
+        </button>
+      </div>
+    );
   }
 
   return (

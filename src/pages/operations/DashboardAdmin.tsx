@@ -18,10 +18,11 @@ const SectionCard: React.FC<SectionCardProps> = ({ title, children, className })
   </div>
 );
 
-const roleOptions: UserRole[] = ["admin", "agent", "superadmin"];
+const roleOptions: UserRole[] = ["admin", "agent", "superadmin","marchand"];
 const roleColors: Record<UserRole, string> = {
   admin: "bg-blue-500 text-white",
   agent: "bg-green-500 text-white",
+  marchand : "bg-yellow-500 text-white",
   superadmin: "bg-purple-500 text-white",
 };
 const statusColors: Record<"Active" | "Suspended", string> = {
@@ -32,7 +33,7 @@ const statusColors: Record<"Active" | "Suspended", string> = {
 const capitalize = (text: string) =>
   text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
 
-const UserManagement: React.FC = () => {
+const DashboardAdmin: React.FC = () => {
   const { stats: overviewStats, loading: statsLoading } = useOverviewStats();
   const {
     users,
@@ -355,4 +356,4 @@ const UserManagement: React.FC = () => {
   );
 };
 
-export default UserManagement;
+export default DashboardAdmin;

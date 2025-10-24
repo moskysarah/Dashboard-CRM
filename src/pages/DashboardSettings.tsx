@@ -2,9 +2,9 @@ import React, { useState, useEffect } from "react";
 import DashboardLayout from "../layouts/dashboardLayout";
 import { Server, Bug, Key, Wifi, Database, Download } from "lucide-react";
 import type { Ticket } from "../types/domain";
-import fetchTicketsIT from "../services/api";
+import API from "../config/api";
 import T from "../components/translatespace";
-import API from "../services/api";
+import { fetchTicketsIT } from "../services/api";
 
 const typeIcon = {
   "Problème de serveur": <Server className="inline-block mr-2 w-6 h-6 text-red-500" />,
@@ -15,25 +15,25 @@ const typeIcon = {
   "Mise à jour logiciel": <Download className="inline-block mr-2 w-6 h-6 text-indigo-500" />,
 };
 
-const DashboardSettings : React.FC = () => {
+const DashboardSettings: React.FC = () => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [filter, setFilter] = useState<"Tous" | "Ouvert" | "En cours" | "Résolu">("Tous");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // ✅ Nouveau state pour les paramètres utilisateur
+  //  Nouveau state pour les paramètres utilisateur
   const [userSettings, setUserSettings] = useState<any>(null);
 
   useEffect(() => {
     const loadTicketsAndSettings = async () => {
       try {
-        // je Charge les tickets IT
+        // 🔹 Charger les tickets IT
         const response = await fetchTicketsIT({});
         setTickets(response.data);
 
-        // je  Charger les paramètres utilisateur depuis l'API user-setting
-        const userResponse = await API.get("/accounts/user-setting");
-        setUserSettings(userResponse.data); // je peux afficher ces infos dans ton dash
+        // 🔹 Charger les paramètres utilisateur depuis l'API user-setting
+        const userResponse = await API.get("/user-setting");
+        setUserSettings(userResponse.data); // tu peux afficher ces infos dans ton dash
         console.log("User settings récupérés :", userResponse.data);
 
       } catch (err) {
@@ -57,7 +57,7 @@ const DashboardSettings : React.FC = () => {
           <T>Module IT - Support & Gestion</T>
         </h1>
 
-        {/* ✅ Exemple d’affichage rapide des paramètres utilisateur */}
+        {/*  Exemple d’affichage rapide des paramètres utilisateur */}
         {userSettings && (
           <div className="mb-4 p-4 bg-gray-50 rounded-lg shadow-sm">
             <h2 className="font-semibold text-lg mb-2 text-gray-800">Paramètres utilisateur</h2>

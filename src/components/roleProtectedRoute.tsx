@@ -9,31 +9,41 @@ interface RoleProtectedRouteProps {
   allowedRoles: ("Admin" | "Marchand" | "Agent PMC" | "SuperAdmin")[];
 }
 
-const mapRole = (role: UserRole): "Admin" | "Marchand" | "Agent PMC" |"SuperAdmin"| null => {
+// Mapper les rôles API vers les rôles affichés dans l'app
+function mapRole(
+  role: UserRole
+): "Admin" | "Marchand" | "Agent PMC" | "SuperAdmin" | null {
   switch (role) {
-    case 'admin':
-      return 'Admin';
-    case 'agent':
-      return 'Marchand';
-    case 'superadmin':
-      return 'Agent PMC';
+    case "admin":
+      return "Admin";
+    case "agent":
+      return "Agent PMC";
+    case "superadmin":
+      return "SuperAdmin";
+    case "marchand":
+      return "Marchand";
     default:
       return null;
   }
-};
+}
 
-const RoleProtectedRoute: React.FC<RoleProtectedRouteProps> = ({ children, allowedRoles }) => {
+const RoleProtectedRoute: React.FC<RoleProtectedRouteProps> = ({
+  children,
+  allowedRoles,
+}) => {
   const { user } = useAuth();
 
   if (!user || !user.role) {
-    // non connecté ou rôle non défini
+    // Non connecté
     return <Navigate to="/login" replace />;
   }
 
   const mappedRole = mapRole(user.role);
+
   if (!mappedRole || !allowedRoles.includes(mappedRole)) {
-    // connecté mais pas le bon rôle
+    // Connecté mais mauvais rôle
     return <Navigate to="/dashboard" replace />;
+    
   }
 
   return <>{children}</>;

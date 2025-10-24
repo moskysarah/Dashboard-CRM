@@ -6,7 +6,7 @@ import { useAuth } from "../store/auth";
 // CONFIGURATION GLOBALE
 // ========================
 const API = axios.create({
-  baseURL: "http://192.162.69.75:8078/api/v1",
+  baseURL: "https://yozma-postepay.mapango.immo/api/v1",
 });
 
 // ========================
@@ -35,8 +35,9 @@ function getAccessToken() {
   return null;
 }
 
+// ========================
 // INTERCEPTEUR REQUEST
-
+// ========================
 API.interceptors.request.use(
   (config) => {
     const accessToken = getAccessToken();
@@ -45,14 +46,14 @@ API.interceptors.request.use(
       ? config.url.startsWith("/") ? config.url : "/" + config.url
       : "";
 
-    //  Routes publiques (pas besoin de token)
+    // Routes publiques : pas besoin de token
     const publicEndpoints = [
       { url: "/accounts/otp/request/", method: "POST" },
       { url: "/accounts/token/phone/", method: "POST" },
       { url: "/accounts/users/", method: "POST" },
       { url: "/accounts/password-reset/", method: "POST" },
       { url: "/accounts/otp/login/", method: "POST" },
-      { url: "/notification/messages/", method: "GET" }, //  ajouté pour recevoir les OTP
+      { url: "/notification/messages/", method: "GET" },
     ];
 
     const isPublicEndpoint = publicEndpoints.some(
@@ -61,13 +62,10 @@ API.interceptors.request.use(
         config.method?.toUpperCase() === endpoint.method
     );
 
-    if (isPublicEndpoint) {
-      config.headers.Authorization = undefined;
-      return config;
-    }
-
-    if (accessToken) {
+    if (!isPublicEndpoint && accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
+    } else {
+      config.headers.Authorization = undefined; // PAS DE TOKEN pour public
     }
 
     return config;
@@ -94,10 +92,8 @@ API.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // Handle 403 Forbidden errors
     if (error.response?.status === 403) {
-      console.error("Accès refusé (403): Permissions insuffisantes pour cette ressource.");
-      // You can add custom logic here, like showing a notification or redirecting
+      console.error("Accès refusé (403): Permissions insuffisantes.");
       return Promise.reject(error);
     }
 
@@ -150,7 +146,7 @@ export const refreshToken = (refresh: string) =>
   API.post("/token/refresh/", { refresh });
 
 // ========================
-// AUTHENTIFICATION (OTP, LOGIN, PASSWORD)
+// AUTHENTIFICATION
 // ========================
 export const requestOTP = (phone: string, password?: string) =>
   axios.post(`${API.defaults.baseURL}/accounts/otp/request/`, password ? { phone, password } : { phone });
@@ -168,22 +164,15 @@ export const confirmResetPassword = (token: string, password: string) =>
   axios.post(`${API.defaults.baseURL}/accounts/password-reset/confirm/`, { token, password });
 
 // ========================
-// GESTION DU PROFIL UTILISATEUR (AGENT)
-
-// Profil de l’agent connecté
+// PROFIL UTILISATEUR
+// ========================
 export const getAgentProfile = () => API.get("/accounts/user");
-// Portefeuille de l’agent connecté
 export const getAgentWallet = () => API.get("/me/wallets");
-// Transactions de l’agent connecté
 export const getAgentTransactions = () => API.get("/me/transactions");
+export const deleteUserAccount = (id: string) => API.delete(`/accounts/users/${id}/`);
 
-// DELETE USER  ACCOUNT  (Agent)
-
-export const deleteUserAccount = (id: string) =>
-  API.delete(`/accounts/users/${id}/`);
-
-
-// CRÉATION ET GESTION DES UTILISATEURS
+// ========================
+// GESTION UTILISATEURS
 // ========================
 export const createUser = (userData: {
   first_name: string;
@@ -206,49 +195,28 @@ export const updateAdminUser = (id: string, data: Partial<{
   phone: string;
 }>) => API.patch(`/accounts/users/${id}/`, data);
 
-
-
+// ========================
 // NOTIFICATIONS
 // ========================
-export const getNotifications = () => API.get("/notification/messages/");
+export const getNotifications = () => axios.get(`${API.defaults.baseURL}/notification/messages/`); // PAS DE CREDENTIALS
 export const markNotificationRead = (id: string) =>
   API.patch(`/notification/messages/${id}/`, { is_read: true });
 
-
-// -------- MARCHANT ROUTE ---------------------------------------------
-
-// GET WALLET OF AGENT AND MERCHANT
+// ========================
+// MARCHANT & ANALYTICS
+// ========================
 export const getAgentWallets = () => API.get("/me/wallets/");
-export const getMerchantWallets = () => API.get("/merchants/wallets/{id}/");
-
-// DELETE A MARCHANT PROFILE 
-export const deleteProfileMerchants = () => API.delete("/merchants/profiles/{id}/")
-
-// GET PROFILE MERCHANT
-
-export const getProfileMerchants = (id: number) => API.get(`/merchants/profiles/${id}/`)
-
-// POST PROFILE MERCHANT 
-
-export const getProfileMerchant = () => API.get("/merchants/profiles/{id}/")
-
-//user seeting 
-
-export const getUserSettings = () => API.get("/accounts/user-settings/")
-
-
-//   ADMIN PANEL - UTILISATEURS ====
-
-// Changer le rôle d'un utilisateur
+export const getMerchantWallets = (id: string | number) => API.get(`/merchants/wallets/${id}/`);
+export const deleteProfileMerchants = (id: string | number) => API.delete(`/merchants/profiles/${id}/`);
+export const getProfileMerchants = (id: number) => API.get(`/merchants/profiles/${id}/`);
+export const getProfileMerchant = (id: string | number) => API.get(`/merchants/profiles/${id}/`);
+export const getUserSettings = () => API.get("/accounts/user-settings/");
 export const setUserRole = (userId: string | number, role: string) =>
   API.post(`/admin-panel/users/${userId}/set-role/`, { role });
-
-// Changer le statut d'un utilisateur (actif/inactif, etc.)
 export const setUserStatus = (userId: string | number, status: string) =>
   API.post(`/admin-panel/users/${userId}/set-status/`, { status });
 
-
-
+// ========================
 // ANALYTICS
 // ========================
 export const getAnalyticsOverview = () => API.get("/analytics/overview/");
@@ -256,10 +224,10 @@ export const getAnalyticsTimeseries = () => API.get("/analytics/timeseries/");
 export const getAnalyticsByStatus = () => API.get("/analytics/by-status/");
 export const getAnalyticsActiveUsers = () => API.get("/analytics/active-users/");
 
-// Additional exports for hooks
+// Export supplémentaires
 export const getAdminOverview = getAnalyticsOverview;
 export const getMerchantTransactions = () => API.get("/me/transactions/");
-
 export const getMerchants = () => API.get("/merchants/");
+export const fetchTicketsIT = (params?: any) => API.get("/it-tickets", { params });
 
 export default API;
