@@ -32,25 +32,25 @@ export const router = createBrowserRouter([
         <RedirectByRole />
       </RequireAuth>
     ),
-    errorElement: <ErrorPage />,
+    //errorElement: <ErrorPage />,
   },
   {
     path: "/login",
     element: <SplashLogin />,
-    errorElement: <ErrorPage />,
+    //errorElement: <ErrorPage />,
   },
   {
     path: "/dashboard",
     element: (
       <RequireAuth>
-        <RoleProtectedRoute allowedRoles={["Admin", "SuperAdmin" ,]}>
+        <RoleProtectedRoute allowedRoles={["Admin", "SuperAdmin" ,"Agent PMC","Marchand"]}>
           <DashboardLayout>
             <DashboardAdmin />
           </DashboardLayout>
         </RoleProtectedRoute>
       </RequireAuth>
     ),
-    errorElement: <ErrorPage />,
+    //errorElement: <ErrorPage />,
   },
   {
     path: "/users",
@@ -63,7 +63,7 @@ export const router = createBrowserRouter([
         </RoleProtectedRoute>
       </RequireAuth>
     ),
-    errorElement: <ErrorPage />,
+   // errorElement: <ErrorPage />,
   },
   {
     path: "/finance",
@@ -76,7 +76,7 @@ export const router = createBrowserRouter([
         </RoleProtectedRoute>
       </RequireAuth>
     ),
-    errorElement: <ErrorPage />,
+   // errorElement: <ErrorPage />,
   },
   {
     path: "/sales",
@@ -89,7 +89,7 @@ export const router = createBrowserRouter([
         </RoleProtectedRoute>
       </RequireAuth>
     ),
-    errorElement: <ErrorPage />,
+    //errorElement: <ErrorPage />,
   },
   {
     path: "/merchants",
@@ -102,7 +102,7 @@ export const router = createBrowserRouter([
         </RoleProtectedRoute>
       </RequireAuth>
     ),
-    errorElement: <ErrorPage />,
+    //errorElement: <ErrorPage />,
   },
   {
     path: "/it",
@@ -115,7 +115,7 @@ export const router = createBrowserRouter([
         </RoleProtectedRoute>
       </RequireAuth>
     ),
-    errorElement: <ErrorPage />,
+    //errorElement: <ErrorPage />,
   },
   {
     path: "*",
