@@ -6,6 +6,8 @@ import TransactionsList from "./TransactionsList";
 import ReportsList from "./RapportsList";
 import T from "../../components/translatespace";
 
+console.log("DashboardAdmin rendu ✅");
+
 interface SectionCardProps {
   title: string | React.ReactNode;
   children?: React.ReactNode;
@@ -218,17 +220,17 @@ const DashboardAdmin: React.FC = () => {
                   onClick={() => setShowCreateModal(true)}
                   className="px-2 py-1 rounded bg-green-500 text-white hover:bg-green-600 text-xs"
                 >
-                  <T>Créer un utilisateur</T>
+                  <T>Créer un marchand </T>
                 </button>
                 <button
                   onClick={() => setShowDeleteModal(true)}
                   className="px-2 py-1 rounded bg-red-500 text-white hover:bg-red-600 text-xs"
                 >
-                  <T>Supprimer un utilisateur</T>
+                  <T>Supprimer un marchand</T>
                 </button>
               </div>
               <span className="text-xs text-gray-600">
-                Page {currentPage} sur {totalPages} ({totalUsers} utilisateurs)
+                Page {currentPage} sur {totalPages} ({totalUsers} marchands)
               </span>
             </div>
           </div>

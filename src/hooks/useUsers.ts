@@ -12,6 +12,8 @@ export const useUsers = () => {
   const [totalUsers, setTotalUsers] = useState(0);
   const [pageSize, setPageSize] = useState(10);
 
+  console.log("HOOK useUsers appelé");
+
   //   Récupérer la liste des utilisateurs
   const fetchUsers = async (page = 1) => {
     if (user?.role !== "admin") {

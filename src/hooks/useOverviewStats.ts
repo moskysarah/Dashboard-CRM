@@ -2,6 +2,8 @@
 import { useState, useEffect } from "react";
 import api from "../services/api";
 
+console.log("HOOK useOverviewStats appelé");
+
 type StatsData = {
   users: {
     total_users: number;

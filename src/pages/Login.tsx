@@ -187,6 +187,7 @@ const Login = () => {
 
     try {
       await api.post("/accounts/users/", {
+
         username: trimmedUsername,
         phone: cleanPhone,
         email: cleanEmail || undefined,
@@ -222,7 +223,7 @@ const Login = () => {
     const code = otp || localStorage.getItem(LOCAL_STORAGE_KEYS.OTP_CODE);
 
     if (!phone || !code) {
-      alert("Une erreur est survenue. Veuillez recommencer la connexion.");
+      alert("Une erreur est survenue.  Veuillez recommencer la connexion.");
       setIsLoading(false);
       setMode("login");
       return;
@@ -230,11 +231,11 @@ const Login = () => {
 
     const cleanPhone = phone.trim();
     const cleanOtp = code.trim();
-
+  
     try {
-      if (isForgotPassword) {
+      if (isForgotPassword) { 
         localStorage.setItem(LOCAL_STORAGE_KEYS.OTP_CODE, cleanOtp);
-        setMode("resetPassword");
+        setMode("resetPassword"); 
       } else {
         const res = await api.post("/accounts/otp/login/", {
           phone: cleanPhone,
@@ -271,11 +272,11 @@ const Login = () => {
             refresh: response.refresh,
           });
 
-          const role = response.data.role;
+          const role = userRole; // j'utilise bien le rôle mappé
+
           if (role === "Admin") navigate("/dashboard");
           else if (role === "Marchand") navigate("/merchants");
           else if (role === "User") navigate("/users");
-
           else navigate("/");
         } else {
           setOtpError(true);
@@ -415,7 +416,12 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row font-sans overflow-hidden">
+    <motion.div
+      initial={{ x: -100, opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      transition={{ duration: 0.8, ease: "easeOut" }}
+      className="min-h-screen flex flex-col md:flex-row font-sans overflow-hidden"
+    >
       {showConfetti && <Confetti width={window.innerWidth} height={window.innerHeight} />}
 
       {/* Modal de succès d'inscription */}
@@ -732,7 +738,7 @@ const Login = () => {
           </>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 };
 

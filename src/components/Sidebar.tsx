@@ -28,7 +28,7 @@ export function Sidebar() {
         </NavLink>
 
         {/* Dashboard Admin uniquement pour Admin/SuperAdmin */}
-        {(role === "admin" || role === "superadmin") && (
+        {(role === "admin" || role === "superadmin" ) && (
           <NavLink
             to="/dashboard"
             className={({ isActive }) =>

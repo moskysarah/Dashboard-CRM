@@ -1,7 +1,126 @@
+// src/routes/index.tsx
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import SplashLogin from "../pages/SplashLogin";
 import DashboardAdmin from "../pages/operations/DashboardAdmin";
 import Merchants from "../pages/DashboardMerchant";
+import Sales from "../pages/DashboardSales";
+import Finance from "../pages/DashboardFinance";
+import IT from "../pages/DashboardSettings";
+import UsersPage from "../pages/AgentDashboard";
+import DashboardLayout from "../layouts/dashboardLayout";
+import ErrorPage from "../pages/ErrorPage";
+import RedirectByRole from "../components/redirectByRole";
+import { useAuth } from "../store/auth";
+import type { JSX } from "react";
+
+// Vérifie si l'utilisateur est connecté
+const RequireAuth = ({ children }: { children: JSX.Element }) => {
+  const { user, isAuthenticated, hydrated } = useAuth();
+
+  if (!hydrated) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-gray-50">
+        <p>Chargement...</p>
+      </div>
+    );
+  }
+
+  if (!user || !isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
+};
+
+export const router = createBrowserRouter([
+  {
+    path: "/",
+    element: (
+      <RequireAuth>
+        <RedirectByRole />
+      </RequireAuth>
+    ),
+  },
+  {
+    path: "/login",
+    element: <SplashLogin />,
+  },
+  {
+    path: "/dashboard",
+    element: (
+      <RequireAuth>
+        <DashboardLayout>
+          <DashboardAdmin />
+        </DashboardLayout>
+      </RequireAuth>
+    ),
+  },
+  {
+    path: "/users",
+    element: (
+      <RequireAuth>
+        <DashboardLayout>
+          <UsersPage />
+        </DashboardLayout>
+      </RequireAuth>
+    ),
+  },
+  {
+    path: "/finance",
+    element: (
+      <RequireAuth>
+        <DashboardLayout>
+          <Finance />
+        </DashboardLayout>
+      </RequireAuth>
+    ),
+  },
+  {
+    path: "/sales",
+    element: (
+      <RequireAuth>
+        <DashboardLayout>
+          <Sales />
+        </DashboardLayout>
+      </RequireAuth>
+    ),
+  },
+  {
+    path: "/merchants",
+    element: (
+      <RequireAuth>
+        <DashboardLayout>
+          <Merchants />
+        </DashboardLayout>
+      </RequireAuth>
+    ),
+  },
+  {
+    path: "/it",
+    element: (
+      <RequireAuth>
+        <DashboardLayout>
+          <IT />
+        </DashboardLayout>
+      </RequireAuth>
+    ),
+  },
+  {
+    path: "*",
+    element: <ErrorPage />,
+  },
+]);
+
+
+
+
+
+
+{/* 
+import { createBrowserRouter, Navigate } from "react-router-dom";
+import SplashLogin from "../pages/SplashLogin";
+import DashboardAdmin from "../pages/operations/DashboardAdmin";
+ import Merchants from "../pages/DashboardMerchant";
 import Sales from "../pages/DashboardSales";
 import Finance from "../pages/DashboardFinance";
 import IT from "../pages/DashboardSettings";
@@ -43,7 +162,7 @@ export const router = createBrowserRouter([
     path: "/dashboard",
     element: (
       <RequireAuth>
-        <RoleProtectedRoute allowedRoles={["Admin", "SuperAdmin" ,"Agent PMC","Marchand"]}>
+        <RoleProtectedRoute allowedRoles={["Admin", "SuperAdmin" ,]}>
           <DashboardLayout>
             <DashboardAdmin />
           </DashboardLayout>
@@ -122,3 +241,4 @@ export const router = createBrowserRouter([
     element: <ErrorPage />,
   },
 ]);
+ */}

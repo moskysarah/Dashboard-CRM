@@ -6,25 +6,15 @@ import { cleanupAuthLocalStorage } from "../utils/localStorageCleanup";
 
 export interface AuthState {
   user: User | null;
-  role: string | null; //  je  garde le rôle
+  role: string | null;
   accessToken: string | null;
   refreshToken: string | null;
   isAuthenticated: boolean;
+  hydrated: boolean; // 
   login: (user: User, tokens: { access: string; refresh: string }) => void;
   logout: () => void;
+  setHydrated: (value: boolean) => void; // 
 }
-
-// pour Vérifié si l’utilisateur est déjà authentifié au démarrage
-const getInitialIsAuthenticated = (): boolean => {
-  const authState = localStorage.getItem(LOCAL_STORAGE_KEYS.AUTH_STATE);
-  if (!authState) return false;
-  try {
-    const { state } = JSON.parse(authState);
-    return !!state?.accessToken;
-  } catch {
-    return false;
-  }
-};
 
 export const useAuth = create<AuthState>()(
   persist(
@@ -33,21 +23,22 @@ export const useAuth = create<AuthState>()(
       role: null,
       accessToken: null,
       refreshToken: null,
-      isAuthenticated: getInitialIsAuthenticated(),
+      isAuthenticated: false,
+      hydrated: false, //  au début, pas encore prêt
 
-      login: (user: User, tokens: { access: string; refresh: string }) => {
+      setHydrated: (value) => set({ hydrated: value }),
+
+      login: (user, tokens) => {
         try {
           set({
             user,
-            role: user.role || null, //je stocke le rôle de l'utilisateur
+            role: user.role || null,
             accessToken: tokens.access,
             refreshToken: tokens.refresh,
             isAuthenticated: true,
           });
 
-          // Optionnel : garder le rôle aussi dans le localStorage pour un accès rapide
           localStorage.setItem("user_role", user.role || "");
-
           cleanupAuthLocalStorage();
         } catch (error) {
           console.error("Login error:", error);
@@ -70,7 +61,13 @@ export const useAuth = create<AuthState>()(
         }
       },
     }),
-    { name: LOCAL_STORAGE_KEYS.AUTH_STATE }
+    {
+      name: LOCAL_STORAGE_KEYS.AUTH_STATE,
+      onRehydrateStorage: () => (state) => {
+        //  après la restauration, on indique que le store est prêt
+        state?.setHydrated(true);
+      },
+    }
   )
 );
 

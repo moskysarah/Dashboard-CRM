@@ -9,10 +9,7 @@ interface RoleProtectedRouteProps {
   allowedRoles: ("Admin" | "Marchand" | "Agent PMC" | "SuperAdmin")[];
 }
 
-// Mapper les rôles API vers les rôles affichés dans l'app
-function mapRole(
-  role: UserRole
-): "Admin" | "Marchand" | "Agent PMC" | "SuperAdmin" | null {
+function mapRole(role: UserRole): "Admin" | "Marchand" | "Agent PMC" | "SuperAdmin" | null {
   switch (role) {
     case "admin":
       return "Admin";
@@ -27,23 +24,28 @@ function mapRole(
   }
 }
 
-const RoleProtectedRoute: React.FC<RoleProtectedRouteProps> = ({
-  children,
-  allowedRoles,
-}) => {
+const RoleProtectedRoute: React.FC<RoleProtectedRouteProps> = ({ children, allowedRoles }) => {
   const { user } = useAuth();
 
   if (!user || !user.role) {
-    // Non connecté
     return <Navigate to="/login" replace />;
   }
 
   const mappedRole = mapRole(user.role);
 
   if (!mappedRole || !allowedRoles.includes(mappedRole)) {
-    // Connecté mais mauvais rôle
-    return <Navigate to="/dashboard" replace />;
-    
+    // Rediriger vers la page par défaut selon le rôle
+    switch (mappedRole) {
+      case "Admin":
+      case "SuperAdmin":
+        return <Navigate to="/dashboard" replace />;
+      case "Agent PMC":
+        return <Navigate to="/users" replace />;
+      case "Marchand":
+        return <Navigate to="/merchants" replace />;
+      default:
+        return <Navigate to="/login" replace />;
+    }
   }
 
   return <>{children}</>;
