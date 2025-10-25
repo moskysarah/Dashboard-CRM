@@ -9,7 +9,7 @@ import Sales from "../pages/Sales";
 import Finance from "../pages/Finance"; 
 import IT from "../pages/IT";
 import UsersPage from "../pages/UsersPage"; // Importer la nouvelle page
-import ProtectedRoute from "../components/ProtectedRoute";
+import ProtectedRoute from "../components/protectedRoute";
 
 export const router = createBrowserRouter([
   { path: "/login", element: <SplashLogin /> },
