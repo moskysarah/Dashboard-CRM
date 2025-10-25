@@ -10,10 +10,9 @@ export interface AuthState {
   accessToken: string | null;
   refreshToken: string | null;
   isAuthenticated: boolean;
-  hydrated: boolean; // 
+  hydrated: boolean;
   login: (user: User, tokens: { access: string; refresh: string }) => void;
   logout: () => void;
-  setHydrated: (value: boolean) => void; // 
 }
 
 export const useAuth = create<AuthState>()(
@@ -24,54 +23,39 @@ export const useAuth = create<AuthState>()(
       accessToken: null,
       refreshToken: null,
       isAuthenticated: false,
-      hydrated: false, //  au début, pas encore prêt
-
-      setHydrated: (value) => set({ hydrated: value }),
+      hydrated: false,
 
       login: (user, tokens) => {
-        try {
-          set({
-            user,
-            role: user.role || null,
-            accessToken: tokens.access,
-            refreshToken: tokens.refresh,
-            isAuthenticated: true,
-          });
-
-          localStorage.setItem("user_role", user.role || "");
-          cleanupAuthLocalStorage();
-        } catch (error) {
-          console.error("Login error:", error);
-        }
+        set({
+          user,
+          role: user.role || null,
+          accessToken: tokens.access,
+          refreshToken: tokens.refresh,
+          isAuthenticated: true,
+          hydrated: true,
+        });
+        localStorage.setItem("user_role", user.role || "");
+        cleanupAuthLocalStorage();
       },
 
       logout: () => {
-        try {
-          set({
-            user: null,
-            role: null,
-            accessToken: null,
-            refreshToken: null,
-            isAuthenticated: false,
-          });
-          localStorage.removeItem("user_role");
-          cleanupAuthLocalStorage();
-        } catch (error) {
-          console.error("Logout error:", error);
-        }
+        set({
+          user: null,
+          role: null,
+          accessToken: null,
+          refreshToken: null,
+          isAuthenticated: false,
+          hydrated: true,
+        });
+        localStorage.removeItem("user_role");
+        cleanupAuthLocalStorage();
       },
     }),
     {
       name: LOCAL_STORAGE_KEYS.AUTH_STATE,
       onRehydrateStorage: () => (state) => {
-        //  après la restauration, on indique que le store est prêt
-        state?.setHydrated(true);
+        state && setTimeout(() => state.hydrated = true, 100);
       },
     }
   )
 );
-
-export const useIsAuthenticated = () => {
-  const auth = useAuth();
-  return auth.isAuthenticated;
-};

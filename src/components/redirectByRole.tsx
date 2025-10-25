@@ -1,38 +1,30 @@
-// src/components/RedirectByRole.tsx
-import React, { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../store/auth";
 
-const RedirectByRole: React.FC = () => {
+const RedirectByRole = () => {
   const { user } = useAuth();
-  const [loading, setLoading] = useState(true);
-
-  // On peut mettre un petit délai pour spinner (optionnel)
-  useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 500);
-    return () => clearTimeout(timer);
-  }, [user]);
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-gray-50">
-        <div className="flex flex-col items-center">
-          <div className="w-12 h-12 border-4 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
-          <p className="mt-4 text-gray-600 text-sm">Redirection en cours...</p>
-        </div>
-      </div>
-    );
-  }
 
   if (!user) return <Navigate to="/login" replace />;
 
-  switch (user.role) {
-    case "admin":
-    case "superadmin":
+  // Mapper la valeur API vers le rôle interne
+  const roleMap: Record<string, string> = {
+    superadmin: "SuperAdmin",
+    admin: "Admin",
+    user: "Agent PMC", // ← on mapper ici l'Agent PMC est renvoyé comme "user"
+    marchand: "Marchand",
+  };
+
+  const role = user.role || '';
+  const appRole = roleMap[role] || null;
+  if (!appRole) return <Navigate to="/login" replace />;
+
+  switch (appRole) {
+    case "SuperAdmin":
+    case "Admin":
       return <Navigate to="/dashboard" replace />;
-    case "agent":
-      return <Navigate to="/users" replace />; // pour Agent PMC
-    case "marchand":
+    case "Agent PMC":
+      return <Navigate to="/users" replace />;
+    case "Marchand":
       return <Navigate to="/merchants" replace />;
     default:
       return <Navigate to="/login" replace />;
