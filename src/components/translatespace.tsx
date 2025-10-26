@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslate } from '../contexts/translateContext';
 
 interface TProps {
@@ -28,7 +28,7 @@ const T: React.FC<TProps> = ({ children }) => {
     performTranslation();
   }, [children, language, translate]);
 
-  // Forcer le re-rendu quand une  langue  change pour assurer la traduction immediat
+  // Forcer le re-rendu quand une langue change pour assurer la traduction immediat
   useEffect(() => {
     if (language === 'fr') {
       setTranslatedText(children);

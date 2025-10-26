@@ -1,4 +1,3 @@
-// src/routes/index.tsx
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import SplashLogin from "../pages/SplashLogin";
 import Dashboard from "../pages/operations/DashboardAdmin";
@@ -10,14 +9,41 @@ import UsersPage from "../pages/AgentDashboard";
 import ErrorPage from "../pages/ErrorPage";
 import RedirectByRole from "../components/redirectByRole";
 import { useAuth } from "../store/auth";
+import DashboardDistributor from "../pages/DashboardDistributor";
 import type { JSX } from "react";
 
+// === PROTECTION AUTH ===
 const RequireAuth = ({ children }: { children: JSX.Element }) => {
   const { user } = useAuth();
   if (!user) return <Navigate to="/login" replace />;
   return children;
 };
 
+// === PROTECTION PAR ROLE ===
+const RoleProtectedRoute = ({
+  children,
+  allowedRoles,
+}: {
+  children: JSX.Element;
+  allowedRoles: string[];
+}) => {
+  const { user } = useAuth();
+
+  // Si pas connecté
+  if (!user) return <Navigate to="/login" replace />;
+
+  // Rôle de l’utilisateur reçu de l’API
+  const role = user.role;
+
+  // Si le rôle n'est pas défini ou ne correspond pas
+  if (!role || !allowedRoles.includes(role)) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return children;
+};
+
+// === ROUTES ===
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -28,12 +54,94 @@ export const router = createBrowserRouter([
     ),
   },
   { path: "/login", element: <SplashLogin /> },
-  { path: "/dashboard", element:<Dashboard /> },
-  { path: "/users", element: <UsersPage /> },
-  { path: "/merchants", element: <Merchants />},
-  { path: "/finance", element: <Finance /> },
-  { path: "/sales", element: <Sales />},
-  { path: "/it", element: <IT />},
 
+  // === ADMIN ===
+  {
+    path: "/dashboard",
+    element: (
+      <RequireAuth>
+        <RoleProtectedRoute allowedRoles={[ "superAdmin"]}>
+          <Dashboard />
+        </RoleProtectedRoute>
+      </RequireAuth>
+    ),
+  },
+
+  // === AGENT ===
+  {
+    path: "/users",
+    element: (
+      <RequireAuth>
+        <RoleProtectedRoute allowedRoles={["user ", "superadmin"]}>
+          <UsersPage />
+        </RoleProtectedRoute>
+      </RequireAuth>
+    ),
+  },
+
+  // === MARCHAND ===
+  {
+    path: "/merchants",
+    element: (
+      <RequireAuth>
+        <RoleProtectedRoute allowedRoles={["superadmin", "admin"]}>
+          <Merchants />
+        </RoleProtectedRoute>
+      </RequireAuth>
+    ),
+  },
+
+  // === FINANCE ===
+  {
+    path: "/finance",
+    element: (
+      <RequireAuth>
+        <RoleProtectedRoute allowedRoles={[ "superAdmin"]}>
+          <Finance />
+        </RoleProtectedRoute>
+      </RequireAuth>
+    ),
+  },
+
+  // === SALES ===
+  {
+    path: "/sales",
+    element: (
+      <RequireAuth>
+        <RoleProtectedRoute allowedRoles={["Superadmin"]}>
+          <Sales />
+        </RoleProtectedRoute>
+      </RequireAuth>
+    ),
+  },
+
+  // === IT ===
+  {
+    path: "/it",
+    element: (
+      <RequireAuth>
+        <RoleProtectedRoute allowedRoles={[ "SuperAdmin"]}>
+          <IT />
+        </RoleProtectedRoute>
+      </RequireAuth>
+    ),
+  },
+
+  // === DISTRIBUTEUR ===
+  {
+    path: "/distributor",
+    element: (
+      <RequireAuth>
+        <RoleProtectedRoute allowedRoles={["partner"]}>
+          <DashboardDistributor distributorId="123" />
+        </RoleProtectedRoute>
+      </RequireAuth>
+    ),
+  },
+
+  // === ERREUR ===
   { path: "*", element: <ErrorPage /> },
 ]);
+
+// Export constants from separate file
+export { ROUTER_CONSTANTS } from './routerConstants';

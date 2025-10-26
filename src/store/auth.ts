@@ -4,9 +4,33 @@ import { LOCAL_STORAGE_KEYS } from "../config/constants";
 import type { User } from "../types/domain";
 import { cleanupAuthLocalStorage } from "../utils/localStorageCleanup";
 
+// === Utilitaire pour générer les initiales ===
+const getInitials = (
+  firstName?: string,
+  lastName?: string,
+  username?: string
+): string => {
+  if (firstName && lastName) {
+    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+  }
+  if (username) {
+    return username.slice(0, 2).toUpperCase();
+  }
+  return "?";
+};
+
+// === Types des rôles ===
+export type UserRole =
+  | "admin"       // Marchand
+  | "user"        // Client
+  | "superadmin"  // Gestionnaire de plateforme
+  | "agent"       // Agents
+  | "partner"; // Distributeurs
+
+// === Interface de l'état d'auth ===
 export interface AuthState {
   user: User | null;
-  role: string | null;
+  role: UserRole | null;
   accessToken: string | null;
   refreshToken: string | null;
   isAuthenticated: boolean;
@@ -15,6 +39,7 @@ export interface AuthState {
   logout: () => void;
 }
 
+// === Store Zustand ===
 export const useAuth = create<AuthState>()(
   persist(
     (set) => ({
@@ -26,15 +51,23 @@ export const useAuth = create<AuthState>()(
       hydrated: false,
 
       login: (user, tokens) => {
+        // Génération automatique des initiales à la connexion
+        const avatar = getInitials(user.first_name, user.last_name, user.username);
+
+        const userRole = (user.role as UserRole) || null;
+
         set({
-          user,
-          role: user.role || null,
+          user: { ...user, avatar },
+          role: userRole,
           accessToken: tokens.access,
           refreshToken: tokens.refresh,
           isAuthenticated: true,
           hydrated: true,
         });
-        localStorage.setItem("user_role", user.role || "");
+
+        // Sauvegarde du rôle dans le localStorage
+        if (userRole) localStorage.setItem("user_role", userRole);
+
         cleanupAuthLocalStorage();
       },
 
@@ -47,6 +80,7 @@ export const useAuth = create<AuthState>()(
           isAuthenticated: false,
           hydrated: true,
         });
+
         localStorage.removeItem("user_role");
         cleanupAuthLocalStorage();
       },
@@ -54,7 +88,7 @@ export const useAuth = create<AuthState>()(
     {
       name: LOCAL_STORAGE_KEYS.AUTH_STATE,
       onRehydrateStorage: () => (state) => {
-        state && setTimeout(() => state.hydrated = true, 100);
+        if (state) setTimeout(() => (state.hydrated = true), 100);
       },
     }
   )

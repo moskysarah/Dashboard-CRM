@@ -1,6 +1,6 @@
 // src/components/Sidebar.tsx
 import { NavLink } from "react-router-dom";
-import { LayoutDashboard, BarChart, Users, Settings, ShoppingCart, Store } from "lucide-react";
+import { LayoutDashboard, BarChart, Users, Settings, ShoppingCart, Store , Briefcase } from "lucide-react";
 import LogoPostSmart from "./logoPostSmart";
 import T from "./translatespace";
 import { useAuth } from "../store/auth";
@@ -40,9 +40,21 @@ export function Sidebar() {
             <LayoutDashboard size={18} /> <T>Dashboard Admin</T>
           </NavLink>
         )}
+        {(role === "superadmin" || role === "partner" ) && (
+          <NavLink
+            to="/distributor"
+            className={({ isActive }) =>
+              `flex items-center gap-2 p-2 rounded-lg text-sm md:text-base ${
+                isActive ? "bg-indigo-500 text-white" : "text-white hover:bg-indigo-500"
+              }`
+            }
+          >
+            <Briefcase size={18} /> <T>Distributeur</T>
+          </NavLink>
+        )}
 
         {/* Autres liens comme Users, Merchants, Finance, Sales */}
-        {(role === "agent" || role === "admin" || role === "superadmin") && (
+        {(role === "superadmin"  ||  role === "user") && (
           <NavLink
             to="/users"
             className={({ isActive }) =>
@@ -51,11 +63,11 @@ export function Sidebar() {
               }`
             }
           >
-            <Users size={18} /> <T>Utilisateurs</T>
+            <Users size={18} /> <T>Clients</T>
           </NavLink>
         )}
 
-        {(role === "marchand" || role === "admin" || role === "superadmin") && (
+        {( role === "admin" || role === "superadmin") && (
           <>
             <NavLink
               to="/merchants"
@@ -67,7 +79,7 @@ export function Sidebar() {
             >
               <Store size={18} /> <T>Marchand</T>
             </NavLink>
-
+              
             <NavLink
               to="/finance"
               className={({ isActive }) =>

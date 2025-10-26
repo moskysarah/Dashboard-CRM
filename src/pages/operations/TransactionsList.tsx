@@ -1,88 +1,68 @@
-import React from "react";
-import { useTransactions } from "../../hooks/useTransactions";
-import type { TransactionStatus } from "../../types/domain";
+import React, { useEffect, useState } from "react";
+import { getAgentTransactions } from "../../services/api"; // adapte selon ton API
+import { useAuth } from "../../store/auth";
 
-const statusColors: Record<TransactionStatus, string> = {
-  SUCCESS: "bg-green-100 text-green-600",
-  PENDING: "bg-yellow-100 text-yellow-600",
-  PROCESSING: "bg-blue-100 text-blue-600",
-  FAILED: "bg-red-100 text-red-600",
-  CANCELLED: "bg-gray-100 text-gray-600",
-  REFUNDED: "bg-purple-100 text-purple-600",
-  ON: "bg-green-100 text-green-600",
-  OFF: "bg-red-100 text-red-600",
+
+type TransactionData = {
+  id: number;
+  amount: number;
+  date: string;
+  status: string;
 };
 
 const TransactionsList: React.FC = () => {
-  const { transactions, loading, error } = useTransactions();
+  const { user } = useAuth();
+  const [transactions, setTransactions] = useState<TransactionData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  if (loading) {
-    return <p className="text-center py-4">Chargement des transactions...</p>;
-  }
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      if (!user) return;
 
-  if (error) {
-    return (
-      <div className="text-center py-4">
-        <p className="text-red-500 mb-2">{error}</p>
-        <button
-          onClick={() => window.location.reload()}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-        >
-          Réessayer
-        </button>
-      </div>
-    );
-  }
+      try {
+        const res = await getAgentTransactions();
+        // Forcer transactions à être un tableau
+        setTransactions(Array.isArray(res.data) ? res.data : []);
+      } catch (err: any) {
+        console.error("Erreur lors du chargement des transactions:", err);
+        setError("Erreur lors du chargement des transactions.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTransactions();
+  }, [user]);
+
+  if (loading) return <p className="text-center py-4">Chargement des transactions...</p>;
+  if (error) return <p className="text-center py-4 text-red-500">{error}</p>;
 
   return (
-    <div className="overflow-x-auto">
-      <table className="min-w-full text-center divide-y divide-gray-200 text-xs sm:text-sm">
-        <thead className="bg-gray-50">
-          <tr>
-            {[
-              "ID Transaction",
-              "Montant",
-              "Statut",
-              "Type",
-              "Opération",
-              "Date",
-            ].map((h) => (
-              <th
-                key={h}
-                className="px-3 py-2 text-xs font-medium text-gray-600 whitespace-nowrap"
-              >
-                {h}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
-          {transactions.map((t) => (
-            <tr key={t.id} className="hover:bg-gray-50 transition-colors">
-              <td className="px-3 py-2 font-mono text-gray-500 whitespace-nowrap overflow-hidden text-ellipsis max-w-[150px]">
-                {t.codeTransaction || t.id}
-              </td>
-              <td className="px-3 py-2 font-semibold whitespace-nowrap">
-                {t.amount}
-              </td>
-              <td className="px-3 py-2 whitespace-nowrap">
-                <span className={`font-bold text-xs px-2 py-0.5 rounded-full ${statusColors[t.status]}`}>
-                  {t.status.toUpperCase()}
-                </span>
-              </td>
-              <td className="px-3 py-2 text-gray-500 whitespace-nowrap">
-                {t.type}
-              </td>
-              <td className="px-3 py-2 text-gray-500 whitespace-nowrap">
-                {t.typeOperation}
-              </td>
-              <td className="px-3 py-2 text-gray-500 whitespace-nowrap overflow-hidden text-ellipsis max-w-[120px]">
-                {new Date(t.createdAt).toLocaleDateString()}
-              </td>
+    <div className="p-6">
+      <div className="w-full bg-white p-4 rounded-2xl shadow overflow-x-auto">
+        <table className="w-full text-center text-xs divide-y divide-gray-200">
+          <thead className="bg-gray-50 sticky top-0 z-10">
+            <tr>
+              {["ID", "Montant", "Date", "Statut"].map((h, i) => (
+                <th key={i} className="px-3 py-2 font-medium text-gray-500">
+                  {h}
+                </th>
+              ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {(Array.isArray(transactions) ? transactions : []).map((t) => (
+              <tr key={t.id} className="hover:bg-gray-50 transition-colors">
+                <td className="px-3 py-2">{t.id}</td>
+                <td className="px-3 py-2">{t.amount} $</td>
+                <td className="px-3 py-2">{new Date(t.date).toLocaleDateString()}</td>
+                <td className="px-3 py-2">{t.status}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

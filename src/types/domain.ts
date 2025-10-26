@@ -4,9 +4,9 @@
 
 // --- Enums from API ---
 
-export type UserRole = 'admin' | 'agent' | 'superadmin'| 'marchand';
+export type UserRole = 'superadmin' | 'admin' | 'agent' | 'partner' | 'user' ;
 
-export type AgentRole = 'admin' | 'agent' | 'superadmin'|'marchand';
+export type AgentRole = 'superadmin' | 'admin' | 'agent' | 'partner' | 'user';
 
 /**
  * Represents an Agent object from the API.
@@ -92,21 +92,4 @@ export type Message = {
   message: string;
   created_at: string; // format: date-time
   updated_at: string; // format: date-time
-  is_sent: boolean;
-  phone?: string | null;
-  is_for?: MessageType | null;
-  user?: number | null;
-}
-
-/**
- * Represents an IT Ticket.
- * Note: This structure is not defined in the provided API spec.
- * It is kept from the original `domain.ts` for now.
- */
-export type Ticket = {
-  id: string;
-  title: string;
-  type: string;
-  status: "Ouvert" | "En cours" | "Résolu";
-  priority: "Haute" | "Moyenne" | "Basse";
 }

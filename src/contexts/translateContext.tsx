@@ -2,4 +2,7 @@
 export { TranslateProvider } from './TranslateProvider';
 
 // Export useTranslate from the context file
-export { useTranslate } from './translateContext.ts';
+export { useTranslate } from './translateContext';
+
+// Export constants from separate file
+export { TRANSLATE_CONSTANTS } from './translateConstants';

@@ -6,8 +6,6 @@ import TransactionsList from "./TransactionsList";
 import ReportsList from "./RapportsList";
 import T from "../../components/translatespace";
 
-console.log("DashboardAdmin rendu ✅");
-
 interface SectionCardProps {
   title: string | React.ReactNode;
   children?: React.ReactNode;
@@ -38,7 +36,7 @@ const capitalize = (text: string) =>
 const DashboardAdmin: React.FC = () => {
   const { stats: overviewStats, loading: statsLoading } = useOverviewStats();
   const {
-    users,
+    users = [],
     loading: usersLoading,
     error: usersError,
     updateUserRole,
@@ -105,25 +103,25 @@ const DashboardAdmin: React.FC = () => {
                 <h3 className="text-gray-500 text-sm">
                   <T>Total Utilisateurs</T>
                 </h3>
-                <p className="text-xl font-bold">{overviewStats.users.total_users}</p>
+                <p className="text-xl font-bold">{overviewStats.users?.total_users ?? 0}</p>
               </div>
               <div className="bg-white rounded-xl shadow-xl p-4 text-center">
                 <h3 className="text-gray-500 text-sm">
                   <T>Nouveaux Utilisateurs (30j)</T>
                 </h3>
-                <p className="text-xl font-bold text-green-600">{overviewStats.users.new_users_in_period}</p>
+                <p className="text-xl font-bold text-green-600">{overviewStats.users?.new_users_in_period ?? 0}</p>
               </div>
               <div className="bg-white rounded-xl shadow-xl p-4 text-center">
                 <h3 className="text-gray-500 text-sm">
                   <T>Volume Total (Entrant)</T>
                 </h3>
-                <p className="text-xl font-bold text-blue-600">{overviewStats.financials.total_volume_in} $</p>
+                <p className="text-xl font-bold text-blue-600">{overviewStats.financials?.total_volume_in ?? 0} $</p>
               </div>
               <div className="bg-white rounded-xl shadow-xl p-4 text-center">
                 <h3 className="text-gray-500 text-sm">
                   <T>Taux de Succès (Tx)</T>
                 </h3>
-                <p className="text-xl font-bold text-purple-600">{overviewStats.transactions.success_rate_percent} %</p>
+                <p className="text-xl font-bold text-purple-600">{overviewStats.transactions?.success_rate_percent ?? 0} %</p>
               </div>
             </div>
           )
@@ -152,7 +150,7 @@ const DashboardAdmin: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {users.map((u) => (
+                {(Array.isArray(users) ? users : []).map((u) => (
                   <tr key={u.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-3 py-2 text-center">
                       {capitalize(`${u.first_name} ${u.last_name}` || u.username).charAt(0)}
@@ -177,7 +175,7 @@ const DashboardAdmin: React.FC = () => {
                       </span>
                       {selectedUserIdForRoleChange === u.id && (
                         <div className="absolute top-10 left-1/2 transform -translate-x-1/2 w-40 bg-white border shadow-lg rounded-lg z-30">
-                          {roleOptions.map((r) => (
+                          {(Array.isArray(roleOptions) ? roleOptions : []).map((r) => (
                             <div
                               key={r}
                               onClick={() => handleChangeRole(u.id, r)}
@@ -197,16 +195,27 @@ const DashboardAdmin: React.FC = () => {
                       </span>
                     </td>
                     <td className="px-3 py-2 whitespace-nowrap">
-                      <button
-                        onClick={() => handleToggleStatus(u)}
-                        className={`text-xs px-2 py-0.5 rounded-full font-semibold transition-colors ${
-                          u.is_active
-                            ? "bg-red-400 hover:bg-red-500 text-white"
-                            : "bg-green-400 hover:bg-green-500 text-white"
-                        }`}
-                      >
-                        {u.is_active ? "Suspendre" : "Activer"}
-                      </button>
+                      <div className="flex gap-1">
+                        <button
+                          onClick={() => handleToggleStatus(u)}
+                          className={`text-xs px-2 py-0.5 rounded-full font-semibold transition-colors ${
+                            u.is_active
+                              ? "bg-red-400 hover:bg-red-500 text-white"
+                              : "bg-green-400 hover:bg-green-500 text-white"
+                          }`}
+                        >
+                          {u.is_active ? "Suspendre" : "Activer"}
+                        </button>
+                        <button
+                          onClick={() => {
+                            setUserIdToDelete(u.id);
+                            setShowDeleteModal(true);
+                          }}
+                          className="text-xs px-2 py-0.5 rounded-full font-semibold bg-red-500 hover:bg-red-600 text-white transition-colors"
+                        >
+                          Supprimer
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -245,110 +254,95 @@ const DashboardAdmin: React.FC = () => {
         </SectionCard>
       </div>
 
-      {/*  Modal création utilisateur */}
+      {/* Modal Création Utilisateur */}
       {showCreateModal && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-auto">
-          <div className="bg-white rounded-xl p-6 w-96 relative shadow-lg">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
             <h3 className="text-lg font-bold mb-4">
               <T>Créer un nouvel utilisateur</T>
             </h3>
-            <input
-              type="text"
-              placeholder="Prénom"
-              required
-              value={newUserData.first_name}
-              onChange={(e) => setNewUserData({ ...newUserData, first_name: e.target.value })}
-              className="w-full px-3 py-2 mb-2 border rounded"
-            />
-            <input
-              type="text"
-              placeholder="Nom"
-              required
-              value={newUserData.last_name}
-              onChange={(e) => setNewUserData({ ...newUserData, last_name: e.target.value })}
-              className="w-full px-3 py-2 mb-2 border rounded"
-            />
-            <input
-              type="email"
-              placeholder="Email"
-              value={newUserData.email}
-              onChange={(e) => setNewUserData({ ...newUserData, email: e.target.value })}
-              className="w-full px-3 py-2 mb-2 border rounded"
-            />
-            <input
-              type="password"
-              placeholder="Mot de passe"
-              required
-              value={newUserData.password}
-              onChange={(e) => setNewUserData({ ...newUserData, password: e.target.value })}
-              className="w-full px-3 py-2 mb-2 border rounded"
-            />
-            <select
-              value={newUserData.role || ""}
-              onChange={(e) =>
-                setNewUserData({
-                  ...newUserData,
-                  role: e.target.value ? (e.target.value as UserRole) : undefined,
-                })
-              }
-              className="w-full px-3 py-2 mb-4 border rounded"
-            >
-              <option value="" disabled>
-                --Choisis le rôle--
-              </option>
-              {roleOptions.map((r) => (
-                <option key={r} value={r}>
-                  {r}
-                </option>
-              ))}
-            </select>
-            <div className="flex justify-end gap-2">
+            <div className="space-y-4">
+              <input
+                type="text"
+                placeholder="Prénom"
+                value={newUserData.first_name}
+                onChange={(e) => setNewUserData({ ...newUserData, first_name: e.target.value })}
+                className="w-full p-2 border rounded"
+              />
+              <input
+                type="text"
+                placeholder="Nom"
+                value={newUserData.last_name}
+                onChange={(e) => setNewUserData({ ...newUserData, last_name: e.target.value })}
+                className="w-full p-2 border rounded"
+              />
+              <input
+                type="email"
+                placeholder="Email"
+                value={newUserData.email}
+                onChange={(e) => setNewUserData({ ...newUserData, email: e.target.value })}
+                className="w-full p-2 border rounded"
+              />
+              <input
+                type="password"
+                placeholder="Mot de passe"
+                value={newUserData.password}
+                onChange={(e) => setNewUserData({ ...newUserData, password: e.target.value })}
+                className="w-full p-2 border rounded"
+              />
+              <select
+                value={newUserData.role || ""}
+                onChange={(e) => setNewUserData({ ...newUserData, role: e.target.value as UserRole })}
+                className="w-full p-2 border rounded"
+              >
+                <option value="">Sélectionner un rôle</option>
+                {roleOptions.map((role) => (
+                  <option key={role} value={role}>
+                    {role}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex justify-end gap-2 mt-4">
               <button
                 onClick={() => setShowCreateModal(false)}
-                className="px-3 py-1 rounded bg-gray-300 hover:bg-gray-400 text-sm"
+                className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
               >
-                Annuler
+                <T>Annuler</T>
               </button>
               <button
                 onClick={handleCreateUser}
-                className="px-3 py-1 rounded bg-green-500 hover:bg-green-600 text-white text-sm"
+                className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
               >
-                Créer
+                <T>Créer</T>
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/*  Modal suppression utilisateur */}
+      {/* Modal Suppression Utilisateur */}
       {showDeleteModal && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-auto">
-          <div className="bg-white rounded-xl p-6 w-80 relative shadow-lg">
-            <h3 className="text-lg font-bold mb-3 text-center text-red-600">
-              <T>Supprimer un utilisateur</T>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+            <h3 className="text-lg font-bold mb-4">
+              <T>Confirmer la suppression</T>
             </h3>
-            <p className="text-sm text-gray-600 text-center mb-4">
-              Saisis l’ID de l’utilisateur à supprimer.
+            <p className="mb-4">
+              <T>Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action est irréversible.</T>
             </p>
-            <input
-              type="number"
-              placeholder="ID utilisateur"
-              value={userIdToDelete || ""}
-              onChange={(e) => setUserIdToDelete(Number(e.target.value))}
-              className="w-full px-3 py-2 mb-3 border rounded text-center"
-            />
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setShowDeleteModal(false)}
-                className="px-3 py-1 rounded bg-gray-300 hover:bg-gray-400 text-sm"
+                className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
               >
-                Annuler
+                <T>Annuler</T>
               </button>
               <button
                 onClick={handleDeleteUser}
-                className="px-3 py-1 rounded bg-red-500 hover:bg-red-600 text-white text-sm"
+                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
               >
-                Supprimer
+                <T>Supprimer</T>
               </button>
             </div>
           </div>

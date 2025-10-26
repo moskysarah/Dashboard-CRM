@@ -1,34 +1,35 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../store/auth";
 
+/**
+ * Redirige automatiquement l'utilisateur selon son rôle.
+ * Compatible avec les rôles : superadmin, admin, agent, partner, user
+ */
 const RedirectByRole = () => {
   const { user } = useAuth();
 
+  // Si pas connecté → page de login
   if (!user) return <Navigate to="/login" replace />;
 
-  // Mapper la valeur API vers le rôle interne
-  const roleMap: Record<string, string> = {
-    superadmin: "SuperAdmin",
-    admin: "Admin",
-    user: "Agent PMC", // ← on mapper ici l'Agent PMC est renvoyé comme "user"
-    marchand: "Marchand",
+  // Vérification du rôle renvoyé par l'API
+  const apiRole = user.role?.toLowerCase();
+
+  // Table de correspondance entre le rôle API et la route de destination
+  const roleRoutes: Record<string, string> = {
+    superadmin: "/dashboard",   // Gestionnaire de plateforme
+    admin: "/merchants",        // Marchand
+    agent: "/agent",            // Agent terrain
+    partner: "/distributor",    // Partenaire / distributeur
+    user: "/users",             // Client
   };
 
-  const role = user.role || '';
-  const appRole = roleMap[role] || null;
-  if (!appRole) return <Navigate to="/login" replace />;
-
-  switch (appRole) {
-    case "SuperAdmin":
-    case "Admin":
-      return <Navigate to="/dashboard" replace />;
-    case "Agent PMC":
-      return <Navigate to="/users" replace />;
-    case "Marchand":
-      return <Navigate to="/merchants" replace />;
-    default:
-      return <Navigate to="/login" replace />;
+  // Si le rôle est reconnu → rediriger
+  if (apiRole && roleRoutes[apiRole]) {
+    return <Navigate to={roleRoutes[apiRole]} replace />;
   }
+
+  // Si rôle inconnu → retour login
+  return <Navigate to="/login" replace />;
 };
 
 export default RedirectByRole;

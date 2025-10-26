@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import { translateText } from '../services/translateService';
-import { TRANSLATE_CACHE } from './translateConstants';
+import { TRANSLATE_CACHE } from './translateConstants.ts';
 import { TranslateContext, type TranslateContextType } from './translateContext.ts';
 
 interface TranslateProviderProps {

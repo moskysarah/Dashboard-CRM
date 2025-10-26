@@ -1,6 +1,18 @@
-# TODO: Fix TypeScript Errors in redirectByRole.tsx
+# TODO: Fix TypeScript Errors
 
-- [x] Update switch cases in `src/components/redirectByRole.tsx` to use lowercase strings matching `UserRole` type ('admin', 'superadmin', 'marchand', 'agent')
-- [x] Map "Agent PMC" to 'agent' in the switch statement (removed "Agent PMC" as it's not in type)
-- [x] Clean up improperly nested comments at the end of the file to fix syntax error
-- [ ] Verify TypeScript compilation after changes
+## Errors to Fix:
+1. Type 'string | undefined' is not assignable to type 'string' - in AvatarRole component props
+2. Type 'UserRole | undefined' is not assignable to type 'UserRole' - in AvatarRole component role prop
+3. 'React' is declared but its value is never read - in avatarRole.tsx
+4. 'T' is declared but its value is never read - in translatespace.tsx
+
+## Plan:
+- Update AvatarRole component to handle optional firstName, lastName, and role props
+- Remove unused React import from avatarRole.tsx
+- Check and fix any unused 'T' in translatespace.tsx
+- Ensure Header.tsx passes safe values to Avatar component
+
+## Files to Edit:
+- src/components/avatarRole.tsx
+- src/components/Header.tsx (if needed)
+- src/components/translatespace.tsx (if needed)
