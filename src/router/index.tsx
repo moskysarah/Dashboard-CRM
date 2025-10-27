@@ -133,7 +133,7 @@
 // src/index.tsx ou src/router.tsx
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import SplashLogin from "../pages/SplashLogin";
-import DashboardLayout from "../layouts/DashboardLayout";
+import DashboardLayout from "../layouts/dashboardLayout";
 import Dashboard from "../pages/operations/DashboardAdmin";
 import Merchants from "../pages/DashboardMerchant";
 import Sales from "../pages/DashboardSales";
