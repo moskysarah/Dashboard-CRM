@@ -1,5 +1,4 @@
 import React, { useState, useEffect, type JSX } from "react";
-import DashboardLayout from "../layouts/dashboardLayout";
 import { Server, Bug, Key, Wifi, Database, Download } from "lucide-react";
 import type { Ticket } from "../types/domain";
 import { fetchTicketsIT } from "../services/api";
@@ -52,7 +51,7 @@ const Settings: React.FC = () => {
         );
 
   return (
-    <DashboardLayout>
+   
       <div className="p-6">
         <h1 className="text-2xl font-bold mb-6">Module IT - Support & Gestion</h1>
 
@@ -131,7 +130,7 @@ const Settings: React.FC = () => {
           </div>
         )}
       </div>
-    </DashboardLayout>
+   
   );
 };
 

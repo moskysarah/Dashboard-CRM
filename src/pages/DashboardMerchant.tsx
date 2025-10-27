@@ -8,7 +8,6 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { DollarSign, CheckCircle, Clock, XCircle } from "lucide-react";
-import DashboardLayout from "../layouts/dashboardLayout";
 import Avatar from "../components/avatar";
 import MerchantKPI from "../components/merchantKPI";
 import MerchantTransactions from "../components/merchantTransactions";
@@ -153,22 +152,22 @@ const DashboardMerchant: React.FC = () => {
 
   if (loading)
     return (
-      <DashboardLayout>
+     
         <p className="p-6">
           <T>Chargement des données...</T>
         </p>
-      </DashboardLayout>
+      
     );
 
   if (error)
     return (
-      <DashboardLayout>
+      
         <p className="p-6 text-red-500">{error}</p>
-      </DashboardLayout>
+      
     );
 
   return (
-    <DashboardLayout>
+    
       <div className="p-6 bg-gray-100 min-h-screen space-y-8">
         {/* Profil du marchand avec AvatarRole */}
         {profile && (
@@ -292,7 +291,7 @@ const DashboardMerchant: React.FC = () => {
           </ResponsiveContainer>
         </div>
       </div>
-    </DashboardLayout>
+   
   );
 };
 

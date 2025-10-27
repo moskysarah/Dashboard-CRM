@@ -1,6 +1,5 @@
 // src/pages/DashboardFinanceSales.tsx
 import React from "react";
-import DashboardLayout from "../layouts/dashboardLayout";
 import { useFinanceData } from "../hooks/useFinanceData";
 import { useSalesData } from "../hooks/useSalesData";
 import { useAnalytics } from "../hooks/useAnalyticsData";
@@ -26,11 +25,11 @@ const DashboardFinanceSales: React.FC = () => {
     ? (((salesData[salesData.length - 1].ventes - salesData[salesData.length - 2].ventes) / salesData[salesData.length - 2].ventes) * 100).toFixed(1)
     : "0";
 
-  if (loading) return <DashboardLayout><p className="p-6"><T>Chargement des données...</T></p></DashboardLayout>;
-  if (error) return <DashboardLayout><p className="p-6 text-red-500">{error}</p></DashboardLayout>;
+  if (loading) return <p className="p-6"><T>Chargement des données...</T></p>
+  if (error) return <p className="p-6 text-red-500">{error}</p>
 
   return (
-    <DashboardLayout>
+   
       <div className="p-4 md:p-6 min-h-[calc(100vh-80px)] space-y-6">
 
         <h1 className="text-2xl md:text-3xl font-bold mb-4"><T>Finance & Ventes</T></h1>
@@ -111,7 +110,7 @@ const DashboardFinanceSales: React.FC = () => {
         {/* ================= Active Users ================= */}
         <ActiveUsersList users={activeUsers} />
       </div>
-    </DashboardLayout>
+ 
   );
 };
 

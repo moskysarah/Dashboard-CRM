@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { Sidebar } from "../components/Sidebar";
 import { useState, useEffect } from "react";
 import { Bell, Mail, Globe, Menu, X } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate , Outlet } from "react-router-dom";
 import { useAuth } from "../store/auth";
 import { getNotifications, type AppNotification} from "../services/notification";
 import { useTranslate } from "../contexts/translateContext";
@@ -13,7 +13,7 @@ type Props = {
   children?: ReactNode;
 };
 
-const DashboardLayout: React.FC<Props> = ({ children }) => {
+const DashboardLayout: React.FC<Props> = ({}) => {
   const { user, logout } = useAuth();
   const { language, setLanguage } = useTranslate();
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
@@ -213,7 +213,7 @@ const DashboardLayout: React.FC<Props> = ({ children }) => {
         </header>
 
         <main className="p-2 md:p-4 flex-1 overflow-y-auto overflow-x-hidden h-[calc(100vh-64px)] md:h-[calc(100vh-80px)]">
-          {children}
+          <Outlet />
         </main>
       </div>
     </div>

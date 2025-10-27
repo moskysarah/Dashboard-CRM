@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import DashboardLayout from "../layouts/dashboardLayout";
 import Avatar from "../components/avatar";
 import WalletCard from "../components/agentwallet";
 import TransactionsTable from "../components/agentTransactionTable";
@@ -42,22 +41,22 @@ const AgentDashboard: React.FC = () => {
 
   if (loading) {
     return (
-      <DashboardLayout>
+      
         <div className="p-6 text-center text-gray-600">Chargement en cours...</div>
-      </DashboardLayout>
+      
     );
   }
 
   if (error) {
     return (
-      <DashboardLayout>
+      
         <div className="p-6 text-center text-red-500">{error}</div>
-      </DashboardLayout>
+      
     );
   }
 
   return (
-    <DashboardLayout>
+    
       <div className="p-6 bg-gray-100 min-h-screen space-y-8">
         {/* Profil simplifié avec AvatarRole */}
         {agent && (
@@ -86,7 +85,7 @@ const AgentDashboard: React.FC = () => {
           error={error}
         />
       </div>
-    </DashboardLayout>
+    
   );
 };
 

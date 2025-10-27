@@ -24,7 +24,7 @@ const DashboardDistributor: React.FC<DashboardDistributorProps> = ({ distributor
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6">Tableau de Bord Distributeur</h1>
+      <h1 className="text-2xl font-bold mb-6">Tableau de Bord Distributeur</h1>
 
       <div className="flex space-x-4 mb-6">
         {(["sales", "stock", "commissions"] as const).map((tab) => (

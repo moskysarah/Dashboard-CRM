@@ -1,6 +1,5 @@
 // src/pages/operations/SalesDashboard.tsx
 import React, { useMemo } from "react";
-import DashboardLayout from "../layouts/dashboardLayout";
 import { useSalesData } from "../hooks/useSalesData";
 import { useAnalytics } from "../hooks/useAnalyticsData";
 import TimeseriesChart from "../components/timeSeriesChart";
@@ -26,11 +25,11 @@ const DashboardSales: React.FC = () => {
     return (((last - prev) / prev) * 100).toFixed(1);
   }, [salesData]);
 
-  if (salesLoading || analyticsLoading) return <DashboardLayout><p className="p-6"><T>Chargement des données...</T></p></DashboardLayout>;
-  if (salesError || analyticsError) return <DashboardLayout><p className="p-6 text-red-500">{salesError || analyticsError}</p></DashboardLayout>;
+  if (salesLoading || analyticsLoading) return <p className="p-6"><T>Chargement des données...</T></p>;
+  if (salesError || analyticsError) return <p className="p-6 text-red-500">{salesError || analyticsError}</p>;
 
   return (
-    <DashboardLayout>
+   
       <div className="p-4 md:p-6 min-h-[calc(100vh-80px)] space-y-6">
 
         <h1 className="text-2xl md:text-3xl font-bold mb-4"><T>Ventes</T></h1>
@@ -79,7 +78,7 @@ const DashboardSales: React.FC = () => {
         <ActiveUsersList users={activeUsers} />
 
       </div>
-    </DashboardLayout>
+    
   );
 };
 
