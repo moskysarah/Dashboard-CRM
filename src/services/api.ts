@@ -228,6 +228,6 @@ export const getAnalyticsActiveUsers = () => API.get("/analytics/active-users/")
 export const getAdminOverview = getAnalyticsOverview;
 export const getMerchantTransactions = () => API.get("/me/transactions/");
 export const getMerchants = () => API.get("/merchants/");
-export const fetchTicketsIT = (params?: any) => API.get("/it-tickets", { params });
+export const fetchTicketsIT = (params?: any) => API.get("/accounts/users-settings/{id}/", { params });
 
 export default API;

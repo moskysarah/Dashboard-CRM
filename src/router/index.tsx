@@ -28,31 +28,17 @@ const RoleProtectedRoute = ({
   allowedRoles: string[];
 }) => {
   const { user } = useAuth();
-
-  // Si pas connecté
   if (!user) return <Navigate to="/login" replace />;
 
-  // Rôle de l’utilisateur reçu de l’API
-  const role = user.role;
-
-  // Si le rôle n'est pas défini ou ne correspond pas
-  if (!role || !allowedRoles.includes(role)) {
-    return <Navigate to="/dashboard" replace />;
-  }
+  const role = user.role?.toLowerCase(); // minuscule
+  if (!role || !allowedRoles.includes(role)) return <Navigate to="/" replace />;
 
   return children;
 };
 
 // === ROUTES ===
 export const router = createBrowserRouter([
-  {
-    path: "/",
-    element: (
-      <RequireAuth>
-        <RedirectByRole />
-      </RequireAuth>
-    ),
-  },
+  { path: "/", element: <RequireAuth><RedirectByRole /></RequireAuth> },
   { path: "/login", element: <SplashLogin /> },
 
   // === ADMIN ===
@@ -60,7 +46,7 @@ export const router = createBrowserRouter([
     path: "/dashboard",
     element: (
       <RequireAuth>
-        <RoleProtectedRoute allowedRoles={[ "superAdmin"]}>
+        <RoleProtectedRoute allowedRoles={["superadmin"]}>
           <Dashboard />
         </RoleProtectedRoute>
       </RequireAuth>
@@ -72,7 +58,7 @@ export const router = createBrowserRouter([
     path: "/users",
     element: (
       <RequireAuth>
-        <RoleProtectedRoute allowedRoles={["user ", "superadmin"]}>
+        <RoleProtectedRoute allowedRoles={["user", "superadmin"]}>
           <UsersPage />
         </RoleProtectedRoute>
       </RequireAuth>
@@ -96,7 +82,7 @@ export const router = createBrowserRouter([
     path: "/finance",
     element: (
       <RequireAuth>
-        <RoleProtectedRoute allowedRoles={[ "superAdmin"]}>
+        <RoleProtectedRoute allowedRoles={["superadmin"]}>
           <Finance />
         </RoleProtectedRoute>
       </RequireAuth>
@@ -108,7 +94,7 @@ export const router = createBrowserRouter([
     path: "/sales",
     element: (
       <RequireAuth>
-        <RoleProtectedRoute allowedRoles={["Superadmin"]}>
+        <RoleProtectedRoute allowedRoles={["superadmin"]}>
           <Sales />
         </RoleProtectedRoute>
       </RequireAuth>
@@ -120,7 +106,7 @@ export const router = createBrowserRouter([
     path: "/it",
     element: (
       <RequireAuth>
-        <RoleProtectedRoute allowedRoles={[ "SuperAdmin"]}>
+        <RoleProtectedRoute allowedRoles={["superadmin"]}>
           <IT />
         </RoleProtectedRoute>
       </RequireAuth>
@@ -142,6 +128,3 @@ export const router = createBrowserRouter([
   // === ERREUR ===
   { path: "*", element: <ErrorPage /> },
 ]);
-
-// Export constants from separate file
-export { ROUTER_CONSTANTS } from './routerConstants';
