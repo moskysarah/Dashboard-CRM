@@ -3,7 +3,7 @@
 import { Bell, Globe } from "lucide-react";
 import { useTranslate } from "../contexts/translateContext";
 import { useAuth } from "../store/auth";
-import AvatarRole from "./AvatarRole";
+import Avatar from "./avatar";
 
 export function Header() {
   const { language, setLanguage } = useTranslate();
@@ -26,7 +26,7 @@ export function Header() {
 
         {user && (
           <div className="flex items-center gap-2 cursor-pointer">
-            <AvatarRole
+            <Avatar
               firstName={user.first_name || ""}
               lastName={user.last_name || ""}
               role={user.role || "user"}

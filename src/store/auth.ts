@@ -21,15 +21,15 @@ const getInitials = (
 
 // === Types des rôles ===
 export type UserRole =
-  | "admin"       // Marchand
-  | "user"        // Client
-  | "superadmin"  // Gestionnaire de plateforme
-  | "agent"       // Agents
+  | "admin" // Marchand
+  | "user" // Client
+  | "superadmin" // Gestionnaire de plateforme
+  | "agent" // Agents
   | "partner"; // Distributeurs
 
 // === Interface de l'état d'auth ===
 export interface AuthState {
-  user: User | null;
+  user: (User & { avatar?: string }) | null; 
   role: UserRole | null;
   accessToken: string | null;
   refreshToken: string | null;
@@ -51,13 +51,12 @@ export const useAuth = create<AuthState>()(
       hydrated: false,
 
       login: (user, tokens) => {
-        // Génération automatique des initiales à la connexion
+        // Génération automatique des initiales
         const avatar = getInitials(user.first_name, user.last_name, user.username);
-
         const userRole = (user.role as UserRole) || null;
 
         set({
-          user: { ...user, avatar },
+          user: { ...user, avatar }, 
           role: userRole,
           accessToken: tokens.access,
           refreshToken: tokens.refresh,
@@ -80,7 +79,6 @@ export const useAuth = create<AuthState>()(
           isAuthenticated: false,
           hydrated: true,
         });
-
         localStorage.removeItem("user_role");
         cleanupAuthLocalStorage();
       },

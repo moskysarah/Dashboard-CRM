@@ -9,7 +9,7 @@ import {
 } from "recharts";
 import { DollarSign, CheckCircle, Clock, XCircle } from "lucide-react";
 import DashboardLayout from "../layouts/dashboardLayout";
-import AvatarRole from "../components/AvatarRole";
+import Avatar from "../components/avatar";
 import MerchantKPI from "../components/merchantKPI";
 import MerchantTransactions from "../components/merchantTransactions";
 import MerchantWallet from "../components/merchantWallet";
@@ -173,7 +173,7 @@ const DashboardMerchant: React.FC = () => {
         {/* Profil du marchand avec AvatarRole */}
         {profile && (
           <div className="flex flex-col items-center bg-white rounded-xl shadow p-6">
-            <AvatarRole
+            <Avatar
               firstName={profile.first_name}
               lastName={profile.last_name}
               role={profile.role}

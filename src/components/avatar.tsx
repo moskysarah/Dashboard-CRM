@@ -3,7 +3,6 @@ import React from "react";
 interface AvatarRoleProps {
   firstName: string;
   lastName: string;
-  userName: string;
   role: string;
   size: string; // ex: "w-10 h-10"
 }
@@ -11,12 +10,11 @@ interface AvatarRoleProps {
 const AvatarRole: React.FC<AvatarRoleProps> = ({
   firstName,
   lastName,
-  userName ,
   role,
   size,
 }) => {
   // Initiales (ex: Sarah Ngoya → SN)
-  const initials = `${firstName?.charAt(0) || ""}${lastName?.charAt(0) || ""}${userName?.charAt(0) || ""}`.toUpperCase();
+  const initials = `${firstName?.charAt(0) || ""}${lastName?.charAt(0) || ""}`.toUpperCase();
 
   // Couleurs selon le rôle
   const roleColors: Record<string, string> = {

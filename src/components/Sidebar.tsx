@@ -7,7 +7,7 @@ import T from "./translatespace";
 export function Sidebar() {
   const links = [
     //{ label: "Tableau de bord général", to: "/", icon: <LayoutDashboard size={18} /> },
-    { label: "Dashboard Admin", to: "/dashboard", icon: <LayoutDashboard size={18} /> },
+    { label: "Tableau de bord admin", to: "/dashboard", icon: <LayoutDashboard size={18} /> },
     { label: "Distributeur", to: "/distributor", icon: <Briefcase size={18} /> },
     { label: "Clients", to: "/users", icon: <Users size={18} /> },
     { label: "Marchand", to: "/merchants", icon: <Store size={18} /> },

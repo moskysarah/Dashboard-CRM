@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import DashboardLayout from "../layouts/dashboardLayout";
-import AvatarRole from "../components/AvatarRole";
+import Avatar from "../components/avatar";
 import WalletCard from "../components/agentwallet";
 import TransactionsTable from "../components/agentTransactionTable";
 import { getAgentProfile, getAgentWallet, getAgentTransactions } from "../services/api";
@@ -62,7 +62,7 @@ const AgentDashboard: React.FC = () => {
         {/* Profil simplifié avec AvatarRole */}
         {agent && (
           <div className="flex flex-col items-center bg-white rounded-xl shadow p-6">
-            <AvatarRole
+            <Avatar
               firstName={agent.first_name}
               lastName={agent.last_name}
               role={agent.role}

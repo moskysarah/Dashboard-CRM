@@ -5,7 +5,7 @@ import type { User, UserRole } from "../../types/domain";
 import TransactionsList from "./TransactionsList";
 import ReportsList from "./RapportsList";
 import T from "../../components/translatespace";
-import AvatarRole from "../../components/AvatarRole";
+import Avatar from "../../components/avatar";
 
 
 interface SectionCardProps {
@@ -149,7 +149,7 @@ const DashboardAdmin: React.FC = () => {
                 {(Array.isArray(users) ? users : []).map((u) => (
                   <tr key={u.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-3 py-2 text-center">
-                      <AvatarRole
+                      <Avatar
                         firstName={u.first_name || ""}
                         lastName={u.last_name || ""}
                         role={u.role || "admin"}
@@ -172,7 +172,7 @@ const DashboardAdmin: React.FC = () => {
                           )
                         }
                       >
-                        <AvatarRole
+                        <Avatar
                           firstName={u.first_name || ""}
                           lastName={u.last_name || ""}
                           role={u.role || "admin"}
@@ -187,7 +187,7 @@ const DashboardAdmin: React.FC = () => {
                               onClick={() => handleChangeRole(u.id, r)}
                               className="cursor-pointer text-xs px-2 py-1 rounded-full text-center hover:opacity-80"
                             >
-                              <AvatarRole
+                              <Avatar
                                 firstName={u.first_name || ""}
                                 lastName={u.last_name || ""}
                                 role={r}

@@ -2,33 +2,42 @@
 // TYPES ALIGNED WITH "POSTEPAY API(1).yaml"
 // ===================================================================
 
-import type { ReactNode } from "react";
+// ===================================================================
+// ROLES — unified
+// ===================================================================
 
-// --- Enums from API ---
-export type UserRole = 'superadmin' | 'admin' | 'agent' | 'partner' | 'user';
-export type AgentRole = 'superadmin' | 'admin' | 'agent' | 'partner' | 'user';
+export type UserRole = "superadmin" | "admin" | "agent" | "partner" | "user";
+
+// Pour éviter la redondance inutile, on supprime AgentRole
+// Si tu veux garder une distinction, tu peux le redéfinir à part
+export type AgentRole = UserRole;
+
+// ===================================================================
+// TRANSACTIONS & MESSAGES TYPES
+// ===================================================================
 
 export type TransactionStatus =
-  | 'PENDING'
-  | 'PROCESSING'
-  | 'SUCCESS'
-  | 'FAILED'
-  | 'CANCELLED'
-  | 'ON'
-  | 'OFF'
-  | 'REFUNDED';
+  | "PENDING"
+  | "PROCESSING"
+  | "SUCCESS"
+  | "FAILED"
+  | "CANCELLED"
+  | "ON"
+  | "OFF"
+  | "REFUNDED";
 
-export type TransactionType = 'IN' | 'OUT';
+export type TransactionType = "IN" | "OUT";
+
 export type TransactionOperationType =
-  | 'MOMO'
-  | 'BANKCARD'
-  | 'VOUCHER'
-  | 'TRANSFERT'
-  | 'DEPOT'
-  | 'CREDIT_PURCHASE'
-  | 'TELCO';
+  | "MOMO"
+  | "BANKCARD"
+  | "VOUCHER"
+  | "TRANSFERT"
+  | "DEPOT"
+  | "CREDIT_PURCHASE"
+  | "TELCO";
 
-export type MessageType = 'auth' | 'val_trans' | 'reset_pwd' | 'other';
+export type MessageType = "auth" | "val_trans" | "reset_pwd" | "other";
 
 // ===================================================================
 // MAIN DATA STRUCTURES
@@ -49,6 +58,8 @@ export type User = {
   date_joined?: string;
   last_login?: string | null;
   merchant?: string | null;
+  // Ajout optionnel pour afficher les initiales/avatar
+  avatar?: string;
 };
 
 export type Agent = {
@@ -66,6 +77,7 @@ export type Agent = {
   date_joined?: string;
   last_login?: string | null;
   merchant?: string | null;
+  avatar?: string;
 };
 
 export type Transaction = {
@@ -97,14 +109,16 @@ export type Message = {
 };
 
 // ===================================================================
+// TICKET SYSTEM TYPES
+// ===================================================================
 
 export type TicketStatus = "OPEN" | "IN_PROGRESS" | "CLOSED";
 export type TicketPriority = "HIGH" | "MEDIUM" | "LOW";
 
 export type Ticket = {
   id: number;
-  title: ReactNode;
-  type: ReactNode;
+  title: string; // pas besoin de ReactNode, plus simple pour API
+  type: string;
   status: TicketStatus;
   priority: TicketPriority;
   created_at: string;
@@ -112,7 +126,7 @@ export type Ticket = {
 };
 
 // ===================================================================
-// DISTRIBUTOR MANAGER TYPES
+// DISTRIBUTOR / PARTNER MANAGEMENT TYPES
 // ===================================================================
 
 export type Product = {
@@ -126,7 +140,7 @@ export type Commission = {
   id: string;
   distributorId: string;
   productId: string;
-  type: 'percentage' | 'fixed';
+  type: "percentage" | "fixed";
   value: number;
   isActive: boolean;
   minSales?: number;
@@ -163,3 +177,18 @@ export type Distributor = {
   totalSales: number;
   totalCommissions: number;
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
