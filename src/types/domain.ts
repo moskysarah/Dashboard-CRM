@@ -88,6 +88,9 @@ export type Transaction = {
 
 export type Message = {
   id: number;
+  is_sent: boolean;
+  phone: string;
+  type: MessageType;
   message: string;
   created_at: string;
   updated_at: string;
@@ -106,4 +109,57 @@ export type Ticket = {
   priority: TicketPriority;
   created_at: string;
   updated_at?: string;
+};
+
+// ===================================================================
+// DISTRIBUTOR MANAGER TYPES
+// ===================================================================
+
+export type Product = {
+  id: string;
+  name: string;
+  price: number;
+  description?: string;
+};
+
+export type Commission = {
+  id: string;
+  distributorId: string;
+  productId: string;
+  type: 'percentage' | 'fixed';
+  value: number;
+  isActive: boolean;
+  minSales?: number;
+  maxSales?: number;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type Sale = {
+  id: string;
+  distributorId: string;
+  productId: string;
+  quantity: number;
+  totalAmount: number;
+  status: string;
+  commissionAmount: number;
+  saleDate: Date;
+};
+
+export type Stock = {
+  id: string;
+  distributorId: string;
+  productId: string;
+  currentLevel: number;
+  reservedQuantity: number;
+  minLevel: number;
+  availableQuantity: number;
+  lastUpdated: Date;
+};
+
+export type Distributor = {
+  id: string;
+  name: string;
+  totalSales: number;
+  totalCommissions: number;
 };

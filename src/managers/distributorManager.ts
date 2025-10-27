@@ -1,64 +1,4 @@
-// src/managers/DistributionManager.ts
-
-export interface Commission {
-  id: string;
-  distributorId: string;
-  productId: string;
-  type: 'percentage' | 'fixed';
-  value: number;
-  minSales?: number;
-  maxSales?: number;
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface Sale {
-  id: string;
-  distributorId: string;
-  productId: string;
-  quantity: number;
-  unitPrice: number;
-  totalAmount: number;
-  commissionAmount: number;
-  status: 'pending' | 'completed' | 'cancelled';
-  saleDate: Date;
-  customerId?: string;
-}
-
-export interface Stock {
-  id: string;
-  distributorId: string;
-  productId: string;
-  currentLevel: number;
-  minLevel: number;
-  maxLevel: number;
-  reservedQuantity: number;
-  availableQuantity: number;
-  lastUpdated: Date;
-}
-
-export interface Distributor {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  address: string;
-  region: string;
-  isActive: boolean;
-  joinDate: Date;
-  totalSales: number;
-  totalCommissions: number;
-}
-
-export interface Product {
-  id: string;
-  name: string;
-  sku: string;
-  price: number;
-  category: string;
-  description: string;
-}
+import type { Commission, Sale, Stock, Distributor, Product } from '../types/domain';
 
 export class DistributionManager {
   private commissions: Commission[] = [];
@@ -67,13 +7,45 @@ export class DistributionManager {
   private distributors: Distributor[] = [];
   private products: Product[] = [];
 
+  // ========== GESTION DES PRODUITS ==========
+  addProduct(productData: Omit<Product, 'id'>): Product {
+    const product: Product = {
+      ...productData,
+      id: this.generateId(),
+    };
+    this.products.push(product);
+    return product;
+  }
+
+  updateProduct(productId: string, updates: Partial<Product>): Product | null {
+    const index = this.products.findIndex(p => p.id === productId);
+    if (index === -1) return null;
+    this.products[index] = { ...this.products[index], ...updates };
+    return this.products[index];
+  }
+
+  getProduct(productId: string): Product | null {
+    return this.products.find(p => p.id === productId) || null;
+  }
+
+  getAllProducts(): Product[] {
+    return [...this.products];
+  }
+
+  deleteProduct(productId: string): boolean {
+    const index = this.products.findIndex(p => p.id === productId);
+    if (index === -1) return false;
+    this.products.splice(index, 1);
+    return true;
+  }
+
   // ========== GESTION DES COMMISSIONS ==========
   configureCommission(config: Omit<Commission, 'id' | 'createdAt' | 'updatedAt'>): Commission {
     const commission: Commission = {
       ...config,
       id: this.generateId(),
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
     this.commissions.push(commission);
     return commission;

@@ -5,6 +5,8 @@ import type { User, UserRole } from "../../types/domain";
 import TransactionsList from "./TransactionsList";
 import ReportsList from "./RapportsList";
 import T from "../../components/translatespace";
+import AvatarRole from "../../components/AvatarRole";
+
 
 interface SectionCardProps {
   title: string | React.ReactNode;
@@ -18,13 +20,7 @@ const SectionCard: React.FC<SectionCardProps> = ({ title, children, className })
   </div>
 );
 
-const roleOptions: UserRole[] = ["admin", "agent", "superadmin","marchand"];
-const roleColors: Record<UserRole, string> = {
-  admin: "bg-blue-500 text-white",
-  agent: "bg-green-500 text-white",
-  marchand : "bg-yellow-500 text-white",
-  superadmin: "bg-purple-500 text-white",
-};
+const roleOptions: UserRole[] = ["admin", "agent", "superadmin", "partner", "user"];
 const statusColors: Record<"Active" | "Suspended", string> = {
   Active: "bg-green-400 text-white",
   Suspended: "bg-red-400 text-white",
@@ -50,7 +46,7 @@ const DashboardAdmin: React.FC = () => {
 
   const [selectedUserIdForRoleChange, setSelectedUserIdForRoleChange] = useState<number | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false); // modal suppression
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [userIdToDelete, setUserIdToDelete] = useState<number | null>(null);
   const [newUserData, setNewUserData] = useState({
     first_name: "",
@@ -94,20 +90,20 @@ const DashboardAdmin: React.FC = () => {
         {/* Statistiques */}
         {statsLoading ? (
           <div className="text-center p-6">
-            <T>Chargement des statistiques...</T>
+           Chargement des statistiques...
           </div>
         ) : (
           overviewStats && (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
               <div className="bg-white rounded-xl shadow-xl p-4 text-center">
                 <h3 className="text-gray-500 text-sm">
-                  <T>Total Utilisateurs</T>
+                 Total Utilisateurs
                 </h3>
                 <p className="text-xl font-bold">{overviewStats.users?.total_users ?? 0}</p>
               </div>
               <div className="bg-white rounded-xl shadow-xl p-4 text-center">
                 <h3 className="text-gray-500 text-sm">
-                  <T>Nouveaux Utilisateurs (30j)</T>
+               Nouveaux Utilisateurs (30j)
                 </h3>
                 <p className="text-xl font-bold text-green-600">{overviewStats.users?.new_users_in_period ?? 0}</p>
               </div>
@@ -119,7 +115,7 @@ const DashboardAdmin: React.FC = () => {
               </div>
               <div className="bg-white rounded-xl shadow-xl p-4 text-center">
                 <h3 className="text-gray-500 text-sm">
-                  <T>Taux de Succès (Tx)</T>
+                 Taux de Succès (Tx)
                 </h3>
                 <p className="text-xl font-bold text-purple-600">{overviewStats.transactions?.success_rate_percent ?? 0} %</p>
               </div>
@@ -128,7 +124,7 @@ const DashboardAdmin: React.FC = () => {
         )}
 
         {/* Gestion Utilisateurs */}
-        <SectionCard title={<T>Gestion des Utilisateurs</T>}>
+        <SectionCard title="Gestion des Utilisateurs">
           <div className="overflow-x-auto relative">
             {usersLoading && (
               <div className="absolute inset-0 bg-white bg-opacity-50 flex justify-center items-center z-30">
@@ -153,7 +149,12 @@ const DashboardAdmin: React.FC = () => {
                 {(Array.isArray(users) ? users : []).map((u) => (
                   <tr key={u.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-3 py-2 text-center">
-                      {capitalize(`${u.first_name} ${u.last_name}` || u.username).charAt(0)}
+                      <AvatarRole
+                        firstName={u.first_name || ""}
+                        lastName={u.last_name || ""}
+                        role={u.role || "admin"}
+                        size="w-8 h-8"
+                      />
                     </td>
                     <td className="px-3 py-2 whitespace-nowrap font-medium">
                       {capitalize(`${u.first_name} ${u.last_name}` || u.username)}
@@ -164,14 +165,19 @@ const DashboardAdmin: React.FC = () => {
                     </td>
                     <td className="px-3 py-2 text-center relative">
                       <span
-                        className={`text-xs px-2 py-0.5 rounded-full cursor-pointer ${roleColors[u.role || "admin"]}`}
+                        className="cursor-pointer"
                         onClick={() =>
                           setSelectedUserIdForRoleChange(
                             selectedUserIdForRoleChange === u.id ? null : u.id
                           )
                         }
                       >
-                        {u.role || "admin"}
+                        <AvatarRole
+                          firstName={u.first_name || ""}
+                          lastName={u.last_name || ""}
+                          role={u.role || "admin"}
+                          size="w-16 h-6 text-xs"
+                        />
                       </span>
                       {selectedUserIdForRoleChange === u.id && (
                         <div className="absolute top-10 left-1/2 transform -translate-x-1/2 w-40 bg-white border shadow-lg rounded-lg z-30">
@@ -179,9 +185,14 @@ const DashboardAdmin: React.FC = () => {
                             <div
                               key={r}
                               onClick={() => handleChangeRole(u.id, r)}
-                              className={`cursor-pointer text-xs px-2 py-1 rounded-full ${roleColors[r]} text-center hover:opacity-80`}
+                              className="cursor-pointer text-xs px-2 py-1 rounded-full text-center hover:opacity-80"
                             >
-                              {r}
+                              <AvatarRole
+                                firstName={u.first_name || ""}
+                                lastName={u.last_name || ""}
+                                role={r}
+                                size="w-16 h-6 text-xs"
+                              />
                             </div>
                           ))}
                         </div>
@@ -189,7 +200,9 @@ const DashboardAdmin: React.FC = () => {
                     </td>
                     <td className="px-3 py-2 whitespace-nowrap">
                       <span
-                        className={`text-xs px-2 py-0.5 rounded-full font-semibold ${statusColors[u.is_active ? "Active" : "Suspended"]}`}
+                        className={`text-xs px-2 py-0.5 rounded-full font-semibold ${
+                          statusColors[u.is_active ? "Active" : "Suspended"]
+                        }`}
                       >
                         {u.is_active ? "Actif" : "Suspendu"}
                       </span>
@@ -213,7 +226,7 @@ const DashboardAdmin: React.FC = () => {
                           }}
                           className="text-xs px-2 py-0.5 rounded-full font-semibold bg-red-500 hover:bg-red-600 text-white transition-colors"
                         >
-                          Supprimer
+                          Supprimer un utilisateur
                         </button>
                       </div>
                     </td>
@@ -229,13 +242,7 @@ const DashboardAdmin: React.FC = () => {
                   onClick={() => setShowCreateModal(true)}
                   className="px-2 py-1 rounded bg-green-500 text-white hover:bg-green-600 text-xs"
                 >
-                  <T>Créer un marchand </T>
-                </button>
-                <button
-                  onClick={() => setShowDeleteModal(true)}
-                  className="px-2 py-1 rounded bg-red-500 text-white hover:bg-red-600 text-xs"
-                >
-                  <T>Supprimer un marchand</T>
+                  <T>Créer un utilisateur </T>
                 </button>
               </div>
               <span className="text-xs text-gray-600">

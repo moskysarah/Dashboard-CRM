@@ -1,5 +1,5 @@
 import React from "react";
-import type { Commission } from "../../managers/distributorManager";
+import type { Commission } from "../../types/domain";
 
 interface CommissionListProps {
   commissions: Commission[];

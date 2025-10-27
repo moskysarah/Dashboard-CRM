@@ -9,7 +9,7 @@ import {
 } from "recharts";
 import { DollarSign, CheckCircle, Clock, XCircle } from "lucide-react";
 import DashboardLayout from "../layouts/dashboardLayout";
-import AvatarRole from "../components/avatarRole";
+import AvatarRole from "../components/AvatarRole";
 import MerchantKPI from "../components/merchantKPI";
 import MerchantTransactions from "../components/merchantTransactions";
 import MerchantWallet from "../components/merchantWallet";

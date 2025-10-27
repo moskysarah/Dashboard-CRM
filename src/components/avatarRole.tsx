@@ -1,35 +1,45 @@
-import type { UserRole } from "../types/domain";
+import React from "react";
 
-interface AvatarProps {
-  firstName?: string;
-  lastName?: string;
-  role?: UserRole;
-  size?: string; // exemple: "w-12 h-12"
+interface AvatarRoleProps {
+  firstName: string;
+  lastName: string;
+  userName: string;
+  role: string;
+  size: string; // ex: "w-10 h-10"
 }
 
-// Couleurs des avatars selon le rôle
-const roleColors: Record<UserRole, string> = {
-  superadmin: "bg-blue-500 text-white",
-  admin: "bg-green-500 text-white",
-  agent: "bg-purple-500 text-white",
-  partner: "bg-yellow-500 text-white",
-  user: "bg-gray-500 text-white",
-};
-
-const AvatarRole: React.FC<AvatarProps> = ({
-  firstName = "",
-  lastName = "",
-  role = "user",
-  size = "w-12 h-12",
+const AvatarRole: React.FC<AvatarRoleProps> = ({
+  firstName,
+  lastName,
+  userName ,
+  role,
+  size,
 }) => {
-  const letters = `${firstName?.[0] || "?"}${lastName?.[0] || "?"}`.toUpperCase();
+  // Initiales (ex: Sarah Ngoya → SN)
+  const initials = `${firstName?.charAt(0) || ""}${lastName?.charAt(0) || ""}${userName?.charAt(0) || ""}`.toUpperCase();
+
+  // Couleurs selon le rôle
+  const roleColors: Record<string, string> = {
+    superadmin: "bg-purple-600",
+    admin: "bg-blue-600",
+    agent: "bg-green-600",
+    partner: "bg-yellow-500",
+    user: "bg-yellow-500",
+    distributor: "bg-orange-600",
+    default: "bg-gray-500",
+  };
+
+  // Sélection automatique de la couleur
+  const bgColor = roleColors[role.toLowerCase()] || roleColors.default;
 
   return (
-    <div
-      className={`flex items-center justify-center rounded-full ${size} ${roleColors[role]} font-bold text-lg`}
-      title={`${firstName || "Unknown"} ${lastName || "user"}`} // Tooltip au survol
-    >
-      {letters}
+    <div className="flex items-center gap-2">
+      <div
+        className={`${size} ${bgColor} text-white rounded-full flex items-center justify-center font-bold uppercase shadow-md`}
+      >
+        {initials}
+      </div>
+      <span className="text-gray-700 font-medium capitalize">{role}</span>
     </div>
   );
 };

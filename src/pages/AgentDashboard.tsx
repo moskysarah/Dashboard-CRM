@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import DashboardLayout from "../layouts/dashboardLayout";
-import AvatarRole from "../components/avatarRole";
+import AvatarRole from "../components/AvatarRole";
 import WalletCard from "../components/agentwallet";
 import TransactionsTable from "../components/agentTransactionTable";
 import { getAgentProfile, getAgentWallet, getAgentTransactions } from "../services/api";
