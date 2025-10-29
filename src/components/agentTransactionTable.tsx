@@ -1,11 +1,11 @@
 import React from "react";
-import T from "./translatespace";
 
 interface Transaction {
   id: number;
   amount: number;
   status: string;
   date: string;
+  createdAt?: string;
   description?: string;
 }
 
@@ -22,6 +22,8 @@ const statusColors: Record<string, string> = {
 };
 
 const AgentTransactionTable: React.FC<Props> = ({ transactions, loading, error }) => {
+  const txs = Array.isArray(transactions) ? transactions : [];
+
   if (loading)
     return (
       <div className="flex justify-center py-6">
@@ -34,17 +36,17 @@ const AgentTransactionTable: React.FC<Props> = ({ transactions, loading, error }
       <div className="text-center py-4 text-red-500 font-medium">{error}</div>
     );
 
-  if (transactions.length === 0)
+  if (txs.length === 0)
     return (
       <div className="text-center py-6 text-gray-500">
-        <T>Aucune transaction trouvée.</T>
+       Aucune transaction trouvée.
       </div>
     );
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-6">
       <h2 className="text-lg font-bold mb-4 text-gray-800">
-        <T>Mes Transactions</T>
+       Mes Transactions
       </h2>
 
       <div className="overflow-x-auto">
@@ -52,24 +54,24 @@ const AgentTransactionTable: React.FC<Props> = ({ transactions, loading, error }
           <thead className="bg-gray-50">
             <tr>
               <th className="px-3 py-2 text-left text-gray-600 font-semibold">
-                <T>ID</T>
+                ID
               </th>
               <th className="px-3 py-2 text-left text-gray-600 font-semibold">
-                <T>Date</T>
+                Date
               </th>
               <th className="px-3 py-2 text-left text-gray-600 font-semibold">
-                <T>Description</T>
+                Description
               </th>
               <th className="px-3 py-2 text-left text-gray-600 font-semibold">
-                <T>Montant</T>
+               Montant
               </th>
               <th className="px-3 py-2 text-left text-gray-600 font-semibold">
-                <T>Statut</T>
+                Statut
               </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {transactions.map((tx) => (
+            {txs.map((tx) => (
               <tr key={tx.id} className="hover:bg-gray-50 transition-colors">
                 <td className="px-3 py-2 font-medium text-gray-700">{tx.id}</td>
                 <td className="px-3 py-2 text-gray-600">
@@ -85,7 +87,7 @@ const AgentTransactionTable: React.FC<Props> = ({ transactions, loading, error }
                       statusColors[tx.status] || "bg-gray-300 text-gray-800"
                     }`}
                   >
-                    <T>{tx.status}</T>
+                    {tx.status}
                   </span>
                 </td>
               </tr>

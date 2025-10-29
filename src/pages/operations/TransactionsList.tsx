@@ -7,6 +7,7 @@ type TransactionData = {
   id: number;
   amount: number;
   date: string;
+  createdAt?: string;
   status: string;
 };
 

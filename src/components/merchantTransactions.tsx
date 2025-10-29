@@ -6,6 +6,7 @@ type Transaction = {
   amount: number;
   status: "Réussi" | "En attente" | "Échoué";
   date: string;
+  createdAt?: string;
 };
 
 interface Props {

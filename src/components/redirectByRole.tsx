@@ -27,7 +27,7 @@ const RedirectByRole: React.FC = () => {
   // Détermine la route cible ou login si rôle inconnu
   const targetRoute = apiRole && roleRoutes[apiRole] ? roleRoutes[apiRole] : "/login";
 
-  // ✅ Ne redirige que si on n’est pas déjà sur la route cible
+  //  Ne redirige que si on n’est pas déjà sur la route cible
   if (location.pathname !== targetRoute) {
     return <Navigate to={targetRoute} replace />;
   }

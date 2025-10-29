@@ -1,45 +1,49 @@
 import React from "react";
 
-interface AvatarRoleProps {
-  firstName: string;
-  lastName: string;
-  role: string;
-  size: string; // ex: "w-10 h-10"
+interface AvatarProps {
+  firstName?: string;
+  lastName?: string;
+  role?: string;
+  size?: string;
 }
 
-const AvatarRole: React.FC<AvatarRoleProps> = ({
-  firstName,
-  lastName,
-  role,
-  size,
-}) => {
-  // Initiales (ex: Sarah Ngoya → SN)
-  const initials = `${firstName?.charAt(0) || ""}${lastName?.charAt(0) || ""}`.toUpperCase();
-
-  // Couleurs selon le rôle
-  const roleColors: Record<string, string> = {
-    superadmin: "bg-purple-600",
-    admin: "bg-blue-600",
-    agent: "bg-green-600",
-    partner: "bg-yellow-500",
-    user: "bg-yellow-500",
-    distributor: "bg-orange-600",
-    default: "bg-gray-500",
+const Avatar: React.FC<AvatarProps> = ({ firstName, lastName, role, size = "w-10 h-10" }) => {
+  const getInitials = () => {
+    if (firstName && lastName) {
+      return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+    }
+    return "";
   };
 
-  // Sélection automatique de la couleur
-  const bgColor = roleColors[role.toLowerCase()] || roleColors.default;
+  const getRoleColor = (role?: string) => {
+    switch (role) {
+      case "admin":
+        return "bg-red-500 text-white";
+      case "superadmin":
+        return "bg-purple-500 text-white";
+      case "agent":
+        return "bg-blue-500 text-white";
+      case "merchant":
+        return "bg-green-500 text-white";
+      case "user":
+        return "bg-gray-500 text-white";
+      case "partner":
+        return "bg-yellow-500 text-white";
+      default:
+        return "bg-gray-400 text-white";
+    }
+  };
+
+  const displayText = firstName && lastName ? getInitials() : role?.toUpperCase() || "N/A";
+  const bgColor = getRoleColor(role);
 
   return (
-    <div className="flex items-center gap-2">
-      <div
-        className={`${size} ${bgColor} text-white rounded-full flex items-center justify-center font-bold uppercase shadow-md`}
-      >
-        {initials}
-      </div>
-      <span className="text-gray-700 font-medium capitalize">{role}</span>
+    <div
+      className={`${size} ${bgColor} rounded-full flex items-center justify-center font-semibold text-sm`}
+    >
+      {displayText}
     </div>
   );
 };
 
-export default AvatarRole;
+export default Avatar;

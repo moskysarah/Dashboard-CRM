@@ -1,17 +1,17 @@
 // src/components/Header.tsx
 
-import { Bell, Globe } from "lucide-react";
-import { useTranslate } from "../contexts/translateContext";
+import { Bell, } from "lucide-react";  // Globe
+// import { useTranslate } from "../contexts/translateContext";
 import { useAuth } from "../store/auth";
 import Avatar from "./avatar";
 
 export function Header() {
-  const { language, setLanguage } = useTranslate();
+  // const { language, setLanguage } = useTranslate();
   const { user } = useAuth();
 
-  const toggleLanguage = () => {
-    setLanguage(language === 'fr' ? 'en' : 'fr');
-  };
+  // const toggleLanguage = () => {
+  //   setLanguage(language === 'fr' ? 'en' : 'fr');
+  // };
 
   return (
     <header className="h-16 bg-white border-b flex items-center justify-between px-6 shadow-sm">
@@ -39,7 +39,7 @@ export function Header() {
         )}
       </div>
 
-      {/* Language Switcher */}
+      {/* Language Switcher
       <button
         onClick={toggleLanguage}
         className="flex items-center gap-2 px-3 py-1 rounded-md hover:bg-gray-100 transition-colors"
@@ -48,8 +48,9 @@ export function Header() {
         <Globe size={18} className="text-gray-600" />
         <span className="text-sm font-medium text-gray-700 uppercase">
           {language === 'fr' ? 'FR' : 'EN'}
-        </span>
-      </button>
+           </button>
+        </span> */}
+     
     </header>
   )
 }

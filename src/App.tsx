@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { RouterProvider } from "react-router-dom";
 import { router } from "./router";
 import { useAuth } from "./store/auth";
-import { TranslateProvider } from "./contexts/TranslateProvider";
 import { UserProvider } from "./contexts/UserProvider";
 
 const App = () => {
@@ -29,11 +28,11 @@ const App = () => {
   }
 
   return (
-    <TranslateProvider>
+    
       <UserProvider>
         <RouterProvider router={router} />
       </UserProvider>
-    </TranslateProvider>
+    
   );
 };
 

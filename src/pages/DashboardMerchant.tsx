@@ -12,9 +12,8 @@ import Avatar from "../components/avatar";
 import MerchantKPI from "../components/merchantKPI";
 import MerchantTransactions from "../components/merchantTransactions";
 import MerchantWallet from "../components/merchantWallet";
-import { getProfileMerchant, getAgentWallets, getMerchantTransactions } from "../services/api";
+import { getProfileMerchant, getMerchantTransactions, getClientWallet } from "../services/api";
 import * as XLSX from "xlsx";
-import T from "../components/translatespace";
 import { useAuth } from "../store/auth";
 
 type Transaction = {
@@ -54,16 +53,57 @@ const DashboardMerchant: React.FC = () => {
 
       setLoading(true);
       try {
-        const transactionsRes = await getMerchantTransactions();
-        setTransactions(transactionsRes.data.results ?? transactionsRes.data);
+        const [transactionsRes, profileRes, walletsRes] = await Promise.allSettled([
+          getMerchantTransactions(),
+          getProfileMerchant(user.id),
+          getClientWallet()
+        ]);
 
-        const profileRes = await getProfileMerchant(user.id);
-        setProfile(profileRes.data);
+        // Handle transactions
+        if (transactionsRes.status === 'fulfilled') {
+          setTransactions(transactionsRes.value.data.results ?? transactionsRes.value.data);
+        } else if (transactionsRes.reason?.response?.status === 403) {
+          console.warn("Accès refusé aux transactions du marchand (403).");
+          setTransactions([]);
+        } else if (transactionsRes.reason?.response?.status === 404) {
+          console.warn("Transactions du marchand non trouvées (404).");
+          setTransactions([]);
+        } else {
+          console.error("Erreur lors du chargement des transactions:", transactionsRes.reason);
+        }
 
-        const walletsRes = await getAgentWallets();
-        setWallets(walletsRes.data.results || walletsRes.data);
+        // Handle profile
+        if (profileRes.status === 'fulfilled') {
+          setProfile(profileRes.value.data);
+        } else if (profileRes.reason?.response?.status === 403) {
+          console.warn("Accès refusé au profil du marchand (403).");
+          setProfile(null);
+        } else if (profileRes.reason?.response?.status === 404) {
+          console.warn("Profil du marchand non trouvé (404).");
+          setProfile(null);
+        } else {
+          console.error("Erreur lors du chargement du profil:", profileRes.reason);
+        }
 
-        setError(null);
+        // Handle wallets
+        if (walletsRes.status === 'fulfilled') {
+          setWallets(walletsRes.value.data.results || walletsRes.value.data);
+        } else if (walletsRes.reason?.response?.status === 403) {
+          console.warn("Accès refusé aux portefeuilles (403).");
+          setWallets([]);
+        } else if (walletsRes.reason?.response?.status === 404) {
+          console.warn("Portefeuilles non trouvés (404).");
+          setWallets([]);
+        } else {
+          console.error("Erreur lors du chargement des portefeuilles:", walletsRes.reason);
+        }
+
+        // Set error only if all requests failed
+        if (transactionsRes.status === 'rejected' && profileRes.status === 'rejected' && walletsRes.status === 'rejected') {
+          setError("Impossible de charger les données.");
+        } else {
+          setError(null);
+        }
       } catch (err: any) {
         console.error("Erreur lors du chargement des données :", err);
         setError("Impossible de charger les données.");
@@ -154,7 +194,7 @@ const DashboardMerchant: React.FC = () => {
     return (
      
         <p className="p-6">
-          <T>Chargement des données...</T>
+          Chargement des données...
         </p>
       
     );
@@ -192,28 +232,28 @@ const DashboardMerchant: React.FC = () => {
         {/* KPIs globaux */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mt-6">
           <MerchantKPI
-            title={<T>Ventes totales</T>}
+            title={"Ventes totales"}
             value={kpis.totalAmount}
             color="bg-white shadow text-blue-700"
             icon={<DollarSign size={24} />}
             iconColor="text-blue-700"
           />
           <MerchantKPI
-            title={<T>Transactions réussies</T>}
+            title={"Transactions réussies"}
             value={kpis.totalSuccess}
             color="bg-white shadow text-green-700"
             icon={<CheckCircle size={24} />}
             iconColor="text-green-700"
           />
           <MerchantKPI
-            title={<T>En attente</T>}
+            title={"En attente"}
             value={kpis.totalPending}
             color="bg-white shadow text-yellow-700"
             icon={<Clock size={24} />}
             iconColor="text-yellow-700"
           />
           <MerchantKPI
-            title={<T>Échouées</T>}
+            title={"Échouées"}
             value={kpis.totalFailed}
             color="bg-white shadow text-red-700"
             icon={<XCircle size={24} />}
@@ -233,28 +273,28 @@ const DashboardMerchant: React.FC = () => {
         {/* Performance par sous-magasin */}
         <div className="bg-white p-4 rounded-lg shadow-lg">
           <h2 className="text-xl font-bold mb-4">
-            <T>Performance par sous-magasin</T>
+            Performance par sous-magasin
           </h2>
           <table className="w-full text-left border-collapse min-w-[600px] md:min-w-full">
             <thead className="border-b sticky top-0 text-center bg-gray-50">
               <tr>
                 <th className="py-2 px-4 font-semibold">
-                  <T>Sous-magasin</T>
+                  Sous-magasin
                 </th>
                 <th className="py-2 px-4 font-semibold">
-                  <T>Transactions</T>
+                  Transactions
                 </th>
                 <th className="py-2 px-4 font-semibold">
-                  <T>Montant total ($)</T>
+                  Montant total ($)
                 </th>
                 <th className="py-2 px-4 font-semibold">
-                  <T>Réussies</T>
+                  Réussies
                 </th>
                 <th className="py-2 px-4 font-semibold">
-                  <T>En attente</T>
+                  En attente
                 </th>
                 <th className="py-2 px-4 font-semibold">
-                  <T>Échouées</T>
+                  Échouées
                 </th>
               </tr>
             </thead>
@@ -279,7 +319,7 @@ const DashboardMerchant: React.FC = () => {
         {/* Performance Chart */}
         <div className="bg-white p-4 rounded-lg shadow-lg">
           <h2 className="text-xl font-bold mb-4">
-            <T>Transactions par sous-magasin</T>
+            Transactions par sous-magasin
           </h2>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={performanceData}>

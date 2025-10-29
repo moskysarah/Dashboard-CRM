@@ -139,12 +139,13 @@ import Merchants from "../pages/DashboardMerchant";
 import Sales from "../pages/DashboardSales";
 import Finance from "../pages/DashboardFinance";
 import Settings from "../pages/DashboardSettings";
-import UsersPage from "../pages/AgentDashboard";
+import User from "../pages/DashboardUser";
+import Agent from "../pages/DashboardAgent";
 import DashboardDistributor from "../pages/DashboardDistributor";
 import ErrorPage from "../pages/ErrorPage";
 import RedirectByRole from "../components/redirectByRole";
 import { useAuth } from "../store/auth";
-import type { JSX } from "react";
+import type { JSX } from "react"; 
 
 // === PROTECTION AUTH ===
 const RequireAuth = ({ children }: { children: JSX.Element }) => {
@@ -185,10 +186,13 @@ export const router = createBrowserRouter([
     ),
     children: [
       // ADMIN
-      { path: "dashboard", element: <RoleProtectedRoute allowedRoles={["superadmin", "user"]}><Dashboard /></RoleProtectedRoute> },
+      { path: "dashboard", element: <RoleProtectedRoute allowedRoles={["superadmin" , "user" ,"admin"]}><Dashboard /></RoleProtectedRoute> },
 
       // AGENT
-      { path: "users", element: <RoleProtectedRoute allowedRoles={["user", "superadmin"]}><UsersPage /></RoleProtectedRoute> },
+      { path: "agent", element: <RoleProtectedRoute allowedRoles={["user", "superadmin" ,"agent"]}><Agent /></RoleProtectedRoute> },
+
+      // USERS
+      { path: "users", element: <RoleProtectedRoute allowedRoles={["user", "superadmin"]}><User /></RoleProtectedRoute> },
 
       // MARCHAND
       { path: "merchants", element: <RoleProtectedRoute allowedRoles={["superadmin", "admin" , "user"]}><Merchants /></RoleProtectedRoute> },
@@ -197,13 +201,13 @@ export const router = createBrowserRouter([
       { path: "finance", element: <RoleProtectedRoute allowedRoles={["superadmin" ,"user"]}><Finance /></RoleProtectedRoute> },
 
       // SALES
-      { path: "sales", element: <RoleProtectedRoute allowedRoles={["superadmin","user"]}><Sales /></RoleProtectedRoute> },
-
+      { path: "sales", element: <RoleProtectedRoute allowedRoles={["superadmin", "user"]}><Sales /></RoleProtectedRoute> },
+       
       // IT / PARAMS
       { path: "it", element: <RoleProtectedRoute allowedRoles={["superadmin","user"]}><Settings /></RoleProtectedRoute> },
-
+      
       // DISTRIBUTEUR
-      { path: "distributor", element: <RoleProtectedRoute allowedRoles={["partner","user"]}><DashboardDistributor distributorId="123" /></RoleProtectedRoute> },
+      { path: "distributor", element: <RoleProtectedRoute allowedRoles={["partner","user"]}><DashboardDistributor /></RoleProtectedRoute> },
     ],
   },
 

@@ -2,12 +2,11 @@
 import type { ReactNode } from "react";
 import { Sidebar } from "../components/Sidebar";
 import { useState, useEffect } from "react";
-import { Bell, Mail, Globe, Menu, X } from "lucide-react";
+import { Bell, Mail, Menu, X } from "lucide-react";
 import { Link, useNavigate , Outlet } from "react-router-dom";
 import { useAuth } from "../store/auth";
 import { getNotifications, type AppNotification} from "../services/notification";
-import { useTranslate } from "../contexts/translateContext";
-import T from "../components/translatespace";
+
 
 type Props = {
   children?: ReactNode;
@@ -15,10 +14,8 @@ type Props = {
 
 const DashboardLayout: React.FC<Props> = ({}) => {
   const { user, logout } = useAuth();
-  const { language, setLanguage } = useTranslate();
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [notifOpen, setNotifOpen] = useState(false);
-  const [langOpen, setLangOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -103,7 +100,7 @@ const DashboardLayout: React.FC<Props> = ({}) => {
             >
               {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
-            <h2 className="font-bold text-sm md:text-base"><T>Dashboard</T></h2>
+            <h2 className="font-bold text-sm md:text-base">Dashboard</h2>
           </div>
 
           <div className="flex items-center gap-2 md:gap-4">
@@ -144,7 +141,7 @@ const DashboardLayout: React.FC<Props> = ({}) => {
 
               {notifOpen && (
                 <div className="absolute right-0 mt-2 w-56 md:w-64 bg-white shadow-lg border rounded p-2 z-10">
-                  {notifications.length === 0 && <p><T>Aucune notification</T></p>}
+                  {notifications.length === 0 && <p>Aucune notification</p>}
                   {notifications.map((n) => (
                     <div
                       key={n.id}
@@ -172,7 +169,26 @@ const DashboardLayout: React.FC<Props> = ({}) => {
               </Link>
             </div>
 
-            {/* Language Selector */}
+            {/* Déconnexion */}
+            <button
+              onClick={handleLogout}
+              className="bg-red-500 text-white px-2 md:px-3 py-1 rounded hover:bg-red-600 text-sm"
+            >
+              Déconnexion
+            </button>
+          </div>
+        </header>
+
+        <main className="p-2 md:p-4 flex-1 overflow-y-auto overflow-x-hidden h-[calc(100vh-64px)] md:h-[calc(100vh-80px)] md:ml-64">
+          <Outlet />
+        </main>
+      </div>
+    </div>
+  );
+};
+
+export default DashboardLayout;
+{/* Language Selector
             <div className="relative">
               <button className="relative" onClick={() => setLangOpen(!langOpen)}>
                 <Globe size={20} />
@@ -200,24 +216,4 @@ const DashboardLayout: React.FC<Props> = ({}) => {
                   </button>
                 </div>
               )}
-            </div>
-
-            {/* Déconnexion */}
-            <button
-              onClick={handleLogout}
-              className="bg-red-500 text-white px-2 md:px-3 py-1 rounded hover:bg-red-600 text-sm"
-            >
-              <T>Logout</T>
-            </button>
-          </div>
-        </header>
-
-        <main className="p-2 md:p-4 flex-1 overflow-y-auto overflow-x-hidden h-[calc(100vh-64px)] md:h-[calc(100vh-80px)]">
-          <Outlet />
-        </main>
-      </div>
-    </div>
-  );
-};
-
-export default DashboardLayout;
+            </div> */}

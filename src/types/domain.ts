@@ -60,6 +60,9 @@ export type User = {
   merchant?: string | null;
   // Ajout optionnel pour afficher les initiales/avatar
   avatar?: string;
+  zone?: string;
+  wallet_balance?: number;
+  total_transactions?: number;
 };
 
 export type Agent = {
@@ -78,7 +81,19 @@ export type Agent = {
   last_login?: string | null;
   merchant?: string | null;
   avatar?: string;
+  zone?: string;
+  wallet_balance?: number;
+  total_transactions?: number;
 };
+
+
+
+export interface Client {
+id: string
+nom: string
+telephone?: string
+statut?: string
+}
 
 export type Transaction = {
   id: number;
@@ -129,66 +144,89 @@ export type Ticket = {
 // DISTRIBUTOR / PARTNER MANAGEMENT TYPES
 // ===================================================================
 
-export type Product = {
-  id: string;
-  name: string;
-  price: number;
-  description?: string;
-};
+// export type Product = {
+//   id: string;
+//   name: string;
+//   price: number;
+//   description?: string;
+// };
 
-export type Commission = {
-  id: string;
-  distributorId: string;
-  productId: string;
-  type: "percentage" | "fixed";
-  value: number;
-  isActive: boolean;
-  minSales?: number;
-  maxSales?: number;
-  createdAt: Date;
-  updatedAt: Date;
-};
+// export type Commission = {
+//   id: string;
+//   distributorId: string;
+//   productId: string;
+//   type: "percentage" | "fixed";
+//   value: number;
+//   isActive: boolean;
+//   minSales?: number;
+//   maxSales?: number;
+//   createdAt: Date;
+//   updatedAt: Date;
+// };
 
-export type Sale = {
-  id: string;
-  distributorId: string;
-  productId: string;
-  quantity: number;
-  totalAmount: number;
-  status: string;
-  commissionAmount: number;
-  saleDate: Date;
-};
+// export type Sale = {
+//   id: string;
+//   distributorId: string;
+//   productId: string;
+//   quantity: number;
+//   totalAmount: number;
+//   status: string;
+//   commissionAmount: number;
+//   saleDate: Date;
+// };
 
-export type Stock = {
-  id: string;
-  distributorId: string;
-  productId: string;
-  currentLevel: number;
-  reservedQuantity: number;
-  minLevel: number;
-  availableQuantity: number;
-  lastUpdated: Date;
-};
+// export type Stock = {
+//   id: string;
+//   distributorId: string;
+//   productId: string;
+//   currentLevel: number;
+//   reservedQuantity: number;
+//   minLevel: number;
+//   availableQuantity: number;
+//   lastUpdated: Date;
+// };
 
-export type Distributor = {
-  id: string;
-  name: string;
-  totalSales: number;
-  totalCommissions: number;
-};
+// export type Distributor = {
+//   id: string;
+//   name: string;
+//   totalSales: number;
+//   totalCommissions: number;
+// };
 
-
-
-
-
-
-
+// export type Wallet = {
+//   balance: number;
+//   updatedAt: string;
+// };
 
 
 
 
 
+
+
+
+
+
+
+export type Partner = {
+id: number
+name: string
+email?: string
+phone?: string
+status?: string
+agents_count?: number
+}
+
+
+
+
+
+export type Performance = {
+total_revenue: number
+active_agents: number
+transactions_month: number
+growth_rate?: number
+}
 
 
 

@@ -2,7 +2,11 @@ import { useRouteError } from "react-router-dom";
 
 const ErrorPage = () => {
   const error: any = useRouteError();
-  console.error(error);
+  if (error) {
+    console.error(error);
+  } else {
+    console.error("No error details available");
+  }
 
   // Determine if it's a 404 or other error
   const is404 = error?.status === 404 || !error;

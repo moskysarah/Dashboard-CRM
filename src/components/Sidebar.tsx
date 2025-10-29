@@ -1,15 +1,39 @@
 // src/components/Sidebar.tsx
+import { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
-import { LayoutDashboard, BarChart, Users, Settings, ShoppingCart, Store , Briefcase } from "lucide-react";
+import {
+  LayoutDashboard,
+  BarChart,
+  Users,
+  Settings,
+  ShoppingCart,
+  Store,
+  UserCheck,
+  Briefcase,
+  Menu,
+  X,
+} from "lucide-react";
 import LogoPostSmart from "./logoPostSmart";
-import T from "./translatespace";
 
 export function Sidebar() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  const toggleSidebar = () => setIsOpen(!isOpen);
+  const closeSidebar = () => setIsOpen(false);
+
+  // Détecter la taille d’écran pour adapter automatiquement
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const links = [
-    //{ label: "Tableau de bord général", to: "/", icon: <LayoutDashboard size={18} /> },
     { label: "Tableau de bord admin", to: "/dashboard", icon: <LayoutDashboard size={18} /> },
     { label: "Distributeur", to: "/distributor", icon: <Briefcase size={18} /> },
-    { label: "Clients", to: "/users", icon: <Users size={18} /> },
+    { label: "Agent", to: "/agent", icon: <UserCheck size={18} /> },
+    { label: "Client", to: "/users", icon: <Users size={18} /> },
     { label: "Marchand", to: "/merchants", icon: <Store size={18} /> },
     { label: "Finance", to: "/finance", icon: <BarChart size={18} /> },
     { label: "Vente", to: "/sales", icon: <ShoppingCart size={18} /> },
@@ -17,25 +41,85 @@ export function Sidebar() {
   ];
 
   return (
-    <div className="w-48 md:w-64 h-screen bg-[#0176D3] border-r border-blue-200 shadow-sm p-2 md:p-4">
-      <div className="flex items-center gap-2 text-yellow-200 font-bold text-base md:text-lg mt-3">
-        <LogoPostSmart /> <T>Poste Smart</T>
+    <>
+      {/* Barre supérieure mobile */}
+      <div className="md:hidden fixed top-0 left-0 w-full flex items-center justify-between bg-[#0176D3] p-3 z-50">
+        <div className="flex items-center gap-2 text-yellow-200 font-semibold">
+          <LogoPostSmart /> Poste Smart
+        </div>
+        <button onClick={toggleSidebar} className="text-white">
+          {isOpen ? <X size={28} /> : <Menu size={28} />}
+        </button>
       </div>
-      <nav className="space-y-2 mt-6">
-        {links.map((link) => (
-          <NavLink
-            key={link.to}
-            to={link.to}
-            className={({ isActive }) =>
-              `flex items-center gap-2 p-2 rounded-lg text-sm md:text-base ${
-                isActive ? "bg-indigo-500 text-white" : "text-white hover:bg-indigo-500"
-              }`
-            }
+
+      {/* Sidebar Desktop */}
+      {!isMobile && (
+        <div
+          className="fixed top-0 left-0 h-full bg-[#0176D3] border-r border-blue-200 shadow-sm 
+          p-4 w-64 z-40 text-white flex flex-col"
+        >
+          <div className="flex items-center gap-2 text-yellow-200 font-semibold text-lg mb-6">
+            <LogoPostSmart /> Poste Smart
+          </div>
+
+          <nav className="space-y-2">
+            {links.map((link) => (
+              <NavLink
+                key={link.to}
+                to={link.to}
+                className={({ isActive }) =>
+                  `flex items-center gap-2 p-2 rounded-lg transition-colors ${
+                    isActive ? "bg-indigo-500 text-white" : "hover:bg-indigo-500"
+                  }`
+                }
+              >
+                {link.icon}
+                <span>{link.label}</span>
+              </NavLink>
+            ))}
+          </nav>
+        </div>
+      )}
+
+      {/* Sidebar Mobile plein écran */}
+      {isMobile && (
+        <div
+          className={`fixed inset-0 bg-[#0176D3] text-white flex flex-col items-center justify-center transition-transform duration-300 z-50
+            ${isOpen ? "translate-x-0" : "-translate-x-full"}
+          `}
+        >
+          {/* Bouton X pour fermer */}
+          <button
+            onClick={closeSidebar}
+            className="absolute top-5 right-5 text-white"
           >
-            {link.icon} <T>{link.label}</T>
-          </NavLink>
-        ))}
-      </nav>
-    </div>
+            <X size={30} />
+          </button>
+
+          {/* Logo */}
+          <div className="flex items-center gap-2 text-yellow-200 font-semibold text-xl mb-8">
+            <LogoPostSmart /> Poste Smart
+          </div>
+
+          {/* Liens verticaux */}
+          <nav className="flex flex-col items-center gap-5 text-lg font-medium">
+            {links.map((link) => (
+              <NavLink
+                key={link.to}
+                to={link.to}
+                onClick={closeSidebar}
+                className={({ isActive }) =>
+                  `transition-colors ${
+                    isActive ? "text-yellow-300" : "hover:text-yellow-200"
+                  }`
+                }
+              >
+                {link.label}
+              </NavLink>
+            ))}
+          </nav>
+        </div>
+      )}
+    </>
   );
 }

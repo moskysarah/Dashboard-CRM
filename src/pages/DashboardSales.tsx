@@ -6,7 +6,6 @@ import TimeseriesChart from "../components/timeSeriesChart";
 import StatusChart from "../components/statusChart";
 import ActiveUsersList from "../components/activeUsersList";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import T from "../components/translatespace";
 
 const DashboardSales: React.FC = () => {
   const { data: salesData, loading: salesLoading, error: salesError } = useSalesData();
@@ -25,36 +24,36 @@ const DashboardSales: React.FC = () => {
     return (((last - prev) / prev) * 100).toFixed(1);
   }, [salesData]);
 
-  if (salesLoading || analyticsLoading) return <p className="p-6"><T>Chargement des données...</T></p>;
+  if (salesLoading || analyticsLoading) return <p className="p-6">Chargement des données...</p>;
   if (salesError || analyticsError) return <p className="p-6 text-red-500">{salesError || analyticsError}</p>;
 
   return (
    
       <div className="p-4 md:p-6 min-h-[calc(100vh-80px)] space-y-6">
 
-        <h1 className="text-2xl md:text-3xl font-bold mb-4"><T>Ventes</T></h1>
+        <h1 className="text-2xl md:text-3xl font-semibold mb-4">Tabkeau de bord-Ventes</h1>
 
         {/* ===== KPI Résumé ===== */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           <div className="bg-white p-4 rounded-2xl shadow flex flex-col">
-            <h2 className="text-sm text-gray-500 mb-1"><T>Total Annuel</T></h2>
+            <h2 className="text-sm text-gray-500 mb-1">Total Annuel</h2>
             <p className="text-2xl font-bold text-blue-600">{totalVentes} €</p>
           </div>
           <div className="bg-white p-4 rounded-2xl shadow flex flex-col">
-            <h2 className="text-sm text-gray-500 mb-1"><T>Meilleur Mois</T></h2>
+            <h2 className="text-sm text-gray-500 mb-1">Meilleur Mois</h2>
             <p className="text-2xl font-bold text-green-600">{meilleurMois.month} ({meilleurMois.ventes} €)</p>
           </div>
           <div className="bg-white p-4 rounded-2xl shadow flex flex-col">
-            <h2 className="text-sm text-gray-500 mb-1"><T>Croissance</T></h2>
+            <h2 className="text-sm text-gray-500 mb-1">Croissance</h2>
             <p className={`text-2xl font-bold ${parseFloat(croissance) >= 0 ? "text-green-600" : "text-red-600"}`}>
               {croissance} %
             </p>
           </div>
         </div>
 
-        {/* ===== LineChart Ventes ===== */}
+        ===== LineChart Ventes =====
         <div className="bg-white p-4 rounded-2xl shadow w-full">
-          <h2 className="text-lg font-semibold mb-3"><T>Suivi des ventes mensuelles</T></h2>
+          <h2 className="text-lg font-semibold mb-3">Suivi des ventes mensuelles</h2>
           <div className="w-full h-64 md:h-96">
             <ResponsiveContainer>
               <LineChart data={salesData}>

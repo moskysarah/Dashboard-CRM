@@ -10,7 +10,7 @@ import { useAuth } from "../store/auth";
 import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
 import { LOCAL_STORAGE_KEYS } from "../config/constants";
-import T from "../components/translatespace";
+
 
 const Login = () => {
   const navigate = useNavigate();
@@ -456,19 +456,20 @@ const Login = () => {
         <AnimatePresence mode="wait">
           {mode === "login" && (
             <motion.div key="login" {...slide} className="w-full max-w-sm text-center">
-              <h2 className="text-3xl font-bold text-gray-800 mb-4"><T>Se connecter</T></h2>
+              <h2 className="text-3xl font-bold text-gray-800 mb-4">Se connecter</h2>
               <form onSubmit={handleLogin} className="space-y-4">
                 <Input
                   type="text"
                   value={loginPhoneOrEmail}
                   onChange={(e) => setLoginPhoneOrEmail(e.target.value)}
-                  placeholder={<T>Téléphone ou Email</T>}
+                  placeholder={"Téléphone ou Email"}
+                  autoComplete="username"
                 />
                 <Input
                   isPassword
                   value={loginPassword}
                   onChange={(e) => setLoginPassword(e.target.value)}
-                  placeholder={<T>Mot de passe</T>}
+                  placeholder={"Mot de passe"}
                 />
                 <div className="text-left w-full">
                   <select
@@ -525,6 +526,7 @@ const Login = () => {
                   value={registerPhone}
                   onChange={(e) => setRegisterPhone(e.target.value)}
                   placeholder="Téléphone"
+                  autoComplete="tel"
                 />
                 <Input
                   type="email"
@@ -576,6 +578,7 @@ const Login = () => {
                   value={forgotPhoneOrEmail}
                   onChange={(e) => setForgotPhoneOrEmail(e.target.value)}
                   placeholder="Téléphone"
+                  autoComplete="tel"
                 />
                 <Button
                   type="submit"
