@@ -1,6 +1,7 @@
 import axios from "axios";
 import { LOCAL_STORAGE_KEYS } from "../config/constants";
 import { useAuth } from "../store/auth";
+import { getUserWallets, getUserTransactions } from "./user";
 
 // ========================
 // CONFIGURATION GLOBALE
@@ -175,18 +176,14 @@ export const confirmResetPassword = (token: string, password: string) =>
 // ========================
 // PROFIL UTILISATEUR
 // ========================
-export const getAgentProfile = () => {
+export const getUserProfile = () => {
   const userId = useAuth.getState().user?.id;
   if (!userId) throw new Error("User not authenticated");
   return API.get(`/accounts/users/${userId}/`);
 };
-export const getClientWallet = () => API.get("/me/wallets");
-export const getClientTransactions = () => API.get("/me/transactions");
-export const getUserWallet = getClientWallet;
-export const getUserTransactions = getClientTransactions;
-export const getAgentWallet = getClientWallet;
-export const getAgentWallets = getClientWallet;
-export const getAgentTransactions = getClientTransactions;
+// Alias for backward compatibility
+export const getAgentWallets = getUserWallets;
+export const getAgentTransactions = getUserTransactions;
 export const deleteUserAccount = (id: string) => API.delete(`/accounts/users/${id}/`);
 
 // ========================
@@ -222,57 +219,57 @@ export const markNotificationRead = (id: string) =>
 
 // ========================
 // MARCHANT & ANALYTICS
-// ========================
+// // ========================
 
-export const getMerchantWallets = (id: string | number) => API.get(`/merchants/wallets/${id}/`);
-export const deleteProfileMerchants = (id: string | number) => API.delete(`/merchants/profiles/${id}/`);
-export const getProfileMerchants = (id: number) => API.get(`/merchants/profiles/${id}/`);
-export const getProfileMerchant = (id: string | number) => API.get(`/accounts/users/${id}/`);
-export const getUserSettings = () => API.get("/accounts/user-settings/");
+// export const getMerchantWallets = (id: string | number) => API.get(`/merchants/wallets/${id}/`);
+// export const deleteProfileMerchants = (id: string | number) => API.delete(`/merchants/profiles/${id}/`);
+// export const getProfileMerchants = (id: number) => API.get(`/merchants/profiles/${id}/`);
+// export const getProfileMerchant = (id: string | number) => API.get(`/accounts/users/${id}/`);
+// export const getUserSettings = () => API.get("/accounts/user-settings/");
 export const setUserRole = (userId: string | number, role: string) =>
   API.post(`/admin-panel/users/${userId}/set-role/`, { role });
 export const setUserStatus = (userId: string | number, status: string) =>
   API.post(`/admin-panel/users/${userId}/set-status/`, { status });
 
-// ========================
-// ANALYTICS
-// ========================
-export const getAnalyticsOverview = () => API.get("/analytics/overview/");
-export const getAnalyticsTimeseries = () => API.get("/analytics/timeseries/");
-export const getAnalyticsByStatus = () => API.get("/analytics/by-status/");
-export const getAnalyticsActiveUsers = () => API.get("/analytics/active-users/");
+// // ========================
+// // ANALYTICS
+// // ========================
+// export const getAnalyticsOverview = () => API.get("/analytics/overview/");
+// export const getAnalyticsTimeseries = () => API.get("/analytics/timeseries/");
+// export const getAnalyticsByStatus = () => API.get("/analytics/by-status/");
+// export const getAnalyticsActiveUsers = () => API.get("/analytics/active-users/");
 
-// Export supplémentaires
-export const getAdminOverview = getAnalyticsOverview;
-export const getMerchantTransactions = () => API.get("/me/transactions/");
-export const getMerchants = () => API.get("/merchants/");
-export const fetchTicketsIT = (params?: any) => API.get("/accounts/users-settings/{id}/", { params });
-
-
-// --------------DISTRIBUTION ROUTES -----------------------
-//-------------------------------------------------------
+// // Export supplémentaires
+// export const getAdminOverview = getAnalyticsOverview;
+// export const getMerchantTransactions = () => API.get("/me/transactions/");
+// export const getMerchants = () => API.get("/merchants/");
+// export const fetchTicketsIT = (params?: any) => API.get("/accounts/users-settings/{id}/", { params });
 
 
-export const getPartnerList = () => API.get('/accounts/partners/')
-export const createPartner = (payload: any) => API.post('/accounts/partners/', payload)
-export const getPartnerById = (id: number) => API.get(`/accounts/partners/${id}/`)
-export const updatePartner = (id: number, payload: any) => API.put(`/accounts/partners/${id}/`, payload)
-export const patchPartner = (id: number, payload: any) => API.patch(`/accounts/partners/${id}/`, payload)
-export const deletePartner = (id: number) => API.delete(`/accounts/partners/${id}/`)
-export const getPartnerAgents = (id: number) => API.get(`/accounts/partners/${id}/agents/`)
-export const getPartnerPerformance = (id: number) => API.get(`/accounts/partners/${id}/performance/`)
+// // // --------------DISTRIBUTION ROUTES -----------------------
+// // //-------------------------------------------------------
 
 
-// export default {
-// getPartnerList,
-// createPartner,
-// getPartnerById,
-// updatePartner,
-// patchPartner,
-// deletePartner,
-// getPartnerAgents,
-// getPartnerPerformance,
-// }
+// export const getPartnerList = () => API.get('/accounts/partners/')
+// export const createPartner = (payload: any) => API.post('/accounts/partners/', payload)
+// export const getPartnerById = (id: number) => API.get(`/accounts/partners/${id}/`)
+// export const updatePartner = (id: number, payload: any) => API.put(`/accounts/partners/${id}/`, payload)
+// export const patchPartner = (id: number, payload: any) => API.patch(`/accounts/partners/${id}/`, payload)
+// export const deletePartner = (id: number) => API.delete(`/accounts/partners/${id}/`)
+// export const getPartnerAgents = (id: number) => API.get(`/accounts/partners/${id}/agents/`)
+// export const getPartnerPerformance = (id: number) => API.get(`/accounts/partners/${id}/performance/`)
+
+
+// // export default {
+// // getPartnerList,
+// // createPartner,
+// // getPartnerById,
+// // updatePartner,
+// // patchPartner,
+// // deletePartner,
+// // getPartnerAgents,
+// // getPartnerPerformance,
+// // }
 
 
 

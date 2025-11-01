@@ -134,14 +134,14 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import SplashLogin from "../pages/SplashLogin";
 import DashboardLayout from "../layouts/dashboardLayout";
-import Dashboard from "../pages/operations/DashboardAdmin";
+import Dashboard from "../pages/operations/DashboardSuperadmin";
 import Merchants from "../pages/DashboardMerchant";
 import Sales from "../pages/DashboardSales";
 import Finance from "../pages/DashboardFinance";
 import Settings from "../pages/DashboardSettings";
 import User from "../pages/DashboardUser";
 import Agent from "../pages/DashboardAgent";
-import DashboardDistributor from "../pages/DashboardDistributor";
+import DashboardDistributor from "../pages/DashboardPartner";
 import ErrorPage from "../pages/ErrorPage";
 import RedirectByRole from "../components/redirectByRole";
 import { useAuth } from "../store/auth";

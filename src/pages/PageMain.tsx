@@ -1,6 +1,6 @@
 import React from "react";
 import DashboardLayout from "../layouts/dashboardLayout"; // vérifie le chemin
-import DashboardAdmin from "./operations/DashboardAdmin";
+import DashboardAdmin from "./operations/DashboardSuperadmin";
 
 const PageMain: React.FC = () => {
   return (

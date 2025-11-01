@@ -101,7 +101,7 @@ const RapportsList: React.FC = () => {
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-    } catch (err: any) {
+    } catch {
       setError('Erreur lors du téléchargement du rapport');
     }
   };

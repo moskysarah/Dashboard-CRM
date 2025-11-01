@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { LOCAL_STORAGE_KEYS } from "../config/constants";
-import type { User } from "../types/domain";
+import type { User, UserRole } from "../types/domain";
 import { cleanupAuthLocalStorage } from "../utils/localStorageCleanup";
 
 // === Utilitaire pour générer les initiales ===
@@ -19,13 +19,7 @@ const getInitials = (
   return "?";
 };
 
-// === Types des rôles ===
-export type UserRole =
-  | "admin" // Marchand
-  | "user" // Client
-  | "superadmin" // Gestionnaire de plateforme
-  | "agent" // Agents
-  | "partner"; // Distributeurs
+// UserRole is imported from domain.ts
 
 // === Interface de l'état d'auth ===
 export interface AuthState {

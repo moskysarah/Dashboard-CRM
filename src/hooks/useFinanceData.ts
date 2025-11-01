@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { getAgentWallets, getAgentTransactions, getAnalyticsOverview } from "../services/api";
+import { getAgentWallets, getAgentTransactions } from "../services/api";
+import { getAnalyticsOverview } from "../services/analytics/overview";
 
 export const useFinanceData = () => {
   const [data, setData] = useState<any>(null);

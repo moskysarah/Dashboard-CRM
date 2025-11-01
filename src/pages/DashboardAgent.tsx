@@ -1,79 +1,68 @@
 import React, { useEffect, useState } from "react";
-import Avatar from "../components/avatar";
-import WalletCard from "../components/agentWallet";
-import TransactionsTable from "../components/agentTransactionTable";
-import AgentForm from "../components/agentForm";
-import { getAgentWallet, getAgentTransactions } from "../services/api";
-import { useAuth } from "../store/auth";
+import { getMyAgents, getMyAgentsPerformance } from "../services/agent";
+import MyStats from "../components/agent/myStats";
+import MyTransactions from "../components/agent/myTransaction";
+import MyWallet from "../components/agent/myWallet";
+import CreateAgentForm from "../components/agent/createAgentForm";
 
 const DashboardAgent: React.FC = () => {
-  const user = useAuth((state) => state.user);
-  const [wallet, setWallet] = useState<any>(null);
-  const [transactions, setTransactions] = useState<any[]>([]);
+  const [showForm, setShowForm] = useState(false);
+  const [agents, setAgents] = useState<any[]>([]);
+  const [performance, setPerformance] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+
+  const fetchData = async () => {
+    try {
+      const [agentsRes, perfRes] = await Promise.all([
+        getMyAgents(),
+        getMyAgentsPerformance(),
+      ]);
+
+      setAgents(agentsRes.data.results || agentsRes.data);
+      setPerformance(perfRes.data);
+    } catch (err) {
+      console.error("Erreur chargement agents :", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const [walletRes, txRes] = await Promise.all([
-          getAgentWallet(),
-          getAgentTransactions(),
-        ]);
-
-        setWallet(walletRes.data);
-        setTransactions(txRes.data);
-      } catch (err: any) {
-        console.error(err);
-        if (err.response?.status === 403) {
-          setError("Accès refusé : permissions insuffisantes.");
-        } else {
-          setError("Impossible de charger les données.");
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchData();
   }, []);
 
-  if (loading) {
-    return <div className="p-6 text-center text-gray-600">Chargement en cours...</div>;
-  }
-
-  if (error) {
-    return <div className="p-6 text-center text-red-500">{error}</div>;
-  }
-
   return (
-    <div className="p-6 bg-gray-100 min-h-screen space-y-8">
-      {/* Profil agent */}
-      {user && (
-        <div className="flex flex-col items-center bg-white rounded-xl shadow p-6">
-          {/* Avatar gère déjà l’affichage par rôle */}
-          <Avatar
-            firstName={user.first_name}
-            lastName={user.last_name}
-            role={user.role}
-            size="w-20 h-20"
-          />
-          <h2 className="mt-3 text-xl font-semibold text-gray-800">
-            {user.first_name} {user.last_name}
-          </h2>
-          <p className="text-gray-500 text-sm">{user.email}</p>
-          <p className="text-gray-600 mt-1 capitalize">{user.role}</p>
-        </div>
+    <div className="p-6 bg-gray-100 min-h-screen space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold text-gray-700">Dashboard Agent</h1>
+        <button
+          onClick={() => setShowForm(!showForm)}
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        >
+          {showForm ? "Fermer" : "Créer un agent"}
+        </button>
+      </div>
+
+      {showForm && (
+        <CreateAgentForm
+          onSuccess={() => {
+            setShowForm(false);
+            fetchData();
+          }}
+        />
       )}
 
-      {/* Carte du portefeuille */}
-      <WalletCard wallet={wallet} loading={loading} />
-
-      {/* Historique des transactions */}
-      <TransactionsTable transactions={transactions} loading={loading} error={error} />
-      <AgentForm />
-
+      {!loading && (
+        <>
+          {performance && <MyStats stats={performance} />}
+          {agents.length > 0 ? (
+            <MyTransactions transactions={agents} />
+          ) : (
+            <p className="text-gray-600">Aucun agent trouvé.</p>
+          )}
+          <MyWallet wallets={[]} /> {/* Tu pourras relier ton wallet ici */}
+        </>
+      )}
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getAnalyticsTimeseries, getAnalyticsByStatus, getAnalyticsActiveUsers } from "../services/api";
+import { getAnalyticsTimeseries, getAnalyticsByStatus, getAnalyticsActiveUsers } from "../services/analytics";
 import { useAuth } from "../store/auth";
 
 export const useAnalytics = () => {

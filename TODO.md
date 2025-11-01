@@ -1,6 +1,10 @@
-# TODO: Fix 403 Forbidden Errors in Dashboard Components
+# TODO: Fix TypeScript Errors in Dashboard-CRM
 
-## Tasks
-- [x] Update API response interceptor to handle 403 errors by logging out the user
-- [x] Add authentication check in DashboardUser.tsx before fetching data
-- [x] Add authentication check in DashboardDistributor.tsx before fetching data
+## Pending Tasks
+
+- [ ] Fix src/services/setting/index.ts to export from userSettings.ts instead of non-existent api.ts
+- [ ] Add missing exports to src/services/partners/index.ts for functions in superAdmin/partner.ts (createPartner, getPartnerPerformance, getPartnerAgents)
+- [ ] Fix import in src/components/settings/userSettingForm.tsx to correct path (../services/setting)
+- [ ] Fix type issue in src/pages/DashboardPartner.tsx for transaction.amount (string | number to number)
+- [ ] Ensure getUserTransactions is properly exported from api.ts or adjust imports
+- [ ] Test that all imports resolve correctly after changes

@@ -9,7 +9,7 @@ import {
   ShoppingCart,
   Store,
   UserCheck,
-  Briefcase,
+  Handshake ,
   Menu,
   X,
 } from "lucide-react";
@@ -31,10 +31,10 @@ export function Sidebar() {
 
   const links = [
     { label: "Tableau de bord admin", to: "/dashboard", icon: <LayoutDashboard size={18} /> },
-    { label: "Distributeur", to: "/distributor", icon: <Briefcase size={18} /> },
+    { label: "Partenaire", to: "/distributor", icon: <Handshake  size={18} /> },
     { label: "Agent", to: "/agent", icon: <UserCheck size={18} /> },
     { label: "Client", to: "/users", icon: <Users size={18} /> },
-    { label: "Marchand", to: "/merchants", icon: <Store size={18} /> },
+    { label: "Marchands", to: "/merchants", icon: <Store size={18} /> },
     { label: "Finance", to: "/finance", icon: <BarChart size={18} /> },
     { label: "Vente", to: "/sales", icon: <ShoppingCart size={18} /> },
     { label: "Paramètre", to: "/it", icon: <Settings size={18} /> },

@@ -1,8 +1,10 @@
-import React, { useState, useEffect, useRef } from "react"; 
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import Confetti from "react-confetti";
 import api from "../services/api";
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
 import twoPersonImage from "../assets/two_person_whith_phone-removebg-preview.png";
 import manPointImage from "../assets/man_who_point_hand-removebg-preview.png";
 import girlPhoneImage from "../assets/girl-showing-phone.png";
@@ -16,7 +18,10 @@ const Login = () => {
   const navigate = useNavigate();
   const login = useAuth((state) => state.login);
 
-  const [loginPhoneOrEmail, setLoginPhoneOrEmail] = useState("");
+  // Define onlyCountries array with common ISO country codes
+  // const onlyCountries = ['cd', 'fr', 'us', 'ca', 'be', 'sn', 'cm', 'ga', 'cg', 'td', 'bj', 'bf', 'ci', 'dj', 'gq'];
+
+  const [loginPhone, setLoginPhone] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [loginRole, setLoginRole] = useState<"admin" | "superadmin"  | "agent"| "partner"  | "user"  >("admin");
 
@@ -53,7 +58,7 @@ const Login = () => {
 
   // Réinitialisation des champs à chaque montage
   useEffect(() => {
-    setLoginPhoneOrEmail("");
+    setLoginPhone("");
     setLoginPassword("");
     setLoginRole("admin");
     setRegisterUsername("");
@@ -82,7 +87,7 @@ const Login = () => {
   // Réinitialisation des champs selon mode
   useEffect(() => {
     if (mode === "login") {
-      setLoginPhoneOrEmail("");
+      setLoginPhone("");
       setLoginPassword("");
       setLoginRole("admin");
     } else if (mode === "register") {
@@ -114,49 +119,60 @@ const Login = () => {
 
   // ------------------------ LOGIN ------------------------
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoginError("");
-    setIsLoading(true);
+  e.preventDefault();
+  setLoginError("");
+  setIsLoading(true);
 
-    const cleanPhone = loginPhoneOrEmail.trim();
-    const cleanPassword = loginPassword.trim();
+  // On nettoie le numéro
+  let cleanPhone = loginPhone.trim().replace(/\s+/g, "");
+  const cleanPassword = loginPassword.trim();
 
-    if (!cleanPhone || !cleanPassword) {
-      setLoginError("Veuillez remplir tous les champs.");
-      setIsLoading(false);
-      return;
-    }
+  if (!cleanPhone || !cleanPassword) {
+    setLoginError("Veuillez remplir tous les champs.");
+    setIsLoading(false);
+    return;
+  }
 
-    try {
-      await api.post("accounts/otp/request/", {
-        phone: cleanPhone,
-        password: cleanPassword,
-      });
+  // Ajout automatique du signe "+"
+  if (!cleanPhone.startsWith("+")) {
+    cleanPhone = "+" + cleanPhone;
+  }
 
-      localStorage.setItem(LOCAL_STORAGE_KEYS.USER_PHONE, cleanPhone);
+  try {
+    await api.post("accounts/otp/request/", {
+      phone: cleanPhone,
+      password: cleanPassword,
+    });
 
-      const maskedPhone = isValidPhone(cleanPhone)
-        ? cleanPhone.replace(/(\d{3})(\d{3})(\d{4})/, "$1***$2***$3")
-        : cleanPhone.replace(/(.{3})(.*)(@.*)/, "$1***$3");
+    // On enregistre le numéro dans le localStorage
+    localStorage.setItem(LOCAL_STORAGE_KEYS.USER_PHONE, cleanPhone);
 
-      localStorage.setItem(LOCAL_STORAGE_KEYS.MASKED_PHONE, maskedPhone);
-      setMode("otp");
-    } catch (err: unknown) {
-      if (err instanceof Error && 'response' in err && err.response) {
-        const response = err.response as { data?: { lockout?: string; detail?: string } };
-        if (response?.data?.lockout) {
-          setLoginError(response.data.lockout);
-        } else {
-          setLoginError(response?.data?.detail || "Identifiants incorrects.");
-        }
+    const maskedPhone = isValidPhone(cleanPhone)
+      ? cleanPhone.replace(/(\d{3})(\d{3})(\d{4})/, "$1***$2***$3")
+      : cleanPhone.replace(/(.{3})(.*)(@.*)/, "$1***$3");
+
+    localStorage.setItem(LOCAL_STORAGE_KEYS.MASKED_PHONE, maskedPhone);
+    setMode("otp");
+  } catch (err: any) {
+    if (err.response) {
+      const { data } = err.response;
+      if (data?.lockout) {
+        setLoginError(data.lockout);
+      } else if (data?.detail) {
+        setLoginError(data.detail);
       } else {
-        setLoginError("Erreur inconnue lors de la connexion.");
+        setLoginError("Identifiants incorrects ou format du numéro invalide.");
       }
+      console.error("🔹 Erreur API :", data);
+    } else {
+      setLoginError("Erreur de connexion au serveur.");
       console.error(err);
-    } finally {
-      setIsLoading(false);
     }
-  };
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   // ------------------------ REGISTER ------------------------
   const handleRegister = async (e: React.FormEvent) => {
@@ -261,26 +277,21 @@ const Login = () => {
             "user": "user"
          };
 
-         const userRole = roleMap[response.data.role] || "Marchand";
+          const userRole = roleMap[response.data.role] || "admin";
 
         // je le sauvegarde dans mon  store auth avec le rôle correct
-            login({ ...response.data, role: userRole }, {
-             access: response.access,
-             refresh: response.refresh,
-          });
+        login({ ...response.data, role: userRole }, {
+          access: response.access,
+          refresh: response.refresh,
+        });
 
-          login(response.data, {
-            access: response.access,
-            refresh: response.refresh,
-          });
+          const currentRole = userRole; // j'utilise bien le rôle mappé
 
-          const role = userRole; // j'utilise bien le rôle mappé
-
-          if (role === "superadmin") navigate("/dashboard");
-          else if (role === "admin") navigate("/merchants");
-          else if (role === "user") navigate("/users");
-           else if (role === "agent") navigate("/users");
-          else if (role === "partner") navigate("/distributor");
+          if (currentRole === "superadmin") navigate("/dashboard");
+          else if (currentRole === "admin") navigate("/merchants");
+          else if (currentRole === "user") navigate("/users");
+           else if (currentRole === "agent") navigate("/agent");
+          else if (currentRole === "partner") navigate("/distributor");
           else navigate("/");
         } else {
           setOtpError(true);
@@ -362,9 +373,7 @@ const Login = () => {
       <path
         className="opacity-75"
         fill="currentColor"
-        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 
-        5.291A7.962 7.962 0 014 12H0c0 
-        3.042 1.135 5.824 3 7.938l3-2.647z"
+        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
       />
     </svg>
   );
@@ -375,7 +384,7 @@ const Login = () => {
       "superadmin": "/dashboard",
       "admin": "/merchants",
       "user": "/users",
-      "agent": "/users" ,
+      "agent": "/agent" ,
       "partner": "/distributor",
     
     };
@@ -458,18 +467,39 @@ const Login = () => {
             <motion.div key="login" {...slide} className="w-full max-w-sm text-center">
               <h2 className="text-3xl font-bold text-gray-800 mb-4">Se connecter</h2>
               <form onSubmit={handleLogin} className="space-y-4">
-                <Input
-                  type="text"
-                  value={loginPhoneOrEmail}
-                  onChange={(e) => setLoginPhoneOrEmail(e.target.value)}
-                  placeholder={"Téléphone ou Email"}
-                  autoComplete="username"
-                />
+                  <PhoneInput
+                country={'cd'}
+                value={loginPhone}
+                onChange={(value) => {
+                  setLoginPhone(value); 
+                }}
+                inputStyle={{
+                  width: '100%',
+                  height: '45px',
+                  borderRadius: '8px',
+                  border: '1px solid #ccc',
+                  color: '#000',
+                  backgroundColor: '#fff',
+                  fontSize: '16px',
+                  paddingLeft: '50px',
+                }}
+                containerStyle={{
+                  width: '100%',
+                }}
+                buttonStyle={{
+                  backgroundColor: '#fff',
+                  border: '1px solid #ccc',
+                }}
+              />
+
+              {/* <p style={{ color: 'black' }}>Valeur du champ : {loginPhone}</p> */}
+
                 <Input
                   isPassword
                   value={loginPassword}
                   onChange={(e) => setLoginPassword(e.target.value)}
-                  placeholder={"Mot de passe"}
+                  placeholder="Mot de passe"
+                  autoComplete="current-password"
                 />
                 <div className="text-left w-full">
                   <select
@@ -521,14 +551,26 @@ const Login = () => {
                   autoComplete="username"
                 />
                 {registerUsernameError && <p className="text-red-500 text-sm">{registerUsernameError}</p>}
-                <Input
-                  type="text"
+                <PhoneInput
+
+                  country={"cd"}
                   value={registerPhone}
-                  onChange={(e) => setRegisterPhone(e.target.value)}
-                  placeholder="Téléphone"
-                  autoComplete="tel"
+                  onChange={(value) => setRegisterPhone("+" + value)}
+                  inputStyle={{
+                    width: "100%",
+                    height: "45px",
+                    borderRadius: "8px",
+                    border: "1px solid #ccc",
+                    color: "#000",
+                    backgroundColor: "#fff",
+                    fontSize: "16px",
+                    paddingLeft: "50px",
+                  }}
+                  containerStyle={{ width: "100%" }}
+                  buttonStyle={{ backgroundColor: "#fff", border: "1px solid #ccc" }}
                 />
-                <Input
+
+                  <Input
                   type="email"
                   value={registerEmail}
                   onChange={(e) => setRegisterEmail(e.target.value)}
@@ -547,6 +589,7 @@ const Login = () => {
                     onChange={(e) => setRegisterRole(e.target.value as "admin" | "superadmin" | "agent" | "partner" | "user")}
                     className="w-full p-2 border border-gray-300 rounded-md"
                   >
+                    <option value="">- Sélectionner un rôle --</option>
                     <option value="superadmin"> Admin </option>
                     <option value="admin"> Marchand </option>
                     <option value="partner"> Distributeur </option>

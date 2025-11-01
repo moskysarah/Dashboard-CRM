@@ -98,7 +98,7 @@ statut?: string
 export type Transaction = {
   id: number;
   codeTransaction?: string | null;
-  amount: string;
+  amount: number;
   status: TransactionStatus;
   type: TransactionType;
   typeOperation: TransactionOperationType;
@@ -199,14 +199,17 @@ export type Ticket = {
 // };
 
 
-
-
-
-
-
-
-
-
+export interface Commission {
+  partner_name: string;
+  id: number;                // identifiant unique
+  partner_id: number;        // l'ID du partenaire associé
+  agent_id?: number;         // optionnel si c’est lié à un agent
+  percentage: number;        // pourcentage de commission, ex: 10 pour 10%
+  amount?: number;           // montant fixe si applicable
+  status: "active" | "inactive" | "pending" | "validated" | "cancelled";  // statut de la commission
+  created_at: string;        // date de création ISO 8601
+  updated_at: string;        // date de mise à jour ISO 8601
+}
 
 export type Partner = {
 id: number
@@ -229,4 +232,16 @@ growth_rate?: number
 }
 
 
+export interface AgentStatsType {
+  total_agents: number;
+  active_agents: number;
+  total_commissions: number;
+  successful_transactions: number;
+}
+
+export interface UserSettings {
+  username: string;
+  email: string;
+  // Add other fields as needed based on API response
+}
 

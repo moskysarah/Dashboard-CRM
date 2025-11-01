@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import Avatar from "../components/avatar";
-import WalletCard from "../components/userWallet";
-import TransactionsTable from "../components/userTransactions";
-import { getClientWallet, getClientTransactions } from "../services/api";
+import WalletCard from "../components/user/userWallet";
+import TransactionsTable from "../components/user/userTransactions";
+import { getUserWallets as getUserWallet } from "../services/user/wallets";
+import { getUserTransactions } from "../services/user/transactions";
 import { useAuth } from "../store/auth";
 
 const DashboardUser: React.FC = () => {
@@ -24,12 +25,12 @@ const DashboardUser: React.FC = () => {
       setLoading(true);
       try {
         const [walletRes, txRes] = await Promise.all([
-          getClientWallet(),
-          getClientTransactions(),
+          getUserWallet(),
+          getUserTransactions(),
         ]);
         // setProfile(null);
-        setWallet(walletRes.data);
-        setTransactions(txRes.data.results);
+        setWallet(walletRes.data.results ? walletRes.data.results[0] : walletRes.data[0] || walletRes.data);
+        setTransactions(txRes.data.results || txRes.data);
       } catch (err: any) {
         console.error(err);
         setError("Impossible de charger les données.");
