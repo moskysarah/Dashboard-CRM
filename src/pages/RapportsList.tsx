@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { getAnalyticsTimeseries } from '../services/api';
+import { getAnalyticsTimeseries } from '../services/analytics';
 
 interface Report {
   id: string;

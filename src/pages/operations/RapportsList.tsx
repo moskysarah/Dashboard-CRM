@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getAnalyticsTimeseries } from "../../services/api";
+import { getAnalyticsTimeseries } from "../../services/analytics";
 import { useAuth } from "../../store/auth";
 import {
   BarChart,
