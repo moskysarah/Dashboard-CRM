@@ -1,4 +1,4 @@
-import API from "../api"; // ton instance axios
+import API from "../../api"; // ton instance axios
 
 export const getCommissions = () => API.get("/accounts/commission/");
 
