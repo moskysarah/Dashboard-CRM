@@ -1,4 +1,4 @@
-import React from "react";
+import type { FC } from 'react';
 
 interface AvatarProps {
   firstName?: string;
@@ -7,7 +7,7 @@ interface AvatarProps {
   size?: string;
 }
 
-const Avatar: React.FC<AvatarProps> = ({ firstName, lastName, role, size = "w-10 h-10" }) => {
+const Avatar: FC<AvatarProps> = ({ firstName, lastName, role, size = "w-10 h-10" }) => {
   const getInitials = () => {
     if (firstName && lastName) {
       return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();

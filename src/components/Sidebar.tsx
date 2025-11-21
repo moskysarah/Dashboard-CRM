@@ -3,15 +3,14 @@ import { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import {
   LayoutDashboard,
-  BarChart,
   Users,
   Settings,
-  ShoppingCart,
   Store,
   UserCheck,
   Handshake ,
   Menu,
   X,
+  TrendingUp,
 } from "lucide-react";
 import LogoPostSmart from "./logoPostSmart";
 
@@ -30,13 +29,18 @@ export function Sidebar() {
   }, []);
 
   const links = [
-    { label: "Tableau de bord admin", to: "/dashboard", icon: <LayoutDashboard size={18} /> },
+    { label: "Tableau de bord ", to: "/dashboard", icon: <LayoutDashboard size={18} /> },
+    { label: "Marchand", to: "/merchants", icon: <Store size={18} /> },
     { label: "Partenaire", to: "/distributor", icon: <Handshake  size={18} /> },
     { label: "Agent", to: "/agent", icon: <UserCheck size={18} /> },
     { label: "Client", to: "/users", icon: <Users size={18} /> },
-    { label: "Marchands", to: "/merchants", icon: <Store size={18} /> },
-    { label: "Finance", to: "/finance", icon: <BarChart size={18} /> },
-    { label: "Vente", to: "/sales", icon: <ShoppingCart size={18} /> },
+    { label: "Analyses", to: "/analytics", icon: <TrendingUp size={18} /> },
+    // { label: "Partenaire", to: "/distributor", icon: <Handshake  size={18} /> },
+    // { label: "Agent", to: "/agent", icon: <UserCheck size={18} /> },
+    // { label: "Client", to: "/users", icon: <Users size={18} /> },
+    // { label: "Marchand", to: "/merchants", icon: <Store size={18} /> },
+    // { label: "Finance", to: "/finance", icon: <BarChart size={18} /> },
+    // { label: "Vente", to: "/sales", icon: <ShoppingCart size={18} /> },
     { label: "Paramètre", to: "/it", icon: <Settings size={18} /> },
   ];
 
@@ -109,12 +113,13 @@ export function Sidebar() {
                 to={link.to}
                 onClick={closeSidebar}
                 className={({ isActive }) =>
-                  `transition-colors ${
+                  `flex items-center gap-2 transition-colors ${
                     isActive ? "text-yellow-300" : "hover:text-yellow-200"
                   }`
                 }
               >
-                {link.label}
+                {link.icon}
+                <span>{link.label}</span>
               </NavLink>
             ))}
           </nav>

@@ -6,9 +6,16 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
   children: React.ReactNode;
   href?: string;
+  size?: string;
 }
 
-const baseClasses = "w-full py-2 rounded-lg font-semibold transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed focus:ring-2 focus:ring-offset-2";
+const baseClasses = "py-2 rounded-lg font-semibold transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed focus:ring-2 focus:ring-offset-2";
+
+const sizeClasses: Record<string, string> = {
+  small: "px-4 text-sm",
+  medium: "px-4 ",
+  large: "px-8 text-lg",
+};
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary: "bg-indigo-600 text-white hover:bg-indigo-700",
@@ -20,8 +27,8 @@ const variantClasses: Record<ButtonVariant, string> = {
   destructive: "bg-red-600 text-white hover:bg-red-700",
 };
 
-export const Button: React.FC<ButtonProps> = ({ children, variant = 'primary', className, href, ...props }) => {
-  const combinedClasses = `${baseClasses} ${variantClasses[variant]} ${className || ''}`;
+export const Button: React.FC<ButtonProps> = ({ children, variant = 'primary', className, href, size = 'medium', ...props }) => {
+  const combinedClasses = `${baseClasses} ${sizeClasses[size]} ${variantClasses[variant]} ${className || ''}`;
 
   if (href) {
     return (

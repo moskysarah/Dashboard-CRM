@@ -1,1 +1,1 @@
-export * from "./commissions/api";
+export * from "./api";

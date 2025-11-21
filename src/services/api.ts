@@ -161,7 +161,7 @@ export const refreshToken = (refresh: string) =>
 export const requestOTP = (phone: string, password?: string) =>
   axios.post(`${API.defaults.baseURL}/accounts/otp/request/`, password ? { phone, password } : { phone });
 
-export const otpLogin = (phone: string, otp: string) =>
+export const otpLoginLegacy = (phone: string, otp: string) =>
   axios.post(`${API.defaults.baseURL}/accounts/otp/login/`, { phone, otp });
 
 export const phoneLogin = (phone: string, password: string) =>
@@ -219,58 +219,137 @@ export const markNotificationRead = (id: string) =>
 
 // ========================
 // MARCHANT & ANALYTICS
-// // ========================
-
-// export const getMerchantWallets = (id: string | number) => API.get(`/merchants/wallets/${id}/`);
-// export const deleteProfileMerchants = (id: string | number) => API.delete(`/merchants/profiles/${id}/`);
-// export const getProfileMerchants = (id: number) => API.get(`/merchants/profiles/${id}/`);
-// export const getProfileMerchant = (id: string | number) => API.get(`/accounts/users/${id}/`);
-// export const getUserSettings = () => API.get("/accounts/user-settings/");
+// ========================
+export const getUserSettings = () => API.get("/accounts/user-settings/");
 export const setUserRole = (userId: string | number, role: string) =>
   API.post(`/admin-panel/users/${userId}/set-role/`, { role });
 export const setUserStatus = (userId: string | number, status: string) =>
   API.post(`/admin-panel/users/${userId}/set-status/`, { status });
 
-// // ========================
-// // ANALYTICS
-// // ========================
-// export const getAnalyticsOverview = () => API.get("/analytics/overview/");
-// export const getAnalyticsTimeseries = () => API.get("/analytics/timeseries/");
-// export const getAnalyticsByStatus = () => API.get("/analytics/by-status/");
-// export const getAnalyticsActiveUsers = () => API.get("/analytics/active-users/");
+// ========================
+// API ROUTES FROM src/api FOLDER
+// ========================
 
-// // Export supplémentaires
-// export const getAdminOverview = getAnalyticsOverview;
-// export const getMerchantTransactions = () => API.get("/me/transactions/");
-// export const getMerchants = () => API.get("/merchants/");
-// export const fetchTicketsIT = (params?: any) => API.get("/accounts/users-settings/{id}/", { params });
+// AUTHENTICATION
+export const otpLogin = (data: any) => API.post("/accounts/otp/login/", data);
+export const requestOtp = (data: any) => API.post("/accounts/otp/request/", data);
+export const passwordReset = (data: any) => API.post("/accounts/password-reset/", data);
+export const passwordResetConfirm = (data: any) => API.post("/accounts/password-reset/confirm/", data);
+export const securityQuestion = (data: any) => API.post("/accounts/security-question/", data);
+export const securityQuestionConfirm = (data: any) => API.post("/accounts/security-question/confirm/", data);
+export const tokenByPhone = (data: any) => API.post("/accounts/token/phone/", data);
+export const initiateEmailVerification = (data: any) => API.post("/accounts/initiate-email-verification/", data);
+export const initiatePhoneVerification = (data: any) => API.post("/accounts/initiate-phone-verification/", data);
+export const verifyEmailOtp = (data: any) => API.post("/accounts/verify-email-otp/", data);
+export const verifyPhoneOtp = (data: any) => API.post("/accounts/verify-phone-otp/", data);
 
+// USERS
+export const getUsers = () => API.get("/accounts/users/");
+export const getUserById = (id: string) => API.get(`/accounts/users/${id}/`);
+export const updateUser = (id: string, data: any) => API.put(`/accounts/users/${id}/`, data);
+export const patchUser = (id: string, data: any) => API.patch(`/accounts/users/${id}/`, data);
+export const deleteUser = (id: string) => API.delete(`/accounts/users/${id}/`);
 
-// // // --------------DISTRIBUTION ROUTES -----------------------
-// // //-------------------------------------------------------
-
-
-// export const getPartnerList = () => API.get('/accounts/partners/')
-// export const createPartner = (payload: any) => API.post('/accounts/partners/', payload)
-// export const getPartnerById = (id: number) => API.get(`/accounts/partners/${id}/`)
-// export const updatePartner = (id: number, payload: any) => API.put(`/accounts/partners/${id}/`, payload)
-// export const patchPartner = (id: number, payload: any) => API.patch(`/accounts/partners/${id}/`, payload)
-// export const deletePartner = (id: number) => API.delete(`/accounts/partners/${id}/`)
-// export const getPartnerAgents = (id: number) => API.get(`/accounts/partners/${id}/agents/`)
-// export const getPartnerPerformance = (id: number) => API.get(`/accounts/partners/${id}/performance/`)
-
-
-// // export default {
-// // getPartnerList,
-// // createPartner,
-// // getPartnerById,
-// // updatePartner,
-// // patchPartner,
-// // deletePartner,
-// // getPartnerAgents,
-// // getPartnerPerformance,
-// // }
+// AGENTS
+export const getAgents = () => API.get("/accounts/agents/");
+export const getAgentById = (id: string) => API.get(`/accounts/agents/${id}/`);
+export const updateAgent = (id: string, data: any) => API.put(`/accounts/agents/${id}/`, data);
+export const patchAgent = (id: string, data: any) => API.patch(`/accounts/agents/${id}/`, data);
+export const deleteAgent = (id: string) => API.delete(`/accounts/agents/${id}/`);
+export const activateAgent = (id: string) => API.post(`/accounts/agents/${id}/activate/`);
+export const getAgentStats = (id: string) => API.get(`/accounts/agents/${id}/stats/`);
+export const getMyAgents = () => API.get("/accounts/my-agents/");
+export const getMyAgentById = (id: string) => API.get(`/accounts/my-agents/${id}/`);
+export const getMyAgentsPerformance = () => API.get("/accounts/my-agents/performance/");
 
 
+
+// COMMISSIONS
+export const getCommissions = () => API.get("/commissions/");
+export const getCommissionById = (id: string) => API.get(`/commissions/${id}/`);
+export const updateCommission = (id: string, data: any) => API.put(`/commissions/${id}/`, data);
+export const deleteCommission = (id: string) => API.delete(`/commissions/${id}/`);
+
+// MERCHANTS
+export const getMerchantsProfiles = () => API.get("/merchants/profiles/");
+export const getMerchantProfileById = (id: string) => API.get(`/merchants/profiles/${id}/`);
+export const updateMerchant = (id: string, data: any) => API.put(`/merchants/profiles/${id}/`, data);
+export const patchMerchantProfile = (id: string, data: any) => API.patch(`/merchants/profiles/${id}/`, data);
+export const deleteMerchant = (id: string) => API.delete(`/merchants/profiles/${id}/`);
+export const getMerchantTransactions = () => API.get("/merchants/transactions/");
+export const getMerchantTransactionById = (uuid: string) => API.get(`/merchants/transactions/${uuid}/`);
+export const getMerchantWallets = () => API.get("/merchants/wallets/");
+export const getMerchantWalletById = (id: string) => API.get(`/merchants/wallets/${id}/`);
+export const regenerateMerchantSecret = (merchant_id: string) => API.post(`/admin-panel/merchants/${merchant_id}/regenerate-secret/`);
+
+// MESSAGES
+export const getMessages = () => API.get("/notification/messages/");
+export const getMessageById = (id: string) => API.get(`/notification/messages/${id}/`);
+export const updateMessage = (id: string, data: any) => API.put(`/notification/messages/${id}/`, data);
+export const deleteMessage = (id: string) => API.delete(`/notification/messages/${id}/`);
+
+// TRANSACTIONS
+// Alias for backward compatibility
+export const getMerchantTransactionsAlias = getMerchantTransactions;
+export const getMerchantTransactionByIdAlias = getMerchantTransactionById;
+
+// WALLET & PAYMENTS
+export const airtimePayout = (data: any) => API.post("/me/payouts/airtime/", data);
+export const initiateMerchantTransfer = (data: any) => API.post("/me/transfers/merchant/initiate/", data);
+export const verifyMerchantTransfer = (data: any) => API.post("/me/transfers/merchant/verify/", data);
+export const initiatePostePayTransfer = (data: any) => API.post("/me/transfers/poste-pay/initiate/", data);
+export const verifyPostePayTransfer = (data: any) => API.post("/me/transfers/poste-pay/verify/", data);
+export const rechargeCreditCard = (data: any) => API.post("/me/wallets/recharge/credit-card/", data);
+export const rechargeMomo = (data: any) => API.post("/me/wallets/recharge/momo/", data);
+export const mobileMoneyPayout = (data: any) => API.post("/me/payouts/mobile-money/", data);
+export const mobileMoneyStatus = (data: any) => API.post("/me/payouts/mobile-money/status/", data);
+export const rechargeAsyncInit = (data: any) => API.post("/me/wallets/recharge-async/momo/", data);
+export const rechargeAsyncComplete = (data: any) => API.post("/me/wallets/recharge-async/complete/momo/", data);
+export const getWallets = () => API.get("/me/wallets/");
+export const getWalletById = (id: string) => API.get(`/me/wallets/${id}/`);
+export const getTransactions = () => API.get("/me/transactions/");
+export const getTransactionById = (uuid: string) => API.get(`/me/transactions/${uuid}/`);
+
+// ANALYTICS
+export const getAdminOverview = () => API.get("/admin-panel/overview/");
+export const getActiveUsers = () => API.get("/analytics/active-users/");
+export const getByDevise = () => API.get("/analytics/by-devise/");
+export const getByOperationType = () => API.get("/analytics/by-operation-type/");
+export const getByStatus = () => API.get("/analytics/by-status/");
+export const getByType = () => API.get("/analytics/by-type/");
+export const getOverview = () => API.get("/analytics/overview/");
+export const getTimeseries = () => API.get("/analytics/timeseries/");
+export const getTopMerchants = () => API.get("/analytics/top-merchants/");
+export const getUsersGrowth = () => API.get("/analytics/users-growth/");
+
+// A2B CREDIT
+export const removeCredit = (data: any) => API.post("/a2b/credit/remove/", data);
+export const transferCredit = (data: any) => API.post("/a2b/credit/transfer/", data);
+
+// WEBHOOKS
+export const webhookMaxiCash = (data: any) => API.post("/webhooks/payments/maxicash/", data);
+
+// ADMIN PANEL
+export const setTransactionStatus = (transactionCode: string, status: string) =>
+  API.post(`/admin-panel/transactions/${transactionCode}/set-status/`, { status });
+
+// ADMIN (User)
+export const getAdminWallets = () => API.get("/admin/wallets/all/");
+export const getAdminWalletById = (id: string) => API.get(`/admin/wallets/all/${id}/`);
+
+// PARTNERS
+export const getPartners = () => API.get("/accounts/partners/");
+export const getPartnerById = (id: string) => API.get(`/accounts/partners/${id}/`);
+export const createPartner = (data: any) => API.post("/accounts/partners/", data);
+export const updatePartner = (id: string, data: any) => API.put(`/accounts/partners/${id}/`, data);
+export const patchPartner = (id: string, data: any) => API.patch(`/accounts/partners/${id}/`, data);
+export const deletePartner = (id: string) => API.delete(`/accounts/partners/${id}/`);
+export const getPartnerAgents = (id: string) => API.get(`/accounts/partners/${id}/agents/`);
+export const getPartnerPerformance = (id: string) => API.get(`/accounts/partners/${id}/performance/`);
+// PUBLIC ENDPOINTS
+export const publicMerchantTopup = (data: any) => API.post("/public/merchant-topup/", data);
+export const getSchema = () => API.get("/schema/");
+export const getToken = (data: any) => API.post("/token/", data);
+export const refreshTokenPublic = (data: any) => API.post("/token/refresh/", data);
 
 export default API;

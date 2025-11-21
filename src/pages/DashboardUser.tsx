@@ -1,69 +1,62 @@
-import React, { useEffect, useState } from "react";
-import Avatar from "../components/avatar";
-import WalletCard from "../components/user/userWallet";
-import TransactionsTable from "../components/user/userTransactions";
-import { getUserWallets as getUserWallet } from "../services/user/wallets";
-import { getUserTransactions } from "../services/user/transactions";
-import { useAuth } from "../store/auth";
+import WalletClient from "../components/cards/ClientWalletCard"
+import TransactionTable from "../components/tables/TransactionTable"
+import MessageList from "../components/MessageList"
+import { useTransactions } from "../hooks/useTransactions"
+// import { Phone, Store, Send, CreditCard, Smartphone } from "lucide-react"
 
 const DashboardUser: React.FC = () => {
-  const user = useAuth((state) => state.user);
-  const isAuthenticated = useAuth((state) => state.isAuthenticated);
-  const [wallet, setWallet] = useState<any>(null);
-  const [transactions, setTransactions] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: transactions } = useTransactions()
 
-  useEffect(() => {
-    if (!isAuthenticated || !user) {
-      setError("Utilisateur non authentifié.");
-      setLoading(false);
-      return;
-    }
-
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const [walletRes, txRes] = await Promise.all([
-          getUserWallet(),
-          getUserTransactions(),
-        ]);
-        // setProfile(null);
-        setWallet(walletRes.data.results ? walletRes.data.results[0] : walletRes.data[0] || walletRes.data);
-        setTransactions(txRes.data.results || txRes.data);
-      } catch (err: any) {
-        console.error(err);
-        setError("Impossible de charger les données.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, [isAuthenticated, user]);
-
-  if (loading) return <div className="p-6">Chargement...</div>;
-  if (error) return <div className="p-6 text-red-500">{error}</div>;
+  // Calcul de KPIs simples
+  const totalTransactions = transactions?.length || 0
+  const totalIn = transactions
+    ? transactions.filter((t: any) => t.type === "IN").reduce((acc, t) => acc + t.amount, 0)
+    : 0
+  const totalOut = transactions
+    ? transactions.filter((t: any) => t.type === "OUT").reduce((acc, t) => acc + t.amount, 0)
+    : 0
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen space-y-6">
-      {user && (
-        <div className="flex flex-col items-center bg-white rounded-xl shadow p-6">
-          <Avatar
-            firstName={user.first_name}
-            lastName={user.last_name}
-            role={user.role}
-            size="w-20 h-20"
-          />
-          <h2 className="mt-3 text-xl font-semibold">{user.first_name} {user.last_name}</h2>
-          <p className="text-gray-500">{user.email}</p>
-          <p className="text-gray-600 mt-1 capitalize">{user.role}</p>
+
+      <div className="flex flex-col space-y-6 p-2 md:p-0">
+         <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-6">Dashboard Client</h2>
+        {/* Wallet */}
+        <div className="grid grid-cols-1 gap-6">
+          <WalletClient/>
         </div>
-      )}
 
-      <WalletCard wallet={wallet} />
-      <TransactionsTable transactions={transactions} />
-    </div>
-  );
-};
+        {/* KPIs */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-white p-4 rounded-2xl shadow">
+            <h3 className="font-semibold text-gray-600 mb-2">Total Transactions</h3>
+            <p className="text-2xl font-bold">{totalTransactions}</p>
+          </div>
+          <div className="bg-green-50 p-4 rounded-2xl shadow">
+            <h3 className="font-semibold text-gray-600 mb-2">Entrées</h3>
+            <p className="text-2xl font-bold">{totalIn} FC</p>
+          </div>
+          <div className="bg-red-50 p-4 rounded-2xl shadow">
+            <h3 className="font-semibold text-gray-600 mb-2">Sorties</h3>
+            <p className="text-2xl font-bold">{totalOut} FC</p>
+          </div>
+        </div>
 
-export default DashboardUser;
+        {/* Transactions */}
+        <div>
+          <h2 className="text-lg md:text-xl font-semibold mb-4">Mes Transactions</h2>
+          <div className="overflow-x-auto">
+            <TransactionTable />
+          </div>
+        </div>
+
+        {/* Messages */}
+        <div>
+          <h2 className="text-lg md:text-xl font-semibold mb-4">Mes Messages</h2>
+          <MessageList />
+        </div>
+      </div>
+
+  )
+}
+
+export default DashboardUser

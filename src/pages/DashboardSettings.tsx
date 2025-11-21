@@ -1,126 +1,118 @@
-import React, { useState, useEffect } from "react";
-import { User, Mail, Phone, Save } from "lucide-react";
-import { getUserSettings, updateUserSettings } from "../services/setting";
+import React, { useState } from "react";
+import { useUserSettings } from "../hooks/useUserSettings";
+import { useUsers } from "../hooks/useUsers";
+import { Button } from "../components/ui/Button";
+import { Input } from "../components/ui/Input";
+import { Bell, Globe, Clock } from "lucide-react";
 
-const Settings: React.FC = () => {
-  const [settings, setSettings] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+const DashboardSettings: React.FC = () => {
+  const { users } = useUsers();
+  const [selectedUserId, setSelectedUserId] = useState<string>("");
+  const { settings, loading, error, canViewOthers } = useUserSettings(selectedUserId || undefined);
 
-  // Charger les paramètres utilisateur
-  useEffect(() => {
-    const loadSettings = async () => {
-      setLoading(true);
-      try {
-        const response: any = await getUserSettings();
-        setSettings(response.data);
-      } catch (err) {
-        console.error(err);
-        setError("Erreur lors du chargement des paramètres utilisateur.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadSettings();
-  }, []);
-
-  // Gérer la modification des champs
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSettings({ ...settings, [e.target.name]: e.target.value });
+  const handleUserSelect = (userId: string) => {
+    setSelectedUserId(userId);
   };
 
-  // Sauvegarder les paramètres
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
-    try {
-      await updateUserSettings(settings);
-      alert("Paramètres mis à jour avec succès !");
-    } catch (err) {
-      console.error(err);
-      setError("Erreur lors de la sauvegarde des paramètres.");
-    } finally {
-      setSaving(false);
-    }
+  const handleViewOwnSettings = () => {
+    setSelectedUserId("");
   };
 
-  if (loading) return <p className="p-6 text-gray-600">Chargement...</p>;
-  if (error) return <p className="p-6 text-red-600">{error}</p>;
+  if (loading) {
+    return (
+      <div className="flex flex-col space-y-6">
+        <h1 className="text-2xl font-bold">Paramètres utilisateur</h1>
+        <div>Chargement...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col space-y-6">
+        <h1 className="text-2xl font-bold">Paramètres utilisateur</h1>
+        <div className="text-red-500">Error: {error}</div>
+      </div>
+    );
+  }
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
-      <div className="max-w-2xl mx-auto bg-white shadow-md rounded-2xl p-6 space-y-6">
-        <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-          <User className="w-6 h-6 text-blue-600" />
-          Paramètres de l’utilisateur
-        </h1>
+    <div className="flex flex-col space-y-6">
+      <h1 className="text-2xl font-bold">Paramètres utilisateur</h1>
 
-        <form onSubmit={handleSave} className="space-y-4">
-          {/* Nom d'utilisateur */}
-          <div>
-            <label className="block text-sm font-semibold mb-1 text-gray-700">
-              Nom d’utilisateur
-            </label>
-            <input
-              type="text"
-              name="username"
-              value={settings?.username || ""}
-              onChange={handleChange}
-              className="w-full border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Entrez votre nom"
-            />
+      {/* Admin controls for viewing other users' settings */}
+      {canViewOthers && (
+        <div className="bg-white p-4 rounded-lg shadow">
+          <h2 className="text-lg font-semibold mb-4">Voir les paramètres</h2>
+          <div className="flex space-x-4 mb-4">
+            <Button onClick={handleViewOwnSettings} variant={selectedUserId === "" ? "primary" : "secondary"}>
+              Mes paramètres
+            </Button>
+            <select
+              value={selectedUserId}
+              onChange={(e) => handleUserSelect(e.target.value)}
+              className="border rounded px-3 py-2"
+            >
+              <option value="">Selectionnez un  utilisateur</option>
+              {users?.map((u) => (
+                <option key={u.id} value={u.id}>
+                  {u.first_name} {u.last_name} ({u.role})
+                </option>
+              ))}
+            </select>
           </div>
+        </div>
+      )}
 
-          {/* Email */}
-          <div>
-            <label className="block text-sm font-semibold mb-1 text-gray-700">
-              Adresse e-mail
-            </label>
-            <div className="flex items-center border rounded-lg p-2">
-              <Mail className="w-5 h-5 text-gray-400 mr-2" />
-              <input
-                type="email"
-                name="email"
-                value={settings?.email || ""}
-                onChange={handleChange}
-                className="w-full focus:outline-none"
-                placeholder="Entrez votre email"
+      {/* Settings display */}
+      <div className="bg-white p-4 rounded-lg shadow">
+        <h2 className="text-lg font-semibold mb-4">
+          {selectedUserId ? `Settings for User ID: ${selectedUserId}` : "Tes paramètres"}
+        </h2>
+
+        {settings ? (
+          <div className="space-y-4">
+            <div>
+              <label className="flex items-center text-sm font-medium text-gray-700">
+                <Bell className="w-5 h-5 mr-2 text-blue-500" />
+                Notifications Activées
+              </label>
+              <Input
+                type="checkbox"
+                checked={settings.notifications_enabled}
+                readOnly
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <label className="flex items-center text-sm font-medium text-gray-700">
+                <Globe className="w-5 h-5 mr-2 text-green-500" />
+                Language
+              </label>
+              <Input
+                value={settings.language}
+                readOnly
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <label className="flex items-center text-sm font-medium text-gray-700">
+                <Clock className="w-5 h-5 mr-2 text-purple-500" />
+                Fuseau horaire
+              </label>
+              <Input
+                value={settings.timezone}
+                readOnly
+                className="mt-1"
               />
             </div>
           </div>
-
-          {/* Téléphone */}
-          <div>
-            <label className="block text-sm font-semibold mb-1 text-gray-700">
-              Numéro de téléphone
-            </label>
-            <div className="flex items-center border rounded-lg p-2">
-              <Phone className="w-5 h-5 text-gray-400 mr-2" />
-              <input
-                type="tel"
-                name="phone"
-                value={settings?.phone || ""}
-                onChange={handleChange}
-                className="w-full focus:outline-none"
-                placeholder="Ex: +243..."
-              />
-            </div>
-          </div>
-
-          {/* Bouton sauvegarder */}
-          <button
-            type="submit"
-            disabled={saving}
-            className="flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
-          >
-            <Save className="w-5 h-5" />
-            {saving ? "Enregistrement..." : "Sauvegarder les modifications"}
-          </button>
-        </form>
+        ) : (
+          <div>Pas de paramètre trouvé</div>
+        )}
       </div>
     </div>
   );
 };
 
-export default Settings;
+export default DashboardSettings;

@@ -1,4 +1,2 @@
-export * from './profile';
-export * from './wallets';
-export * from './transaction';
-export * from './transactions';
+export * from './api';
+export { getProfileMerchants, getMerchantWallets, getMerchantTransactions } from './api';

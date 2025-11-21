@@ -7,15 +7,29 @@ interface Props {
 }
 
 const TimeseriesChart: React.FC<Props> = ({ data, title }) => (
-  <div className="bg-white p-4 rounded-2xl shadow w-full mb-6">
-    <h2 className="text-lg font-semibold mb-3">{title}</h2>
-    <ResponsiveContainer width="100%" height={300}>
+  <div className="bg-white p-6 rounded-3xl shadow-lg hover:shadow-xl transition-shadow duration-300 w-full">
+    <h2 className="text-xl font-bold mb-4 text-gray-800">{title}</h2>
+    <ResponsiveContainer width="100%" height={350}>
       <LineChart data={data}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="date" />
-        <YAxis />
-        <Tooltip />
-        <Line type="monotone" dataKey="value" stroke="#3b82f6" strokeWidth={2} />
+        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+        <XAxis dataKey="date" stroke="#6b7280" fontSize={12} />
+        <YAxis stroke="#6b7280" fontSize={12} />
+        <Tooltip
+          contentStyle={{
+            backgroundColor: '#f9fafb',
+            border: 'none',
+            borderRadius: '12px',
+            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+          }}
+        />
+        <Line
+          type="monotone"
+          dataKey="value"
+          stroke="#3b82f6"
+          strokeWidth={3}
+          dot={{ fill: '#3b82f6', strokeWidth: 2, r: 4 }}
+          activeDot={{ r: 6, stroke: '#3b82f6', strokeWidth: 2, fill: '#ffffff' }}
+        />
       </LineChart>
     </ResponsiveContainer>
   </div>
