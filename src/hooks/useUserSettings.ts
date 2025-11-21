@@ -1,16 +1,25 @@
 import { useState } from 'react';
 import { getUserSettings, getUserSettingById } from '../api/me';
+import { useAuth } from '../store/auth';
 
-export const useUserSettings = () => {
+export const useUserSettings = (userId?: string) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [settings, setSettings] = useState<any[]>([]);
+  const [settings, setSettings] = useState<any>(null);
+  const { user } = useAuth();
+
+  const canViewOthers = user?.role === 'admin' || user?.role === 'superadmin';
 
   const fetchUserSettings = async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await getUserSettings();
+      let response;
+      if (userId && canViewOthers) {
+        response = await getUserSettingById(userId);
+      } else {
+        response = await getUserSettings();
+      }
       setSettings(response);
       return response;
     } catch (err: any) {
@@ -26,6 +35,7 @@ export const useUserSettings = () => {
     setError(null);
     try {
       const response = await getUserSettingById(id);
+      setSettings(response);
       return response;
     } catch (err: any) {
       setError(err.message || 'Failed to fetch user setting');
@@ -41,5 +51,6 @@ export const useUserSettings = () => {
     settings,
     loading,
     error,
+    canViewOthers,
   };
 };

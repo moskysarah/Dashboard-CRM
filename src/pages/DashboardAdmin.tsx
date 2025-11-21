@@ -8,7 +8,7 @@ import PartnerPerformanceChart from "../components/PartnerPerformanceChart"
 // import TransactionTable from "../components/tables/TransactionTable";
 import AgentTransactionsTable from "../components/tables/AgentTransactionsTable";
 import ReportGenerator from "../components/ReportGenerator";
-import AgentStatsCard from "../components/cards/AgentStatsCard";
+
 import AdminWalletTable from "../components/AdminWalletTable.tsx";
 import { Dialog, DialogHeader, DialogTitle, DialogContent } from "../components/ui/Modal";
 import { Button } from "../components/ui/Button";

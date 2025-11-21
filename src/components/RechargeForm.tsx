@@ -28,26 +28,25 @@ const RechargeForm: React.FC<RechargeFormProps> = ({ onSuccess }) => {
     setSuccess(null);
 
     try {
-      let response;
       if (method === "credit-card") {
-        response = await rechargeCreditCard({
+        await rechargeCreditCard({
           amount: parseFloat(formData.amount),
           card_number: formData.cardNumber,
           expiry_date: formData.expiryDate,
           cvv: formData.cvv,
         });
       } else if (method === "momo") {
-        response = await rechargeMomo({
+        await rechargeMomo({
           amount: parseFloat(formData.amount),
           phone_number: formData.phoneNumber,
         });
       } else if (method === "async-init") {
-        response = await rechargeAsyncInit({
+        await rechargeAsyncInit({
           amount: parseFloat(formData.amount),
           phone_number: formData.phoneNumber,
         });
       } else if (method === "async-complete") {
-        response = await rechargeAsyncComplete({
+        await rechargeAsyncComplete({
           transaction_id: formData.transactionId,
         });
       }

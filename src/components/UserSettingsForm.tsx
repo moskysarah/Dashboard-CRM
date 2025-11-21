@@ -4,10 +4,12 @@ import { useUserSettings } from "../hooks/useUserSettings";
 
 interface UserSettingsFormProps {
   onSuccess?: () => void;
+  userId?: string;
+  canViewOthers?: boolean;
 }
 
-const UserSettingsForm: React.FC<UserSettingsFormProps> = ({ onSuccess }) => {
-  const { fetchUserSettings, settings, loading, error } = useUserSettings();
+const UserSettingsForm: React.FC<UserSettingsFormProps> = ({ onSuccess, userId }) => {
+  const { fetchUserSettings, settings, loading, error } = useUserSettings(userId);
   const [success, setSuccess] = useState<string | null>(null);
 
   useEffect(() => {

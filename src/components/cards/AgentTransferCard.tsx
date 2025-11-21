@@ -27,10 +27,7 @@ const AgentTransferCard: React.FC = () => {
     await verifyTransfer({ otp });
   };
 
-  const resetForm = () => {
-    setTransferData({ amount: '', recipient: '', description: '' });
-    setOtp('');
-  };
+
 
   return (
     <div className="bg-gradient-to-br from-indigo-600 via-blue-600 to-cyan-700 p-4 md:p-6 lg:p-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 md:hover:scale-102">

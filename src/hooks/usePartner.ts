@@ -37,7 +37,7 @@ export function usePartners() {
   // Supprimer un partenaire
   const removePartner = async (id: string | number) => {
     try {
-      await deletePartner(id);
+      await deletePartner(id.toString());
       setData((prev) => prev.filter((p: any) => p.id !== id));
     } catch (err: any) {
       setError(err.message || "Failed to remove partner");

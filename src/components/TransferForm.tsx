@@ -26,24 +26,23 @@ const TransferForm: React.FC<TransferFormProps> = ({ onSuccess }) => {
     setSuccess(null);
 
     try {
-      let response;
       if (method === "merchant-initiate") {
-        response = await initiateMerchantTransfer({
+        await initiateMerchantTransfer({
           amount: parseFloat(formData.amount),
           recipient_id: formData.recipientId,
         });
       } else if (method === "merchant-verify") {
-        response = await verifyMerchantTransfer({
+        await verifyMerchantTransfer({
           transaction_id: formData.transactionId,
           otp: formData.otp,
         });
       } else if (method === "poste-pay-initiate") {
-        response = await initiatePostePayTransfer({
+        await initiatePostePayTransfer({
           amount: parseFloat(formData.amount),
           recipient_id: formData.recipientId,
         });
       } else if (method === "poste-pay-verify") {
-        response = await verifyPostePayTransfer({
+        await verifyPostePayTransfer({
           transaction_id: formData.transactionId,
           otp: formData.otp,
         });

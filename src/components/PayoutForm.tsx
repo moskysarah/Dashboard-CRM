@@ -25,19 +25,18 @@ const PayoutForm: React.FC<PayoutFormProps> = ({ onSuccess }) => {
     setSuccess(null);
 
     try {
-      let response;
       if (method === "mobile-money") {
-        response = await mobileMoneyPayout({
+        await mobileMoneyPayout({
           amount: parseFloat(formData.amount),
           phone_number: formData.phoneNumber,
         });
       } else if (method === "airtime") {
-        response = await airtimePayout({
+        await airtimePayout({
           amount: parseFloat(formData.amount),
           phone_number: formData.phoneNumber,
         });
       } else if (method === "status") {
-        response = await mobileMoneyStatus({
+        await mobileMoneyStatus({
           transaction_id: formData.transactionId,
         });
       }
