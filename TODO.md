@@ -1,16 +1,15 @@
-# Fix TypeScript Errors
+# TODO: Secure Routes Based on User Roles
 
-## Files to Edit
-- [ ] src/components/AgentTable.tsx: Change import AgentForm to "./AgentForm.tsx"
-- [ ] src/components/PayoutForm.tsx: Remove unused 'response' variable
-- [ ] src/components/RechargeForm.tsx: Remove unused 'response' variable
-- [ ] src/components/TransferForm.tsx: Remove unused 'response' variable
-- [ ] src/components/cards/AgentTransferCard.tsx: Remove unused 'resetForm' function
-- [ ] src/hooks/usePartner.ts: Convert id to string in removePartner
-- [ ] src/pages/DashboardAdmin.tsx: Remove unused import AgentStatsCard
-- [ ] src/hooks/useUserSettings.ts: Modify hook to accept userId param, change settings to object, add canViewOthers
-- [ ] src/pages/DashboardSettings.tsx: Fix hook call and destructuring
-
-## Followup Steps
-- [ ] Run build to verify errors are fixed
-- [ ] Test the application
+## Steps to Complete
+- [x] Add necessary imports to src/router/index.tsx (Navigate, useAuth, RoleProtectedRoute)
+- [x] Define RequireAuth component in src/router/index.tsx
+- [x] Wrap the Layout component with RequireAuth
+- [x] Wrap dashboard route with RoleProtectedRoute (allowedRoles: ["superadmin", "admin"])
+- [x] Wrap analytics route with RoleProtectedRoute (allowedRoles: ["superadmin", "admin", "user"])
+- [x] Wrap agent route with RoleProtectedRoute (allowedRoles: ["superadmin", "admin", "agent"])
+- [x] Wrap users route with RoleProtectedRoute (allowedRoles: ["superadmin", "admin"])
+- [x] Wrap merchants route with RoleProtectedRoute (allowedRoles: ["superadmin", "admin", "user"])
+- [x] Wrap transactions route with RoleProtectedRoute (allowedRoles: ["superadmin", "admin", "user", "agent"])
+- [x] Wrap it route with RoleProtectedRoute (allowedRoles: ["superadmin"])
+- [x] Wrap distributor route with RoleProtectedRoute (allowedRoles: ["partner"])
+- [ ] Test the implementation by running the app and checking access with different roles
