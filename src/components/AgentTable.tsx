@@ -5,7 +5,6 @@ import { Button } from "./ui/Button";
 import AgentForm from "./AgentForm";
 import { Users, Edit, Trash2, UserCheck, UserX, BarChart3 } from "lucide-react";
 import type { Agent, AgentStats } from "../types/Agent";
-
 const AgentTable: React.FC = () => {
   const { data: agents, loading, error, refetch } = useAgents();
   const [updating, setUpdating] = useState<string | null>(null);
