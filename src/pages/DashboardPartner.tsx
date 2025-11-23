@@ -1,6 +1,6 @@
 import React, { useState } from "react"
 import PartnerTable from "../components/tables/PartnerTable"
-import AgentTable from "../components/AgentTable"
+import AgentTable from "../components/tables/AgentTable"
 import PartnerWalletCard from "../components/cards/PartnerWalletCard"
 import PartnerStatsCard from "../components/cards/PartnerStatsCard"
 import PartnerPerformanceChart from "../components/PartnerPerformanceChart"
