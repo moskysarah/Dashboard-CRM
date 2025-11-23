@@ -5,6 +5,7 @@ import { Button } from "./ui/Button";
 import AgentForm from "./AgentForm.tsx";
 import { Users, Edit, Trash2, UserCheck, UserX, BarChart3 } from "lucide-react";
 import type { Agent, AgentStats } from "../types/Agent";
+
 const AgentTable: React.FC = () => {
   const { data: agents, loading, error, refetch } = useAgents();
   const [updating, setUpdating] = useState<string | null>(null);
@@ -193,14 +194,13 @@ const AgentTable: React.FC = () => {
                 <BarChart3 className="w-6 h-6 mr-2 text-blue-600" />
                 Statistiques de l'Agent
               </h3>
-              <Button
-                onClick={() => setShowStats(null)}
-                variant="ghost"
-                size="sm"
-                className="p-1 hover:bg-gray-100 rounded-full"
-              >
-                <UserX className="w-5 h-5" />
-              </Button>
+<Button
+  onClick={() => setShowStats(null)}
+  variant="ghost"
+  size="sm"
+  className="p-1 hover:bg-gray-100 rounded-full"
+  children={<UserX className="w-5 h-5" />}
+/>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
