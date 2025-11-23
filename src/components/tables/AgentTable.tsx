@@ -4,7 +4,8 @@ import { deleteAgent, activateAgent, getAgentStats } from "../../api/agents";
 import { Button } from "../ui/Button";
 import AgentForm from '../AgentForm';
 import { Users, Edit, Trash2, UserCheck, UserX, BarChart3 } from "lucide-react";
-import type { Agent, AgentStats } from "../../types/Agent";
+import type { Agent, AgentStats, CreateAgentData, UpdateAgentData } from "../../types/Agent";
+
 
 const AgentTable: React.FC = () => {
   const { data: agents, loading, error, refetch } = useAgents();
@@ -23,6 +24,30 @@ const AgentTable: React.FC = () => {
     } catch (err) {
       console.error("Erreur lors de la suppression:", err);
       alert("Erreur lors de la suppression de l'agent");
+    } finally {
+      setUpdating(null);
+    }
+  };
+
+  const handleFormSubmit = async (data: CreateAgentData | UpdateAgentData) => {
+    try {
+      setUpdating(editingAgent ? editingAgent.id : null);
+      if (editingAgent) {
+        // Update existing agent
+        await import("../../services/agents/api").then(({ updateAgent }) =>
+          updateAgent(editingAgent.id, data as UpdateAgentData)
+        );
+      } else {
+        // Create new agent
+        // Assert data as CreateAgentData before passing to createAgent
+        await import("../../services/agents/api").then(({ createAgent }) =>
+          createAgent(data as CreateAgentData)
+        );
+      }
+      handleFormSuccess();
+    } catch (error) {
+      console.error("Erreur lors de la sauvegarde de l'agent:", error);
+      alert("Erreur lors de la sauvegarde de l'agent");
     } finally {
       setUpdating(null);
     }
@@ -180,8 +205,8 @@ const AgentTable: React.FC = () => {
       {showForm && (
         <AgentForm
           agent={editingAgent}
-          onClose={handleFormClose}
-          onSuccess={handleFormSuccess}
+          onCancel={handleFormClose}
+          onSubmit={handleFormSubmit}
         />
       )}
 
