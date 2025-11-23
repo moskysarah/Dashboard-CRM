@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useAgents } from "../../hooks/useAgents";
 import { deleteAgent, activateAgent, getAgentStats } from "../../api/agents";
 import { Button } from "../ui/Button";
-import AgentForm from "../AgentForm";
+import AgentForm from '../AgentForm';
 import { Users, Edit, Trash2, UserCheck, UserX, BarChart3 } from "lucide-react";
 import type { Agent, AgentStats } from "../../types/Agent";
 
