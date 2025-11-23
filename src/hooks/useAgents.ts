@@ -1,9 +1,10 @@
 import { useEffect, useState, useCallback } from "react";
 import { getAgents, getAgentById } from "../api/agents";
 import { useAuth } from "../context/AuthContext";
+import type { Agent } from "../types/Agent";
 
 export const useAgents = () => {
-  const [data, setData] = useState<any[]>([]);
+  const [data, setData] = useState<Agent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

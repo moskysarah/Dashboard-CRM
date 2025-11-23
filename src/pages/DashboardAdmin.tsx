@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import UserTable from "../components/UserTable";
-import AgentTable from "../components/AgentTable";
+import AgentTable from "../components/tables/AgentTable";
 import CommissionTable from "../components/CommissionTable";
 import CommissionForm from "../components/CommissionForm";
 import PartnerPerformanceChart from "../components/PartnerPerformanceChart"
